@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { AnalyzerError, resolveAnalyzerDll, runAnalyzer } from './analyzerRunner';
+import { AtlasPanel } from './atlasPanel';
 import { pickTarget } from './targetPicker';
 import type { AtlasGraph } from './types';
 
@@ -32,10 +33,7 @@ async function openMap(context: vscode.ExtensionContext): Promise<void> {
     return;
   }
 
-  // The map itself follows in a later step; for now report what was found.
-  void vscode.window.showInformationMessage(
-    `DotNet Solution Atlas: found ${graph.nodes.length} types and ${graph.edges.length} relationships.`,
-  );
+  AtlasPanel.show(context.extensionUri, graph);
 }
 
 async function analyze(context: vscode.ExtensionContext, target: string): Promise<AtlasGraph | undefined> {
