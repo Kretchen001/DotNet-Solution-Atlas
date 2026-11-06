@@ -1,0 +1,58 @@
+namespace Atlas.Analyzer.Model;
+
+/// <summary>The kind of a type shown as a node in the map.</summary>
+public enum NodeKind
+{
+    Class,
+    Interface,
+    Struct,
+    Record,
+    Enum,
+}
+
+/// <summary>How two types are related. The edge points from the dependent to the dependency.</summary>
+public enum EdgeKind
+{
+    /// <summary>The source derives from the target (class or interface inheritance).</summary>
+    Inherits,
+
+    /// <summary>The source class or struct implements the target interface.</summary>
+    Implements,
+
+    /// <summary>The source references the target in a field, property, event or method signature.</summary>
+    Uses,
+}
+
+/// <summary>A type that is declared in source code of the analyzed solution.</summary>
+/// <param name="Id">Fully qualified, unique name, e.g. <c>Shop.Domain.Order</c>.</param>
+/// <param name="Name">Short display name including generic parameters.</param>
+/// <param name="Namespace">Containing namespace, empty for the global namespace.</param>
+/// <param name="Project">Name of the project that declares the type.</param>
+/// <param name="File">Absolute path of the first declaring file.</param>
+/// <param name="Line">1-based line of the declaration in <paramref name="File"/>.</param>
+/// <param name="Members">Number of explicitly declared members.</param>
+/// <param name="Methods">Number of explicitly declared methods (without accessors).</param>
+/// <param name="Lines">Total number of lines of all declarations.</param>
+public sealed record AtlasNode(
+    string Id,
+    string Name,
+    NodeKind Kind,
+    string Namespace,
+    string Project,
+    string? File,
+    int? Line,
+    int Members,
+    int Methods,
+    int Lines);
+
+/// <param name="Source">Id of the dependent type.</param>
+/// <param name="Target">Id of the type it depends on.</param>
+/// <param name="Weight">How often the relationship occurs, e.g. number of signatures using the target.</param>
+public sealed record AtlasEdge(string Source, string Target, EdgeKind Kind, int Weight);
+
+/// <summary>The complete result of an analysis run.</summary>
+/// <param name="Root">The solution or project file that was analyzed.</param>
+public sealed record AtlasGraph(
+    string Root,
+    IReadOnlyList<AtlasNode> Nodes,
+    IReadOnlyList<AtlasEdge> Edges);
