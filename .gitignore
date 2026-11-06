@@ -1,0 +1,58 @@
+# --- .NET / Visual Studio ---
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.nupkg
+*.snupkg
+project.lock.json
+artifacts/
+TestResults/
+*.log
+*.binlog
+
+# --- Node / TypeScript ---
+node_modules/
+out/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# --- VS Code extension ---
+*.vsix
+.vscode-test/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# --- Analyzer output / lokale Testdaten ---
+*.atlas.json
+.atlas-cache/
+
+# --- Secrets / Zugangsdaten (nie einchecken) ---
+.env
+.env.*
+*.pat
+*.pfx
+*.snk
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+
+# --- Betriebssystem / Editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
