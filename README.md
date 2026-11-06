@@ -7,8 +7,8 @@ implementation, usage) as connections. The goal is to answer questions such as
 "what depends on this type?", "where are the hubs of this codebase?" and "how is
 this solution layered?" at a glance.
 
-> Status: early development. The analyzer and the extension skeleton are in
-> place; features are added step by step.
+> Status: early development. Analyzer, extension and map view are written but
+> have not been run against a real solution yet; expect rough edges.
 
 ## How it works
 
@@ -35,6 +35,33 @@ this solution layered?" at a glance.
 - Heatmap by coupling to find hubs, and detection of dependency cycles
 - Namespaces and projects as visual groups
 - Export as SVG or PNG
+
+## Try it
+
+1. Open the repository root in VS Code.
+2. In `extension/`, run `npm install`.
+3. Press F5 to start an Extension Development Host.
+4. Run **DotNet Solution Atlas: Open sample map** from the command palette.
+   The sample works without the .NET SDK.
+
+To analyze a real solution, build the analyzer once (`npm run build:analyzer`
+in `extension/`), open a folder that contains a `.sln`, `.slnx` or `.csproj`,
+and run **DotNet Solution Atlas: Open map of the solution**.
+
+The analyzer can also be used on its own:
+
+```
+dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.json
+```
+
+## Using the map
+
+- Arrows point from a type to the types it depends on.
+- Colour shows the kind of type; dashed arrows are interface implementations,
+  filled heads are inheritance, thin arrows are usage.
+- Click a type to see its neighbours, double-click to open it in the editor.
+- Filter by type kind and project, search by name, or switch on
+  "Focus on selection" to see only a type and its direct neighbours.
 
 ## Requirements
 
