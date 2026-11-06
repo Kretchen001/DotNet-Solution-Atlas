@@ -2,9 +2,9 @@
  * The JSON document written by the analyzer (see analyzer/Atlas.Analyzer/Model).
  * Property names are camelCase, enum values are lower camelCase strings.
  */
-export type NodeKind = 'class' | 'interface' | 'struct' | 'record' | 'enum';
+export type NodeKind = 'class' | 'interface' | 'struct' | 'record' | 'enum' | 'delegate';
 
-export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls';
+export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls' | 'accesses';
 
 export interface AtlasNode {
   /** Fully qualified, unique name, e.g. `Shop.Domain.Order`. */

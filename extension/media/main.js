@@ -11,13 +11,16 @@
     { id: 'struct', label: 'Structs', fill: '#FAC775', border: '#854F0B' },
     { id: 'record', label: 'Records', fill: '#F5C4B3', border: '#993C1D' },
     { id: 'enum', label: 'Enums', fill: '#D3D1C7', border: '#5F5E5A' },
+    { id: 'delegate', label: 'Delegates', fill: '#B5D4F4', border: '#185FA5' },
   ];
 
+  // color: [VS Code theme variable, fallback]; line: how the swatch and the edges are drawn.
   const EDGE_KINDS = [
-    { id: 'inherits', label: 'Inheritance' },
-    { id: 'implements', label: 'Implements' },
-    { id: 'uses', label: 'Uses types' },
-    { id: 'calls', label: 'Method calls' },
+    { id: 'inherits', label: 'Inheritance', color: ['--vscode-editor-foreground', '#cccccc'], line: 'solid' },
+    { id: 'implements', label: 'Implements', color: ['--vscode-editor-foreground', '#cccccc'], line: 'dashed' },
+    { id: 'uses', label: 'Uses types', color: ['--vscode-descriptionForeground', '#8a8a8a'], line: 'solid' },
+    { id: 'calls', label: 'Method calls', color: ['--vscode-charts-orange', '#d18616'], line: 'dotted' },
+    { id: 'accesses', label: 'Property and field access', color: ['--vscode-charts-purple', '#b180d7'], line: 'dotted' },
   ];
 
   const state = {
@@ -78,7 +81,9 @@
     edgeBox.replaceChildren();
     for (const kind of EDGE_KINDS) {
       const count = graph.edges.filter((e) => e.kind === kind.id).length;
-      edgeBox.append(checkbox(kind.label, state.edgeKinds.has(kind.id), count, null, (on) => {
+      const swatch = el('span', { className: 'line' });
+      swatch.style.borderTop = `2px ${kind.line} ${css(kind.color[0], kind.color[1])}`;
+      edgeBox.append(checkbox(kind.label, state.edgeKinds.has(kind.id), count, swatch, (on) => {
         toggle(state.edgeKinds, kind.id, on);
       }));
     }
@@ -116,6 +121,7 @@
     const accent = css('--vscode-focusBorder', '#007fd4');
     const edgeColor = css('--vscode-descriptionForeground', '#8a8a8a');
     const callColor = css('--vscode-charts-orange', '#d18616');
+    const accessColor = css('--vscode-charts-purple', '#b180d7');
 
     cy = cytoscape({
       container: $('cy'),
@@ -166,11 +172,11 @@
         { selector: 'edge[kind = "implements"]', style: { 'target-arrow-shape': 'triangle', 'line-style': 'dashed', 'line-color': fg, 'target-arrow-color': fg } },
         {
           selector: 'edge[kind = "calls"]',
-          style: {
-            'line-style': 'dotted',
-            'line-color': callColor,
-            'target-arrow-color': callColor,
-          },
+          style: { 'line-style': 'dotted', 'line-color': callColor, 'target-arrow-color': callColor },
+        },
+        {
+          selector: 'edge[kind = "accesses"]',
+          style: { 'line-style': 'dotted', 'line-color': accessColor, 'target-arrow-color': accessColor },
         },
         { selector: 'node:selected', style: { 'border-width': 3, 'border-color': accent } },
         { selector: '.faded', style: { opacity: 0.15 } },
@@ -235,6 +241,7 @@
     if (visibleKey !== lastVisibleKey) {
       lastVisibleKey = visibleKey;
       layout();
+      updateGroups();
     }
   }
 
@@ -253,6 +260,74 @@
   function openNode(node) {
     if (node.data('file')) {
       vscode.postMessage({ type: 'open', file: node.data('file'), line: node.data('line') });
+    }
+  }
+
+  // ----------------------------------------------------------------- groups
+
+  /**
+   * Lists the connected groups of the visible types, largest first, and the types that have no
+   * visible relationship at all. A group that is cut off from the rest shows up as its own entry.
+   */
+  function updateGroups() {
+    const box = $('groups');
+    box.replaceChildren();
+
+    const components = cy.elements().not('.hidden').components()
+      .map((component) => component.nodes())
+      .sort((a, b) => b.length - a.length);
+    const groups = components.filter((nodes) => nodes.length > 1);
+    const isolated = cy.collection(components.filter((nodes) => nodes.length === 1).map((nodes) => nodes[0]));
+
+    if (components.length === 0) return;
+
+    box.append(el('p', {
+      className: 'hint',
+      textContent: `${groups.length} connected group${groups.length === 1 ? '' : 's'}, ${isolated.length} isolated type${isolated.length === 1 ? '' : 's'}`,
+    }));
+
+    const list = el('ul', { className: 'links' });
+    groups.forEach((nodes, index) => list.append(groupItem(`Group ${index + 1}`, nodes)));
+    if (isolated.length > 0) list.append(groupItem('Isolated types', isolated));
+    box.append(list);
+  }
+
+  function groupItem(label, nodes) {
+    const link = el('a', { textContent: label, tabIndex: 0, role: 'link' });
+    link.addEventListener('click', () => focusGroup(label, nodes));
+    link.addEventListener('keydown', (e) => { if (e.key === 'Enter') focusGroup(label, nodes); });
+    return el('li', {}, link, el('span', { className: 'edge', textContent: `${nodes.length} types` }));
+  }
+
+  /** Fades everything except the group, zooms to it and lists its members. */
+  function focusGroup(label, nodes) {
+    select(null);
+    cy.elements().not('.hidden').addClass('faded');
+    nodes.union(nodes.connectedEdges()).removeClass('faded');
+    cy.fit(nodes, 40);
+    showList(label, nodes);
+  }
+
+  function showList(title, nodes) {
+    const limit = 300;
+    const box = $('details');
+    box.replaceChildren(
+      el('p', { className: 'title', textContent: title }),
+      el('p', { className: 'sub', textContent: `${nodes.length} types` }),
+    );
+
+    const list = el('ul', { className: 'links' });
+    const sorted = nodes.toArray().sort((a, b) => a.id().localeCompare(b.id()));
+    for (const node of sorted.slice(0, limit)) {
+      const link = el('a', { textContent: node.data('name'), tabIndex: 0, role: 'link' });
+      link.addEventListener('click', () => select(node.id()));
+      link.addEventListener('keydown', (e) => { if (e.key === 'Enter') select(node.id()); });
+      list.append(el('li', {}, link, el('span', { className: 'edge', textContent: node.data('project') })));
+    }
+    box.append(list);
+
+    if (sorted.length > limit) {
+      box.append(el('p', { className: 'hint', textContent: `... and ${sorted.length - limit} more` }));
     }
   }
 

@@ -151,6 +151,68 @@
       "methods": 3,
       "lines": 48,
       "isStatic": true
+    },
+    {
+      "id": "Shop.Domain.OrderChangedHandler",
+      "name": "OrderChangedHandler",
+      "kind": "delegate",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 0,
+      "methods": 0,
+      "lines": 3
+    },
+    {
+      "id": "Shop.Reporting.ReportBuilder",
+      "name": "ReportBuilder",
+      "kind": "class",
+      "namespace": "Shop.Reporting",
+      "project": "Shop.Reporting",
+      "members": 5,
+      "methods": 4,
+      "lines": 96
+    },
+    {
+      "id": "Shop.Reporting.ReportFormatter",
+      "name": "ReportFormatter",
+      "kind": "class",
+      "namespace": "Shop.Reporting",
+      "project": "Shop.Reporting",
+      "members": 3,
+      "methods": 2,
+      "lines": 44
+    },
+    {
+      "id": "Shop.Reporting.CsvWriter",
+      "name": "CsvWriter",
+      "kind": "class",
+      "namespace": "Shop.Reporting",
+      "project": "Shop.Reporting",
+      "members": 2,
+      "methods": 2,
+      "lines": 30
+    },
+    {
+      "id": "Shop.Domain.LegacyHelper",
+      "name": "LegacyHelper",
+      "kind": "class",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 2,
+      "methods": 2,
+      "lines": 25,
+      "isStatic": true
+    },
+    {
+      "id": "Shop.Api.<top-level statements>",
+      "name": "Program (top-level statements)",
+      "kind": "class",
+      "namespace": "Shop.Api",
+      "project": "Shop.Api",
+      "members": 0,
+      "methods": 0,
+      "lines": 24,
+      "isStatic": true
     }
   ],
   "edges": [
@@ -320,6 +382,72 @@
       "source": "Shop.Domain.Order",
       "target": "Shop.Domain.PriceCalculator",
       "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.OrderChangedHandler",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.OrderChangedHandler",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.Order",
+      "kind": "accesses",
+      "weight": 6
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.Order",
+      "kind": "accesses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.OrderStatus",
+      "kind": "accesses",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.Customer",
+      "kind": "accesses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Reporting.ReportBuilder",
+      "target": "Shop.Reporting.ReportFormatter",
+      "kind": "calls",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Reporting.ReportBuilder",
+      "target": "Shop.Reporting.CsvWriter",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Reporting.ReportFormatter",
+      "target": "Shop.Reporting.CsvWriter",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Api.OrdersController",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Domain.OrderService",
+      "kind": "uses",
       "weight": 1
     }
   ]

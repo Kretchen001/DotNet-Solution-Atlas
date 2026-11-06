@@ -141,6 +141,8 @@ export class AtlasPanel {
         <div id="kinds"></div>
         <h3>Projects</h3>
         <div id="projects"></div>
+        <h3>Groups</h3>
+        <div id="groups"></div>
       </aside>
       <main>
         <div id="toolbar">

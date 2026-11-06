@@ -39,6 +39,8 @@ label.check { display: flex; align-items: center; gap: 6px; padding: 2px 0; curs
 label.check .count { margin-left: auto; color: var(--vscode-descriptionForeground); }
 .swatch { width: 10px; height: 10px; border-radius: 2px; border: 1px solid; flex: none; }
 
+span.line { display: inline-block; width: 14px; height: 0; flex: none; }
+
 main { position: relative; display: flex; flex-direction: column; min-width: 0; }
 
 #toolbar {
