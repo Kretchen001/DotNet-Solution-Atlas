@@ -41,6 +41,7 @@ internal static class SyntaxSupport
     public static ISyntaxSupport? For(string language) => language switch
     {
         LanguageNames.CSharp => CSharpSyntaxSupport.Instance,
+        LanguageNames.VisualBasic => VisualBasicSyntaxSupport.Instance,
         _ => null,
     };
 }

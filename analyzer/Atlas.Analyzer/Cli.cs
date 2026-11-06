@@ -13,7 +13,7 @@ internal static class Cli
         Atlas.Analyzer - writes the type dependency graph of a .NET solution as JSON.
 
         Usage:
-          Atlas.Analyzer <path to .sln, .slnx, .slnf or .csproj> [--out <file>]
+          Atlas.Analyzer <path to .sln, .slnx, .slnf, .csproj or .vbproj> [--out <file>]
 
         Options:
           --out <file>   Write the JSON to a file instead of standard output.

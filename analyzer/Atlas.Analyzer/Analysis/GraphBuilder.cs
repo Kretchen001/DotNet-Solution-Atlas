@@ -28,7 +28,7 @@ internal static class GraphBuilder
 
             var projectName = ProjectName(project);
 
-            foreach (var type in TypeWalker.GetTypes(compilation.Assembly.GlobalNamespace))
+            foreach (var type in TypeWalker.GetTypes(compilation))
             {
                 // Partial types and same-named types in several projects: first one wins.
                 symbols.TryAdd(SymbolIds.For(type), (type, projectName, compilation));
@@ -36,7 +36,7 @@ internal static class GraphBuilder
 
             // Code in top-level statements (Program.cs without a class) belongs to no declared
             // type, yet it is often where everything is wired up. It becomes a node of its own.
-            foreach (var tree in compilation.SyntaxTrees)
+            foreach (var tree in compilation.SyntaxTrees.Where(_ => compilation.Language == LanguageNames.CSharp))
             {
                 var unit = await tree.GetRootAsync(ct);
                 var statements = unit.ChildNodes().OfType<GlobalStatementSyntax>().ToList();
@@ -50,7 +50,7 @@ internal static class GraphBuilder
         }
 
         var nodes = symbols
-            .Select(entry => CreateNode(entry.Key, entry.Value.Symbol, entry.Value.Project, ct))
+            .Select(entry => CreateNode(entry.Key, entry.Value.Symbol, entry.Value.Project, entry.Value.Compilation, ct))
             .Concat(topLevel.Values.Select(entry => entry.Node))
             .OrderBy(node => node.Id, StringComparer.Ordinal)
             .ToList();
@@ -132,16 +132,25 @@ internal static class GraphBuilder
             IsStatic: true);
     }
 
-    private static AtlasNode CreateNode(string id, INamedTypeSymbol type, string project, CancellationToken ct)
+    private static AtlasNode CreateNode(
+        string id,
+        INamedTypeSymbol type,
+        string project,
+        Compilation compilation,
+        CancellationToken ct)
     {
         var location = type.Locations.First(l => l.IsInSource).GetLineSpan();
 
         var members = type.GetMembers().Where(m => !m.IsImplicitlyDeclared).ToList();
         var methods = members.OfType<IMethodSymbol>().Count(m => m.MethodKind == MethodKind.Ordinary);
 
+        var support = SyntaxSupport.For(compilation.Language);
+
         var lines = type.DeclaringSyntaxReferences.Sum(reference =>
         {
-            var span = reference.GetSyntax(ct).GetLocation().GetLineSpan();
+            // In Visual Basic the declaration is only the header line, the body is the block around it.
+            var declaration = reference.GetSyntax(ct);
+            var span = (support?.BodyRoot(declaration) ?? declaration).GetLocation().GetLineSpan();
             return span.EndLinePosition.Line - span.StartLinePosition.Line + 1;
         });
 
@@ -156,7 +165,7 @@ internal static class GraphBuilder
             Members: members.Count,
             Methods: methods,
             Lines: lines,
-            IsStatic: type.IsStatic);
+            IsStatic: type.IsStatic || type.TypeKind == TypeKind.Module);
     }
 
     private static string DisplayName(INamedTypeSymbol type) =>
@@ -172,6 +181,7 @@ internal static class GraphBuilder
             TypeKind.Struct => NodeKind.Struct,
             TypeKind.Enum => NodeKind.Enum,
             TypeKind.Delegate => NodeKind.Delegate,
+            TypeKind.Module => NodeKind.Class,
             _ => NodeKind.Class,
         };
 }
