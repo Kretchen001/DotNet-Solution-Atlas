@@ -1,6 +1,5 @@
 using Atlas.Analyzer.Model;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -14,8 +13,10 @@ namespace Atlas.Analyzer.Analysis;
 /// <item>"calls": methods, constructors, operators, delegate invocations (static or not,
 /// extension methods resolve to their static class)</item>
 /// <item>"accesses": properties, indexers, fields, events (also enum members)</item>
-/// <item>"uses": types named in code, attributes, <c>typeof</c>, <c>new()</c>, <c>var</c> locals</item>
+/// <item>"uses": types named in code, attributes, <c>typeof</c>, <c>new()</c>, inferred locals</item>
 /// </list>
+/// The operation tree is the same for all languages; what differs (which syntax nodes belong to a
+/// type, where trees start) is provided by <see cref="ISyntaxSupport"/>.
 /// Like <see cref="DependencyCollector"/>, targets are reported per occurrence and the caller filters them.
 /// </summary>
 internal static class BodyDependencyCollector
@@ -27,15 +28,20 @@ internal static class BodyDependencyCollector
     {
         var result = new List<(string Target, EdgeKind Kind)>();
 
+        if (SyntaxSupport.For(compilation.Language) is not { } syntax)
+        {
+            return result;
+        }
+
         foreach (var reference in type.DeclaringSyntaxReferences)
         {
-            Walk(reference.GetSyntax(ct), compilation, result, ct);
+            Walk(syntax.BodyRoot(reference.GetSyntax(ct)), syntax, compilation, result, ct);
         }
 
         return result;
     }
 
-    /// <summary>The code of a file with top-level statements, which belongs to no declared type.</summary>
+    /// <summary>The code of a C# file with top-level statements, which belongs to no declared type.</summary>
     public static List<(string Target, EdgeKind Kind)> CollectTopLevel(
         IEnumerable<GlobalStatementSyntax> statements,
         Compilation compilation,
@@ -45,7 +51,7 @@ internal static class BodyDependencyCollector
 
         foreach (var statement in statements)
         {
-            Walk(statement, compilation, result, ct);
+            Walk(statement, CSharpSyntaxSupport.Instance, compilation, result, ct);
         }
 
         return result;
@@ -53,76 +59,33 @@ internal static class BodyDependencyCollector
 
     private static void Walk(
         SyntaxNode root,
+        ISyntaxSupport syntax,
         Compilation compilation,
         List<(string Target, EdgeKind Kind)> result,
         CancellationToken ct)
     {
         var model = compilation.GetSemanticModel(root.SyntaxTree);
 
-        // Nested types and delegates are nodes of their own and are analyzed separately. The
-        // base list is already covered by "inherits" and "implements".
-        var nodes = root.DescendantNodesAndSelf(node =>
-            ReferenceEquals(node, root)
-            || node is not (BaseTypeDeclarationSyntax or DelegateDeclarationSyntax or BaseListSyntax));
-
-        foreach (var node in nodes)
+        foreach (var node in syntax.Nodes(root))
         {
-            switch (node)
+            if (syntax.ReferencedType(node, model, ct) is { } named)
             {
-                case SimpleNameSyntax name when name.Parent is not AttributeSyntax && IsInCode(name):
-                    if (model.GetSymbolInfo(name, ct).Symbol is INamedTypeSymbol named)
-                    {
-                        result.Add((SymbolIds.For(named), EdgeKind.Uses));
-                    }
-
-                    break;
-
-                // [Authorize] names the attribute class, but the compiler binds it to a constructor.
-                case AttributeSyntax attribute:
-                    if (model.GetSymbolInfo(attribute, ct).Symbol is IMethodSymbol { ContainingType: { } attributeType })
-                    {
-                        result.Add((SymbolIds.For(attributeType), EdgeKind.Uses));
-                    }
-
-                    break;
+                result.Add((SymbolIds.For(named), EdgeKind.Uses));
             }
 
-            if (OperationRoot(node) is { } operationRoot && model.GetOperation(operationRoot, ct) is { } operation)
+            if (syntax.OperationRoot(node) is { } operationRoot && model.GetOperation(operationRoot, ct) is { } operation)
             {
                 foreach (var child in operation.DescendantsAndSelf())
                 {
-                    AddFromOperation(child, model, result);
+                    AddFromOperation(child, syntax, model, result);
                 }
             }
         }
     }
 
-    /// <summary>
-    /// The syntax nodes from which operation trees are taken. They are chosen so that every piece
-    /// of code is covered once: method-like members (including constructor initializers) and
-    /// accessors as a whole, expression bodies of properties, and field and property initializers.
-    /// Lambdas and local functions are part of the tree of the member that contains them.
-    /// </summary>
-    private static SyntaxNode? OperationRoot(SyntaxNode node) => node switch
-    {
-        BaseMethodDeclarationSyntax => node,
-        AccessorDeclarationSyntax => node,
-        PropertyDeclarationSyntax { ExpressionBody: { } body } => body.Expression,
-        IndexerDeclarationSyntax { ExpressionBody: { } body } => body.Expression,
-        PropertyDeclarationSyntax { Initializer: { } initializer } => initializer.Value,
-        EqualsValueClauseSyntax
-        {
-            Parent: VariableDeclaratorSyntax
-            {
-                Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax or EventFieldDeclarationSyntax },
-            },
-        } clause => clause.Value,
-        GlobalStatementSyntax global => global.Statement,
-        _ => null,
-    };
-
     private static void AddFromOperation(
         IOperation operation,
+        ISyntaxSupport syntax,
         SemanticModel model,
         List<(string Target, EdgeKind Kind)> result)
     {
@@ -149,7 +112,7 @@ internal static class BodyDependencyCollector
                 AddMethod(creation.Constructor, result);
 
                 // "new()" does not name the type, so the name scan cannot see it.
-                if (creation.Syntax is ImplicitObjectCreationExpressionSyntax)
+                if (syntax.IsImplicitCreation(creation))
                 {
                     AddTypes(creation.Type, EdgeKind.Uses, result);
                 }
@@ -173,18 +136,18 @@ internal static class BodyDependencyCollector
                 break;
 
             // foreach calls GetEnumerator, MoveNext, Current and Dispose without naming them.
-            case IForEachLoopOperation { Syntax: CommonForEachStatementSyntax loop }:
-            {
-                var info = model.GetForEachStatementInfo(loop);
-                AddMethod(info.GetEnumeratorMethod, result);
-                AddMethod(info.MoveNextMethod, result);
-                AddMethod(info.DisposeMethod, result);
-                AddMember(info.CurrentProperty, result);
-                break;
-            }
+            case IForEachLoopOperation loop:
+                if (syntax.ForEachInfo(loop, model) is { } info)
+                {
+                    AddMethod(info.GetEnumeratorMethod, result);
+                    AddMethod(info.MoveNextMethod, result);
+                    AddMethod(info.DisposeMethod, result);
+                    AddMember(info.CurrentProperty, result);
+                }
 
-            // "var order = factory.Create();" depends on the type of order, although it is never named.
-            case IVariableDeclaratorOperation { Syntax.Parent: VariableDeclarationSyntax { Type.IsVar: true } } declarator:
+                break;
+
+            case IVariableDeclaratorOperation declarator when syntax.IsInferredLocal(declarator):
                 AddTypes(declarator.Symbol.Type, EdgeKind.Uses, result);
                 break;
         }
@@ -218,31 +181,5 @@ internal static class BodyDependencyCollector
         {
             result.Add((SymbolIds.For(named), kind));
         }
-    }
-
-    /// <summary>
-    /// True for names inside executable code, initializers and attributes, and for the parameters
-    /// of a primary constructor or positional record. Names in member signatures are not counted
-    /// here, <see cref="DependencyCollector"/> already did that.
-    /// </summary>
-    private static bool IsInCode(SyntaxNode name)
-    {
-        foreach (var ancestor in name.Ancestors())
-        {
-            switch (ancestor)
-            {
-                case BlockSyntax or ArrowExpressionClauseSyntax or EqualsValueClauseSyntax
-                    or ConstructorInitializerSyntax or AttributeListSyntax or GlobalStatementSyntax:
-                    return true;
-
-                case ParameterListSyntax { Parent: TypeDeclarationSyntax }:
-                    return true;
-
-                case BaseTypeDeclarationSyntax:
-                    return false;
-            }
-        }
-
-        return false;
     }
 }
