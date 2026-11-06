@@ -56,3 +56,6 @@ Thumbs.db
 desktop.ini
 *.swp
 .idea/
+
+# --- Published analyzer, produced by "npm run build:analyzer" ---
+extension/analyzer/
