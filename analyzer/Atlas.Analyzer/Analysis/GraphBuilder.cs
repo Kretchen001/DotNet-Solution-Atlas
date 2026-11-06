@@ -38,9 +38,45 @@ internal static class GraphBuilder
             .OrderBy(node => node.Id, StringComparer.Ordinal)
             .ToList();
 
-        Console.Error.WriteLine($"Found {nodes.Count} type(s).");
+        var edges = CreateEdges(symbols, nodes);
 
-        return new AtlasGraph(root, nodes, []);
+        Console.Error.WriteLine($"Found {nodes.Count} type(s) and {edges.Count} relationship(s).");
+
+        return new AtlasGraph(root, nodes, edges);
+    }
+
+    /// <summary>
+    /// Counts every occurrence of a relationship and keeps one edge per
+    /// (source, target, kind). References to types outside the solution
+    /// (framework, NuGet packages) and self references are dropped.
+    /// </summary>
+    private static List<AtlasEdge> CreateEdges(
+        Dictionary<string, (INamedTypeSymbol Symbol, string Project)> symbols,
+        List<AtlasNode> nodes)
+    {
+        var known = nodes.Select(n => n.Id).ToHashSet(StringComparer.Ordinal);
+        var weights = new Dictionary<(string Source, string Target, EdgeKind Kind), int>();
+
+        foreach (var (id, entry) in symbols)
+        {
+            foreach (var (target, kind) in DependencyCollector.Collect(entry.Symbol))
+            {
+                if (target == id || !known.Contains(target))
+                {
+                    continue;
+                }
+
+                var key = (id, target, kind);
+                weights[key] = weights.GetValueOrDefault(key) + 1;
+            }
+        }
+
+        return weights
+            .Select(w => new AtlasEdge(w.Key.Source, w.Key.Target, w.Key.Kind, w.Value))
+            .OrderBy(e => e.Source, StringComparer.Ordinal)
+            .ThenBy(e => e.Target, StringComparer.Ordinal)
+            .ThenBy(e => e.Kind)
+            .ToList();
     }
 
     /// <summary>Project name without the target framework suffix, e.g. <c>Shop.Api</c> instead of <c>Shop.Api(net8.0)</c>.</summary>
