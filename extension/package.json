@@ -1,0 +1,69 @@
+{
+  "name": "dotnet-solution-atlas",
+  "displayName": "DotNet Solution Atlas",
+  "description": "Shows the classes, interfaces and their relationships of a .NET solution as an interactive map.",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "dotnet",
+    "csharp",
+    "dependencies",
+    "architecture",
+    "graph",
+    "roslyn"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dotnetAtlas.openMap",
+        "title": "Open map of the solution",
+        "category": "DotNet Solution Atlas"
+      },
+      {
+        "command": "dotnetAtlas.openSample",
+        "title": "Open sample map",
+        "category": "DotNet Solution Atlas"
+      }
+    ],
+    "configuration": {
+      "title": "DotNet Solution Atlas",
+      "properties": {
+        "dotnetAtlas.dotnetPath": {
+          "type": "string",
+          "default": "dotnet",
+          "description": "Path or name of the dotnet executable used to run the analyzer."
+        },
+        "dotnetAtlas.analyzerPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to Atlas.Analyzer.dll. Leave empty to use the analyzer bundled with the extension."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build:analyzer": "dotnet publish ../analyzer/Atlas.Analyzer -c Release -o analyzer",
+    "vscode:prepublish": "npm run compile"
+  },
+  "dependencies": {
+    "cytoscape": "^3.30.2",
+    "cytoscape-dagre": "^2.5.0",
+    "dagre": "^0.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.5.0"
+  }
+}
