@@ -1,5 +1,6 @@
 using Atlas.Analyzer.Model;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Atlas.Analyzer.Analysis;
 
@@ -12,6 +13,7 @@ internal static class GraphBuilder
         CancellationToken ct = default)
     {
         var symbols = new Dictionary<string, (INamedTypeSymbol Symbol, string Project, Compilation Compilation)>(StringComparer.Ordinal);
+        var topLevel = new Dictionary<string, (AtlasNode Node, Compilation Compilation, IReadOnlyList<GlobalStatementSyntax> Statements)>(StringComparer.Ordinal);
 
         // A project that targets several frameworks is loaded once per target.
         // One of them is enough to describe its types.
@@ -31,14 +33,29 @@ internal static class GraphBuilder
                 // Partial types and same-named types in several projects: first one wins.
                 symbols.TryAdd(SymbolIds.For(type), (type, projectName, compilation));
             }
+
+            // Code in top-level statements (Program.cs without a class) belongs to no declared
+            // type, yet it is often where everything is wired up. It becomes a node of its own.
+            foreach (var tree in compilation.SyntaxTrees)
+            {
+                var unit = await tree.GetRootAsync(ct);
+                var statements = unit.ChildNodes().OfType<GlobalStatementSyntax>().ToList();
+
+                if (statements.Count > 0)
+                {
+                    var id = $"{projectName}.<top-level statements>";
+                    topLevel.TryAdd(id, (CreateTopLevelNode(id, projectName, statements), compilation, statements));
+                }
+            }
         }
 
         var nodes = symbols
             .Select(entry => CreateNode(entry.Key, entry.Value.Symbol, entry.Value.Project, ct))
+            .Concat(topLevel.Values.Select(entry => entry.Node))
             .OrderBy(node => node.Id, StringComparer.Ordinal)
             .ToList();
 
-        var edges = CreateEdges(symbols, nodes, ct);
+        var edges = CreateEdges(symbols, topLevel, nodes, ct);
 
         Console.Error.WriteLine($"Found {nodes.Count} type(s) and {edges.Count} relationship(s).");
 
@@ -52,27 +69,36 @@ internal static class GraphBuilder
     /// </summary>
     private static List<AtlasEdge> CreateEdges(
         Dictionary<string, (INamedTypeSymbol Symbol, string Project, Compilation Compilation)> symbols,
+        Dictionary<string, (AtlasNode Node, Compilation Compilation, IReadOnlyList<GlobalStatementSyntax> Statements)> topLevel,
         List<AtlasNode> nodes,
         CancellationToken ct)
     {
         var known = nodes.Select(n => n.Id).ToHashSet(StringComparer.Ordinal);
         var weights = new Dictionary<(string Source, string Target, EdgeKind Kind), int>();
 
-        foreach (var (id, entry) in symbols)
+        void Add(string source, IEnumerable<(string Target, EdgeKind Kind)> dependencies)
         {
-            var dependencies = DependencyCollector.Collect(entry.Symbol)
-                .Concat(BodyDependencyCollector.Collect(entry.Symbol, entry.Compilation, ct));
-
             foreach (var (target, kind) in dependencies)
             {
-                if (target == id || !known.Contains(target))
+                if (target == source || !known.Contains(target))
                 {
                     continue;
                 }
 
-                var key = (id, target, kind);
+                var key = (source, target, kind);
                 weights[key] = weights.GetValueOrDefault(key) + 1;
             }
+        }
+
+        foreach (var (id, entry) in symbols)
+        {
+            Add(id, DependencyCollector.Collect(entry.Symbol)
+                .Concat(BodyDependencyCollector.Collect(entry.Symbol, entry.Compilation, ct)));
+        }
+
+        foreach (var (id, entry) in topLevel)
+        {
+            Add(id, BodyDependencyCollector.CollectTopLevel(entry.Statements, entry.Compilation, ct));
         }
 
         return weights
@@ -86,6 +112,25 @@ internal static class GraphBuilder
     /// <summary>Project name without the target framework suffix, e.g. <c>Shop.Api</c> instead of <c>Shop.Api(net8.0)</c>.</summary>
     private static string ProjectName(Project project) =>
         project.FilePath is { } path ? Path.GetFileNameWithoutExtension(path) : project.Name;
+
+    private static AtlasNode CreateTopLevelNode(string id, string project, IReadOnlyList<GlobalStatementSyntax> statements)
+    {
+        var first = statements[0].GetLocation().GetLineSpan();
+        var last = statements[^1].GetLocation().GetLineSpan();
+
+        return new AtlasNode(
+            Id: id,
+            Name: "Program (top-level statements)",
+            Kind: NodeKind.Class,
+            Namespace: "",
+            Project: project,
+            File: first.Path,
+            Line: first.StartLinePosition.Line + 1,
+            Members: 0,
+            Methods: 0,
+            Lines: last.EndLinePosition.Line - first.StartLinePosition.Line + 1,
+            IsStatic: true);
+    }
 
     private static AtlasNode CreateNode(string id, INamedTypeSymbol type, string project, CancellationToken ct)
     {
