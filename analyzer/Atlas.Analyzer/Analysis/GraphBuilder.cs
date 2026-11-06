@@ -11,7 +11,7 @@ internal static class GraphBuilder
         IReadOnlyList<Project> projects,
         CancellationToken ct = default)
     {
-        var symbols = new Dictionary<string, (INamedTypeSymbol Symbol, string Project)>(StringComparer.Ordinal);
+        var symbols = new Dictionary<string, (INamedTypeSymbol Symbol, string Project, Compilation Compilation)>(StringComparer.Ordinal);
 
         // A project that targets several frameworks is loaded once per target.
         // One of them is enough to describe its types.
@@ -29,7 +29,7 @@ internal static class GraphBuilder
             foreach (var type in TypeWalker.GetTypes(compilation.Assembly.GlobalNamespace))
             {
                 // Partial types and same-named types in several projects: first one wins.
-                symbols.TryAdd(SymbolIds.For(type), (type, projectName));
+                symbols.TryAdd(SymbolIds.For(type), (type, projectName, compilation));
             }
         }
 
@@ -38,7 +38,7 @@ internal static class GraphBuilder
             .OrderBy(node => node.Id, StringComparer.Ordinal)
             .ToList();
 
-        var edges = CreateEdges(symbols, nodes);
+        var edges = CreateEdges(symbols, nodes, ct);
 
         Console.Error.WriteLine($"Found {nodes.Count} type(s) and {edges.Count} relationship(s).");
 
@@ -51,15 +51,19 @@ internal static class GraphBuilder
     /// (framework, NuGet packages) and self references are dropped.
     /// </summary>
     private static List<AtlasEdge> CreateEdges(
-        Dictionary<string, (INamedTypeSymbol Symbol, string Project)> symbols,
-        List<AtlasNode> nodes)
+        Dictionary<string, (INamedTypeSymbol Symbol, string Project, Compilation Compilation)> symbols,
+        List<AtlasNode> nodes,
+        CancellationToken ct)
     {
         var known = nodes.Select(n => n.Id).ToHashSet(StringComparer.Ordinal);
         var weights = new Dictionary<(string Source, string Target, EdgeKind Kind), int>();
 
         foreach (var (id, entry) in symbols)
         {
-            foreach (var (target, kind) in DependencyCollector.Collect(entry.Symbol))
+            var dependencies = DependencyCollector.Collect(entry.Symbol)
+                .Concat(BodyDependencyCollector.Collect(entry.Symbol, entry.Compilation, ct));
+
+            foreach (var (target, kind) in dependencies)
             {
                 if (target == id || !known.Contains(target))
                 {
@@ -106,7 +110,8 @@ internal static class GraphBuilder
             Line: location.StartLinePosition.Line + 1,
             Members: members.Count,
             Methods: methods,
-            Lines: lines);
+            Lines: lines,
+            IsStatic: type.IsStatic);
     }
 
     private static string DisplayName(INamedTypeSymbol type) =>

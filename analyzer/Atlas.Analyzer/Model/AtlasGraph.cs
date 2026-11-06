@@ -19,8 +19,17 @@ public enum EdgeKind
     /// <summary>The source class or struct implements the target interface.</summary>
     Implements,
 
-    /// <summary>The source references the target in a field, property, event or method signature.</summary>
+    /// <summary>
+    /// The source references the target in a signature (field, property, event, method) or names it in
+    /// code (<c>new</c>, <c>typeof</c>, casts, locals, attributes).
+    /// </summary>
     Uses,
+
+    /// <summary>
+    /// The source calls a method of the target or accesses one of its properties, fields or events.
+    /// Static and instance members count alike, so calls of static helper classes show up as well.
+    /// </summary>
+    Calls,
 }
 
 /// <summary>A type that is declared in source code of the analyzed solution.</summary>
@@ -33,6 +42,7 @@ public enum EdgeKind
 /// <param name="Members">Number of explicitly declared members.</param>
 /// <param name="Methods">Number of explicitly declared methods (without accessors).</param>
 /// <param name="Lines">Total number of lines of all declarations.</param>
+/// <param name="IsStatic">True for static classes.</param>
 public sealed record AtlasNode(
     string Id,
     string Name,
@@ -43,7 +53,8 @@ public sealed record AtlasNode(
     int? Line,
     int Members,
     int Methods,
-    int Lines);
+    int Lines,
+    bool IsStatic);
 
 /// <param name="Source">Id of the dependent type.</param>
 /// <param name="Target">Id of the type it depends on.</param>
