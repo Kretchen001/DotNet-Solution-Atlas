@@ -1,7 +1,7 @@
 {
   "name": "dotnet-solution-atlas",
   "displayName": "DotNet Solution Atlas",
-  "description": "Shows the classes, interfaces and their relationships of a .NET solution as an interactive map.",
+  "description": "Shows the classes, interfaces and their relationships of a C# or Visual Basic solution as an interactive map.",
   "version": "0.1.0",
   "private": true,
   "license": "UNLICENSED",
@@ -15,6 +15,7 @@
   "keywords": [
     "dotnet",
     "csharp",
+    "visualbasic",
     "dependencies",
     "architecture",
     "graph",

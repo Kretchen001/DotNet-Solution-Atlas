@@ -13,12 +13,12 @@ export async function pickTarget(): Promise<string | undefined> {
   let candidates = await vscode.workspace.findFiles('**/*.{sln,slnx}', EXCLUDE, MAX_RESULTS);
 
   if (candidates.length === 0) {
-    candidates = await vscode.workspace.findFiles('**/*.csproj', EXCLUDE, MAX_RESULTS);
+    candidates = await vscode.workspace.findFiles('**/*.{csproj,vbproj}', EXCLUDE, MAX_RESULTS);
   }
 
   if (candidates.length === 0) {
     void vscode.window.showWarningMessage(
-      'DotNet Solution Atlas: no solution (.sln, .slnx) or project (.csproj) found in the open folder.',
+      'DotNet Solution Atlas: no solution (.sln, .slnx) or project (.csproj, .vbproj) found in the open folder.',
     );
     return undefined;
   }

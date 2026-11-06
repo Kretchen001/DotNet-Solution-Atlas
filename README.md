@@ -1,8 +1,8 @@
 # DotNet Solution Atlas
 
 A Visual Studio Code extension that turns a .NET solution into a map. It
-analyzes the open solution with Roslyn and shows classes, interfaces, structs,
-records and enums as nodes, and their relationships (inheritance,
+analyzes the open solution (C# and Visual Basic, also mixed) with Roslyn and
+shows classes, interfaces, structs, records, enums and delegates as nodes, and their relationships (inheritance,
 implementation, usage) as connections. The goal is to answer questions such as
 "what depends on this type?", "where are the hubs of this codebase?" and "how is
 this solution layered?" at a glance.
@@ -45,8 +45,8 @@ this solution layered?" at a glance.
    The sample works without the .NET SDK.
 
 To analyze a real solution, build the analyzer once (`npm run build:analyzer`
-in `extension/`), open a folder that contains a `.sln`, `.slnx` or `.csproj`,
-and run **DotNet Solution Atlas: Open map of the solution**.
+in `extension/`), open a folder that contains a `.sln`, `.slnx`, `.csproj` or
+`.vbproj`, and run **DotNet Solution Atlas: Open map of the solution**.
 
 The analyzer can also be used on its own:
 
@@ -77,6 +77,12 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - Click a type to see its neighbours, double-click to open it in the editor.
 - Filter by type kind and project, search by name, or switch on
   "Focus on selection" to see only a type and its direct neighbours.
+
+## Supported languages
+
+C# and Visual Basic, in the same solution if needed. F# is not supported,
+because Roslyn does not analyze it. A Visual Basic module is shown as a
+static class; the compiler-generated `My` namespace is left out.
 
 ## Requirements
 
