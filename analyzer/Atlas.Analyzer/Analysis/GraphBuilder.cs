@@ -126,6 +126,7 @@ internal static class GraphBuilder
             TypeKind.Interface => NodeKind.Interface,
             TypeKind.Struct => NodeKind.Struct,
             TypeKind.Enum => NodeKind.Enum,
+            TypeKind.Delegate => NodeKind.Delegate,
             _ => NodeKind.Class,
         };
 }

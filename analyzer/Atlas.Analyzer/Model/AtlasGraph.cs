@@ -8,6 +8,7 @@ public enum NodeKind
     Struct,
     Record,
     Enum,
+    Delegate,
 }
 
 /// <summary>How two types are related. The edge points from the dependent to the dependency.</summary>
@@ -26,10 +27,16 @@ public enum EdgeKind
     Uses,
 
     /// <summary>
-    /// The source calls a method of the target or accesses one of its properties, fields or events.
-    /// Static and instance members count alike, so calls of static helper classes show up as well.
+    /// The source calls a method, constructor or operator of the target, or invokes a delegate of that
+    /// type. Static and instance members count alike, so calls of static helper classes show up as well.
     /// </summary>
     Calls,
+
+    /// <summary>
+    /// The source reads or writes a property, indexer, field or event of the target.
+    /// Enum members count as well.
+    /// </summary>
+    Accesses,
 }
 
 /// <summary>A type that is declared in source code of the analyzed solution.</summary>

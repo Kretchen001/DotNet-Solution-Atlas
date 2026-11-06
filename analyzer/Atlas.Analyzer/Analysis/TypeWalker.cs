@@ -50,12 +50,12 @@ internal static class TypeWalker
 
     /// <summary>
     /// Only types written by the developer count: no compiler-generated types,
-    /// no delegates, nothing without a declaration in source.
+    /// nothing without a declaration in source.
     /// </summary>
     private static bool IsRelevant(INamedTypeSymbol type) =>
         !type.IsImplicitlyDeclared
         && !type.IsAnonymousType
         && !type.Name.StartsWith('<')
-        && (type.TypeKind is TypeKind.Class or TypeKind.Interface or TypeKind.Struct or TypeKind.Enum)
+        && (type.TypeKind is TypeKind.Class or TypeKind.Interface or TypeKind.Struct or TypeKind.Enum or TypeKind.Delegate)
         && type.Locations.Any(l => l.IsInSource);
 }

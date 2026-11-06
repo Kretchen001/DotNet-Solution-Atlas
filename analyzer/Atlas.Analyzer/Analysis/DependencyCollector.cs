@@ -36,6 +36,21 @@ internal static class DependencyCollector
             }
         }
 
+        // Constraints: where T : IShape
+        foreach (var target in Referenced(type.TypeParameters.SelectMany(p => p.ConstraintTypes)))
+        {
+            yield return (target, EdgeKind.Uses);
+        }
+
+        // A delegate type is described by its Invoke method, which the compiler declares implicitly.
+        if (type.DelegateInvokeMethod is { } invoke)
+        {
+            foreach (var target in Referenced(MethodSignature(invoke)))
+            {
+                yield return (target, EdgeKind.Uses);
+            }
+        }
+
         foreach (var member in type.GetMembers())
         {
             if (member.IsImplicitlyDeclared)
@@ -73,13 +88,28 @@ internal static class DependencyCollector
 
             // Accessors belong to a property or event and were counted there.
             case IMethodSymbol { AssociatedSymbol: null } method:
-                yield return method.ReturnType;
-                foreach (var parameter in method.Parameters)
+                foreach (var type in MethodSignature(method))
                 {
-                    yield return parameter.Type;
+                    yield return type;
                 }
 
                 break;
+        }
+    }
+
+    /// <summary>Return type, parameter types and generic constraints of a method.</summary>
+    private static IEnumerable<ITypeSymbol> MethodSignature(IMethodSymbol method)
+    {
+        yield return method.ReturnType;
+
+        foreach (var parameter in method.Parameters)
+        {
+            yield return parameter.Type;
+        }
+
+        foreach (var constraint in method.TypeParameters.SelectMany(p => p.ConstraintTypes))
+        {
+            yield return constraint;
         }
     }
 
@@ -87,7 +117,7 @@ internal static class DependencyCollector
         types.SelectMany(Named).Select(SymbolIds.For);
 
     /// <summary>Unwraps arrays, pointers and generic arguments: <c>Dictionary&lt;string, Order[]&gt;</c> yields Dictionary, string and Order.</summary>
-    private static IEnumerable<INamedTypeSymbol> Named(ITypeSymbol? type)
+    internal static IEnumerable<INamedTypeSymbol> Named(ITypeSymbol? type)
     {
         switch (type)
         {
