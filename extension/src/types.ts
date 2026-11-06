@@ -4,7 +4,7 @@
  */
 export type NodeKind = 'class' | 'interface' | 'struct' | 'record' | 'enum';
 
-export type EdgeKind = 'inherits' | 'implements' | 'uses';
+export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls';
 
 export interface AtlasNode {
   /** Fully qualified, unique name, e.g. `Shop.Domain.Order`. */
@@ -22,6 +22,8 @@ export interface AtlasNode {
   members: number;
   methods: number;
   lines: number;
+  /** True for static classes. */
+  isStatic?: boolean;
 }
 
 /** Points from the dependent type to the type it depends on. */

@@ -140,6 +140,17 @@
       "members": 4,
       "methods": 3,
       "lines": 40
+    },
+    {
+      "id": "Shop.Domain.PriceCalculator",
+      "name": "PriceCalculator",
+      "kind": "class",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 3,
+      "methods": 3,
+      "lines": 48,
+      "isStatic": true
     }
   ],
   "edges": [
@@ -267,6 +278,48 @@
       "source": "Shop.Infrastructure.SerilogLogger",
       "target": "Shop.Domain.IAppLogger",
       "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "calls",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.PriceCalculator",
+      "kind": "calls",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.PriceCalculator",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IOrderRepository",
+      "kind": "calls",
+      "weight": 4
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IPaymentGateway",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IAppLogger",
+      "kind": "calls",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.PriceCalculator",
+      "kind": "calls",
       "weight": 1
     }
   ]

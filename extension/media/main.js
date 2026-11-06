@@ -13,8 +13,16 @@
     { id: 'enum', label: 'Enums', fill: '#D3D1C7', border: '#5F5E5A' },
   ];
 
+  const EDGE_KINDS = [
+    { id: 'inherits', label: 'Inheritance' },
+    { id: 'implements', label: 'Implements' },
+    { id: 'uses', label: 'Uses types' },
+    { id: 'calls', label: 'Method calls' },
+  ];
+
   const state = {
     kinds: new Set(KINDS.map((k) => k.id)),
+    edgeKinds: new Set(EDGE_KINDS.map((k) => k.id)),
     projects: new Set(),
     query: '',
     focus: false,
@@ -66,6 +74,15 @@
       }));
     }
 
+    const edgeBox = $('edgeKinds');
+    edgeBox.replaceChildren();
+    for (const kind of EDGE_KINDS) {
+      const count = graph.edges.filter((e) => e.kind === kind.id).length;
+      edgeBox.append(checkbox(kind.label, state.edgeKinds.has(kind.id), count, null, (on) => {
+        toggle(state.edgeKinds, kind.id, on);
+      }));
+    }
+
     const projectBox = $('projects');
     projectBox.replaceChildren();
     const projects = [...state.projects].sort();
@@ -98,6 +115,7 @@
     const fg = css('--vscode-editor-foreground', '#cccccc');
     const accent = css('--vscode-focusBorder', '#007fd4');
     const edgeColor = css('--vscode-descriptionForeground', '#8a8a8a');
+    const callColor = css('--vscode-charts-orange', '#d18616');
 
     cy = cytoscape({
       container: $('cy'),
@@ -146,6 +164,14 @@
         },
         { selector: 'edge[kind = "inherits"]', style: { 'target-arrow-shape': 'triangle', 'line-color': fg, 'target-arrow-color': fg } },
         { selector: 'edge[kind = "implements"]', style: { 'target-arrow-shape': 'triangle', 'line-style': 'dashed', 'line-color': fg, 'target-arrow-color': fg } },
+        {
+          selector: 'edge[kind = "calls"]',
+          style: {
+            'line-style': 'dotted',
+            'line-color': callColor,
+            'target-arrow-color': callColor,
+          },
+        },
         { selector: 'node:selected', style: { 'border-width': 3, 'border-color': accent } },
         { selector: '.faded', style: { opacity: 0.15 } },
         { selector: '.hidden', style: { display: 'none' } },
@@ -187,7 +213,10 @@
       });
 
       cy.edges().forEach((edge) => {
-        edge.toggleClass('hidden', edge.source().hasClass('hidden') || edge.target().hasClass('hidden'));
+        edge.toggleClass(
+          'hidden',
+          !state.edgeKinds.has(edge.data('kind')) || edge.source().hasClass('hidden') || edge.target().hasClass('hidden'),
+        );
       });
 
       cy.elements().removeClass('faded');
@@ -202,7 +231,7 @@
       }
     });
 
-    const visibleKey = cy.nodes().not('.hidden').map((n) => n.id()).sort().join('|');
+    const visibleKey = cy.elements().not('.hidden').map((e) => e.id()).sort().join('|');
     if (visibleKey !== lastVisibleKey) {
       lastVisibleKey = visibleKey;
       layout();
@@ -238,12 +267,12 @@
       return;
     }
 
-    const dependsOn = node.outgoers('edge');
-    const usedBy = node.incomers('edge');
+    const dependsOn = node.outgoers('edge').not('.hidden');
+    const usedBy = node.incomers('edge').not('.hidden');
 
     box.append(
       el('p', { className: 'title', textContent: node.data('name') }),
-      el('p', { className: 'sub', textContent: `${node.data('kind')} in ${node.data('namespace') || '(global namespace)'}` }),
+      el('p', { className: 'sub', textContent: `${node.data('isStatic') ? 'static ' : ''}${node.data('kind')} in ${node.data('namespace') || '(global namespace)'}` }),
       el('p', { className: 'sub', textContent: node.data('project') }),
       el('div', { className: 'metrics' },
         metric('Depends on', dependsOn.length),

@@ -57,8 +57,13 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 ## Using the map
 
 - Arrows point from a type to the types it depends on.
-- Colour shows the kind of type; dashed arrows are interface implementations,
-  filled heads are inheritance, thin arrows are usage.
+- Colour shows the kind of type. Dashed arrows are interface implementations,
+  filled heads are inheritance, thin arrows are usage of a type (signatures,
+  `new`, casts, ...) and orange dotted arrows are method calls and member
+  access, including calls to static helper classes.
+- Each kind of relationship can be switched on and off in the "Relationships"
+  filter. Method calls are shown by default; switch them off if the map gets
+  too busy.
 - Click a type to see its neighbours, double-click to open it in the editor.
 - Filter by type kind and project, search by name, or switch on
   "Focus on selection" to see only a type and its direct neighbours.

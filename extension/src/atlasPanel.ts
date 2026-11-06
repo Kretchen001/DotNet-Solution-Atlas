@@ -135,6 +135,8 @@ export class AtlasPanel {
   <body>
     <div id="app">
       <aside id="filters" aria-label="Filters">
+        <h3>Relationships</h3>
+        <div id="edgeKinds"></div>
         <h3>Types</h3>
         <div id="kinds"></div>
         <h3>Projects</h3>
