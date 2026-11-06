@@ -49,7 +49,8 @@ public enum EdgeKind
 /// <param name="Members">Number of explicitly declared members.</param>
 /// <param name="Methods">Number of explicitly declared methods (without accessors).</param>
 /// <param name="Lines">Total number of lines of all declarations.</param>
-/// <param name="IsStatic">True for static classes.</param>
+/// <param name="IsStatic">True for static classes and Visual Basic modules.</param>
+/// <param name="Language">Language of the declaring project: <c>csharp</c> or <c>visualbasic</c>.</param>
 public sealed record AtlasNode(
     string Id,
     string Name,
@@ -61,7 +62,8 @@ public sealed record AtlasNode(
     int Members,
     int Methods,
     int Lines,
-    bool IsStatic);
+    bool IsStatic,
+    string Language);
 
 /// <param name="Source">Id of the dependent type.</param>
 /// <param name="Target">Id of the type it depends on.</param>

@@ -129,7 +129,8 @@ internal static class GraphBuilder
             Members: 0,
             Methods: 0,
             Lines: last.EndLinePosition.Line - first.StartLinePosition.Line + 1,
-            IsStatic: true);
+            IsStatic: true,
+            Language: "csharp");
     }
 
     private static AtlasNode CreateNode(
@@ -165,8 +166,13 @@ internal static class GraphBuilder
             Members: members.Count,
             Methods: methods,
             Lines: lines,
-            IsStatic: type.IsStatic || type.TypeKind == TypeKind.Module);
+            IsStatic: type.IsStatic || type.TypeKind == TypeKind.Module,
+            Language: LanguageId(compilation));
     }
+
+    /// <summary>The language of a compilation as written in the JSON.</summary>
+    private static string LanguageId(Compilation compilation) =>
+        compilation.Language == LanguageNames.VisualBasic ? "visualbasic" : "csharp";
 
     private static string DisplayName(INamedTypeSymbol type) =>
         type.IsGenericType
