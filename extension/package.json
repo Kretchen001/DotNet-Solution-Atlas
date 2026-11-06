@@ -4,7 +4,7 @@
   "description": "Shows the classes, interfaces and their relationships of a C# or Visual Basic solution as an interactive map.",
   "version": "0.1.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
   },

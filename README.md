@@ -134,6 +134,10 @@ Basic part can be looked at separately.
 | `analyzer/`  | .NET console tool (Roslyn)              |
 | `extension/` | VS Code extension (TypeScript, webview) |
 
+### License
+
+MIT, see [LICENSE](LICENSE). Free to use, modify and distribute. The third-party components (Cytoscape.js, dagre, cytoscape-dagre, Roslyn, MSBuild Locator) are MIT-licensed as well.
+
 [Back to the top](#dotnet-solution-atlas)
 
 ---
@@ -272,6 +276,10 @@ sich der C#- und der Visual-Basic-Teil getrennt betrachten lassen.
 | `analyzer/`  | .NET-Konsolenprogramm (Roslyn)               |
 | `extension/` | VS-Code-Erweiterung (TypeScript, Webview)    |
 
+### Lizenz
+
+MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch die verwendeten Komponenten von Dritten (Cytoscape.js, dagre, cytoscape-dagre, Roslyn, MSBuild Locator) stehen unter der MIT-Lizenz.
+
 [Zurück nach oben](#dotnet-solution-atlas)
 
 ---
@@ -387,6 +395,10 @@ Visual Basic 的模块（Module）会显示为静态类；编译器生成的 `My
 | ------------ | ------------------------------------- |
 | `analyzer/`  | .NET 命令行工具（Roslyn）             |
 | `extension/` | VS Code 扩展（TypeScript、Webview）   |
+
+### 许可证
+
+MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用的第三方组件（Cytoscape.js, dagre, cytoscape-dagre, Roslyn, MSBuild Locator）同样采用 MIT 许可证。
 
 [返回顶部](#dotnet-solution-atlas)
 
@@ -523,6 +535,10 @@ C# и Visual Basic, при необходимости — в одном реше
 | `analyzer/`  | консольная утилита .NET (Roslyn)                 |
 | `extension/` | расширение VS Code (TypeScript, веб-представление) |
 
+### Лицензия
+
+MIT, см. [LICENSE](LICENSE). Можно свободно использовать, изменять и распространять. Используемые сторонние компоненты (Cytoscape.js, dagre, cytoscape-dagre, Roslyn, MSBuild Locator) также распространяются по лицензии MIT.
+
 [Наверх](#dotnet-solution-atlas)
 
 ---
@@ -655,5 +671,9 @@ separado la parte en C# y la parte en Visual Basic.
 | ------------ | ------------------------------------------------ |
 | `analyzer/`  | herramienta de consola de .NET (Roslyn)          |
 | `extension/` | extensión de VS Code (TypeScript, webview)       |
+
+### Licencia
+
+MIT, consulta [LICENSE](LICENSE). Se puede usar, modificar y distribuir libremente. Los componentes de terceros utilizados (Cytoscape.js, dagre, cytoscape-dagre, Roslyn, MSBuild Locator) también tienen licencia MIT.
 
 [Volver arriba](#dotnet-solution-atlas)

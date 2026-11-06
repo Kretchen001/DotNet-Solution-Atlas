@@ -9,6 +9,7 @@
     <RootNamespace>Atlas.Analyzer</RootNamespace>
     <AssemblyName>Atlas.Analyzer</AssemblyName>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
