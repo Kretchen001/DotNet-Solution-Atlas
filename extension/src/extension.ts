@@ -1,3 +1,5 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { AnalyzerError, resolveAnalyzerDll, runAnalyzer } from './analyzerRunner';
 import { AtlasPanel } from './atlasPanel';
@@ -12,9 +14,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     output,
     vscode.commands.registerCommand('dotnetAtlas.openMap', () => openMap(context)),
-    vscode.commands.registerCommand('dotnetAtlas.openSample', () => {
-      void vscode.window.showInformationMessage('DotNet Solution Atlas: sample map is not implemented yet.');
-    }),
+    vscode.commands.registerCommand('dotnetAtlas.openSample', () => openSample(context)),
   );
 }
 
@@ -33,6 +33,13 @@ async function openMap(context: vscode.ExtensionContext): Promise<void> {
     return;
   }
 
+  AtlasPanel.show(context.extensionUri, graph);
+}
+
+/** Shows a small example map, so the view can be tried without a .NET solution or SDK. */
+function openSample(context: vscode.ExtensionContext): void {
+  const file = path.join(context.extensionPath, 'media', 'sample-graph.json');
+  const graph = JSON.parse(fs.readFileSync(file, 'utf8')) as AtlasGraph;
   AtlasPanel.show(context.extensionUri, graph);
 }
 

@@ -1,0 +1,273 @@
+{
+  "root": "Shop.sln (sample data)",
+  "nodes": [
+    {
+      "id": "Shop.Api.OrdersController",
+      "name": "OrdersController",
+      "kind": "class",
+      "namespace": "Shop.Api",
+      "project": "Shop.Api",
+      "members": 5,
+      "methods": 4,
+      "lines": 92
+    },
+    {
+      "id": "Shop.Api.CustomersController",
+      "name": "CustomersController",
+      "kind": "class",
+      "namespace": "Shop.Api",
+      "project": "Shop.Api",
+      "members": 4,
+      "methods": 3,
+      "lines": 70
+    },
+    {
+      "id": "Shop.Domain.Entity",
+      "name": "Entity",
+      "kind": "class",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 3,
+      "methods": 1,
+      "lines": 18
+    },
+    {
+      "id": "Shop.Domain.Order",
+      "name": "Order",
+      "kind": "class",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 9,
+      "methods": 3,
+      "lines": 120
+    },
+    {
+      "id": "Shop.Domain.Customer",
+      "name": "Customer",
+      "kind": "class",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 6,
+      "methods": 1,
+      "lines": 54
+    },
+    {
+      "id": "Shop.Domain.OrderStatus",
+      "name": "OrderStatus",
+      "kind": "enum",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 4,
+      "methods": 0,
+      "lines": 10
+    },
+    {
+      "id": "Shop.Domain.IOrderService",
+      "name": "IOrderService",
+      "kind": "interface",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 4,
+      "methods": 4,
+      "lines": 22
+    },
+    {
+      "id": "Shop.Domain.OrderService",
+      "name": "OrderService",
+      "kind": "class",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 8,
+      "methods": 6,
+      "lines": 214
+    },
+    {
+      "id": "Shop.Domain.IOrderRepository",
+      "name": "IOrderRepository",
+      "kind": "interface",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 5,
+      "methods": 5,
+      "lines": 24
+    },
+    {
+      "id": "Shop.Domain.IPaymentGateway",
+      "name": "IPaymentGateway",
+      "kind": "interface",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 2,
+      "methods": 2,
+      "lines": 14
+    },
+    {
+      "id": "Shop.Domain.IAppLogger",
+      "name": "IAppLogger",
+      "kind": "interface",
+      "namespace": "Shop.Domain",
+      "project": "Shop.Domain",
+      "members": 3,
+      "methods": 3,
+      "lines": 16
+    },
+    {
+      "id": "Shop.Infrastructure.SqlOrderRepository",
+      "name": "SqlOrderRepository",
+      "kind": "class",
+      "namespace": "Shop.Infrastructure",
+      "project": "Shop.Infrastructure",
+      "members": 7,
+      "methods": 5,
+      "lines": 148
+    },
+    {
+      "id": "Shop.Infrastructure.StripeGateway",
+      "name": "StripeGateway",
+      "kind": "class",
+      "namespace": "Shop.Infrastructure",
+      "project": "Shop.Infrastructure",
+      "members": 4,
+      "methods": 2,
+      "lines": 86
+    },
+    {
+      "id": "Shop.Infrastructure.SerilogLogger",
+      "name": "SerilogLogger",
+      "kind": "class",
+      "namespace": "Shop.Infrastructure",
+      "project": "Shop.Infrastructure",
+      "members": 4,
+      "methods": 3,
+      "lines": 40
+    }
+  ],
+  "edges": [
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "uses",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Api.CustomersController",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.CustomersController",
+      "target": "Shop.Domain.Customer",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.Entity",
+      "kind": "inherits",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Customer",
+      "target": "Shop.Domain.Entity",
+      "kind": "inherits",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.OrderStatus",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.Customer",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.IOrderService",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IOrderRepository",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IPaymentGateway",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IAppLogger",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 5
+    },
+    {
+      "source": "Shop.Domain.IOrderRepository",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 4
+    },
+    {
+      "source": "Shop.Domain.IPaymentGateway",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Infrastructure.SqlOrderRepository",
+      "target": "Shop.Domain.IOrderRepository",
+      "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Infrastructure.SqlOrderRepository",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 4
+    },
+    {
+      "source": "Shop.Infrastructure.StripeGateway",
+      "target": "Shop.Domain.IPaymentGateway",
+      "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Infrastructure.StripeGateway",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Infrastructure.SerilogLogger",
+      "target": "Shop.Domain.IAppLogger",
+      "kind": "implements",
+      "weight": 1
+    }
+  ]
+}
