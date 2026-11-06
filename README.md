@@ -84,6 +84,10 @@ C# and Visual Basic, in the same solution if needed. F# is not supported,
 because Roslyn does not analyze it. A Visual Basic module is shown as a
 static class; the compiler-generated `My` namespace is left out.
 
+In a solution that mixes both, relationships across the languages are shown
+like any other, and a "Languages" filter appears so that the C# and the Visual
+Basic part can be looked at separately.
+
 ## Requirements
 
 - Visual Studio Code 1.85 or newer

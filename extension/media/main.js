@@ -23,8 +23,14 @@
     { id: 'accesses', label: 'Property and field access', color: ['--vscode-charts-purple', '#b180d7'], line: 'dotted' },
   ];
 
+  const LANGUAGES = [
+    { id: 'csharp', label: 'C#' },
+    { id: 'visualbasic', label: 'Visual Basic' },
+  ];
+
   const state = {
     kinds: new Set(KINDS.map((k) => k.id)),
+    languages: new Set(LANGUAGES.map((l) => l.id)),
     edgeKinds: new Set(EDGE_KINDS.map((k) => k.id)),
     projects: new Set(),
     query: '',
@@ -42,6 +48,15 @@
     Object.assign(node, props);
     node.append(...children);
     return node;
+  }
+
+  // Older data has no language: it was C# only.
+  function languageOf(node) {
+    return node.language || 'csharp';
+  }
+
+  function languageLabel(id) {
+    return (LANGUAGES.find((l) => l.id === id) || LANGUAGES[0]).label;
   }
 
   function css(name, fallback) {
@@ -86,6 +101,19 @@
       edgeBox.append(checkbox(kind.label, state.edgeKinds.has(kind.id), count, swatch, (on) => {
         toggle(state.edgeKinds, kind.id, on);
       }));
+    }
+
+    // The language filter only makes sense, and only shows up, in solutions that mix languages.
+    const present = LANGUAGES.filter((l) => graph.nodes.some((n) => languageOf(n) === l.id));
+    state.languages = new Set(present.map((l) => l.id));
+    $('languagesHeading').hidden = present.length < 2;
+    const languageBox = $('languages');
+    languageBox.replaceChildren();
+    if (present.length > 1) {
+      for (const language of present) {
+        const count = graph.nodes.filter((n) => languageOf(n) === language.id).length;
+        languageBox.append(checkbox(language.label, true, count, null, (on) => toggle(state.languages, language.id, on)));
+      }
     }
 
     const projectBox = $('projects');
@@ -214,6 +242,7 @@
         const visible =
           state.kinds.has(node.data('kind')) &&
           state.projects.has(node.data('project')) &&
+          state.languages.has(languageOf(node.data())) &&
           (!state.focus || !neighbourhood || neighbourhood.contains(node));
         node.toggleClass('hidden', !visible);
       });
@@ -348,7 +377,7 @@
     box.append(
       el('p', { className: 'title', textContent: node.data('name') }),
       el('p', { className: 'sub', textContent: `${node.data('isStatic') ? 'static ' : ''}${node.data('kind')} in ${node.data('namespace') || '(global namespace)'}` }),
-      el('p', { className: 'sub', textContent: node.data('project') }),
+      el('p', { className: 'sub', textContent: `${node.data('project')} \u00b7 ${languageLabel(languageOf(node.data()))}` }),
       el('div', { className: 'metrics' },
         metric('Depends on', dependsOn.length),
         metric('Used by', usedBy.length),

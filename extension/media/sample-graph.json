@@ -9,7 +9,8 @@
       "project": "Shop.Api",
       "members": 5,
       "methods": 4,
-      "lines": 92
+      "lines": 92,
+      "language": "csharp"
     },
     {
       "id": "Shop.Api.CustomersController",
@@ -19,7 +20,8 @@
       "project": "Shop.Api",
       "members": 4,
       "methods": 3,
-      "lines": 70
+      "lines": 70,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.Entity",
@@ -29,7 +31,8 @@
       "project": "Shop.Domain",
       "members": 3,
       "methods": 1,
-      "lines": 18
+      "lines": 18,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.Order",
@@ -39,7 +42,8 @@
       "project": "Shop.Domain",
       "members": 9,
       "methods": 3,
-      "lines": 120
+      "lines": 120,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.Customer",
@@ -49,7 +53,8 @@
       "project": "Shop.Domain",
       "members": 6,
       "methods": 1,
-      "lines": 54
+      "lines": 54,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.OrderStatus",
@@ -59,7 +64,8 @@
       "project": "Shop.Domain",
       "members": 4,
       "methods": 0,
-      "lines": 10
+      "lines": 10,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.IOrderService",
@@ -69,7 +75,8 @@
       "project": "Shop.Domain",
       "members": 4,
       "methods": 4,
-      "lines": 22
+      "lines": 22,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.OrderService",
@@ -79,7 +86,8 @@
       "project": "Shop.Domain",
       "members": 8,
       "methods": 6,
-      "lines": 214
+      "lines": 214,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.IOrderRepository",
@@ -89,7 +97,8 @@
       "project": "Shop.Domain",
       "members": 5,
       "methods": 5,
-      "lines": 24
+      "lines": 24,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.IPaymentGateway",
@@ -99,7 +108,8 @@
       "project": "Shop.Domain",
       "members": 2,
       "methods": 2,
-      "lines": 14
+      "lines": 14,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.IAppLogger",
@@ -109,7 +119,8 @@
       "project": "Shop.Domain",
       "members": 3,
       "methods": 3,
-      "lines": 16
+      "lines": 16,
+      "language": "csharp"
     },
     {
       "id": "Shop.Infrastructure.SqlOrderRepository",
@@ -119,7 +130,8 @@
       "project": "Shop.Infrastructure",
       "members": 7,
       "methods": 5,
-      "lines": 148
+      "lines": 148,
+      "language": "csharp"
     },
     {
       "id": "Shop.Infrastructure.StripeGateway",
@@ -129,7 +141,8 @@
       "project": "Shop.Infrastructure",
       "members": 4,
       "methods": 2,
-      "lines": 86
+      "lines": 86,
+      "language": "csharp"
     },
     {
       "id": "Shop.Infrastructure.SerilogLogger",
@@ -139,7 +152,8 @@
       "project": "Shop.Infrastructure",
       "members": 4,
       "methods": 3,
-      "lines": 40
+      "lines": 40,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.PriceCalculator",
@@ -150,7 +164,8 @@
       "members": 3,
       "methods": 3,
       "lines": 48,
-      "isStatic": true
+      "isStatic": true,
+      "language": "csharp"
     },
     {
       "id": "Shop.Domain.OrderChangedHandler",
@@ -160,7 +175,8 @@
       "project": "Shop.Domain",
       "members": 0,
       "methods": 0,
-      "lines": 3
+      "lines": 3,
+      "language": "csharp"
     },
     {
       "id": "Shop.Reporting.ReportBuilder",
@@ -170,7 +186,8 @@
       "project": "Shop.Reporting",
       "members": 5,
       "methods": 4,
-      "lines": 96
+      "lines": 96,
+      "language": "visualbasic"
     },
     {
       "id": "Shop.Reporting.ReportFormatter",
@@ -180,7 +197,8 @@
       "project": "Shop.Reporting",
       "members": 3,
       "methods": 2,
-      "lines": 44
+      "lines": 44,
+      "language": "visualbasic"
     },
     {
       "id": "Shop.Reporting.CsvWriter",
@@ -190,7 +208,8 @@
       "project": "Shop.Reporting",
       "members": 2,
       "methods": 2,
-      "lines": 30
+      "lines": 30,
+      "language": "visualbasic"
     },
     {
       "id": "Shop.Domain.LegacyHelper",
@@ -201,7 +220,8 @@
       "members": 2,
       "methods": 2,
       "lines": 25,
-      "isStatic": true
+      "isStatic": true,
+      "language": "csharp"
     },
     {
       "id": "Shop.Api.<top-level statements>",
@@ -212,7 +232,20 @@
       "members": 0,
       "methods": 0,
       "lines": 24,
-      "isStatic": true
+      "isStatic": true,
+      "language": "csharp"
+    },
+    {
+      "id": "Shop.Legacy.OrderImport",
+      "name": "OrderImport",
+      "kind": "class",
+      "namespace": "Shop.Legacy",
+      "project": "Shop.Legacy",
+      "members": 4,
+      "methods": 3,
+      "lines": 72,
+      "isStatic": true,
+      "language": "visualbasic"
     }
   ],
   "edges": [
@@ -449,6 +482,24 @@
       "target": "Shop.Domain.OrderService",
       "kind": "uses",
       "weight": 1
+    },
+    {
+      "source": "Shop.Legacy.OrderImport",
+      "target": "Shop.Domain.OrderService",
+      "kind": "calls",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Legacy.OrderImport",
+      "target": "Shop.Domain.OrderService",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Legacy.OrderImport",
+      "target": "Shop.Domain.Order",
+      "kind": "accesses",
+      "weight": 3
     }
   ]
 }

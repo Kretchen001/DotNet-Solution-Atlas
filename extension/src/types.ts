@@ -24,6 +24,8 @@ export interface AtlasNode {
   lines: number;
   /** True for static classes. */
   isStatic?: boolean;
+  /** Language of the declaring project. */
+  language?: 'csharp' | 'visualbasic';
 }
 
 /** Points from the dependent type to the type it depends on. */
