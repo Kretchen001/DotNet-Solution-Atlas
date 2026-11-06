@@ -1,5 +1,8 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Atlas.Analyzer.Analysis;
 using Atlas.Analyzer.Model;
+using Microsoft.Build.Locator;
 
 namespace Atlas.Analyzer;
 
@@ -58,7 +61,37 @@ internal static class Cli
             return 1;
         }
 
-        // Placeholder until the workspace loading is wired in: an empty graph.
+        // MSBuild has to be located before any MSBuild type is loaded, which is
+        // why the actual work lives in a separate method.
+        try
+        {
+            MSBuildLocator.RegisterDefaults();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.Error.WriteLine($"No usable .NET SDK found: {ex.Message}");
+            return 2;
+        }
+
+        try
+        {
+            return await AnalyzeAsync(input, outPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Analysis failed: {ex.Message}");
+            return 3;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task<int> AnalyzeAsync(string input, string? outPath)
+    {
+        Console.Error.WriteLine($"Loading {input} ...");
+        using var workspace = await LoadedWorkspace.OpenAsync(input);
+        Console.Error.WriteLine($"Loaded {workspace.Projects.Count} project(s).");
+
+        // Placeholder until the graph builder exists: an empty graph.
         var graph = new AtlasGraph(input, [], []);
         await WriteAsync(graph, outPath);
         return 0;
