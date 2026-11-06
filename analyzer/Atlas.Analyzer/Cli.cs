@@ -91,8 +91,7 @@ internal static class Cli
         using var workspace = await LoadedWorkspace.OpenAsync(input);
         Console.Error.WriteLine($"Loaded {workspace.Projects.Count} project(s).");
 
-        // Placeholder until the graph builder exists: an empty graph.
-        var graph = new AtlasGraph(input, [], []);
+        var graph = await GraphBuilder.BuildAsync(input, workspace.Projects);
         await WriteAsync(graph, outPath);
         return 0;
     }
