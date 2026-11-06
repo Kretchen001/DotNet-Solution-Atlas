@@ -70,6 +70,9 @@ internal static class Cli
         catch (InvalidOperationException ex)
         {
             Console.Error.WriteLine($"No usable .NET SDK found: {ex.Message}");
+            Console.Error.WriteLine(
+                "Note: only SDKs that are not newer than the runtime running this tool can be used. " +
+                "Check 'dotnet --list-sdks' and 'dotnet --list-runtimes'.");
             return 2;
         }
 
