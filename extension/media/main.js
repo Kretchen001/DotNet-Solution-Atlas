@@ -39,7 +39,7 @@
 
   // ---------------------------------------------------------------- loading
 
-  function load(graph) {
+  function load(graph, settings) {
     state.selected = null;
     state.projects = new Set(graph.nodes.map((n) => n.project));
     lastVisibleKey = '';
@@ -48,7 +48,7 @@
     $('empty').hidden = graph.nodes.length > 0;
 
     buildFilters(graph);
-    buildGraph(graph);
+    buildGraph(graph, settings);
     applyView();
     showDetails(null);
   }
@@ -92,7 +92,7 @@
 
   // ------------------------------------------------------------------ graph
 
-  function buildGraph(graph) {
+  function buildGraph(graph, settings) {
     if (cy) cy.destroy();
 
     const fg = css('--vscode-editor-foreground', '#cccccc');
@@ -110,7 +110,8 @@
       ],
       minZoom: 0.05,
       maxZoom: 3,
-      wheelSensitivity: 0.3,
+      // Multiplier for the mouse wheel; 1 is Cytoscape's default. Set in the extension settings.
+      wheelSensitivity: (settings && settings.zoomSpeed) || 1,
       style: [
         {
           selector: 'node',
@@ -301,7 +302,7 @@
   $('relayout').addEventListener('click', () => cy && layout());
 
   window.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'graph') load(event.data.graph);
+    if (event.data && event.data.type === 'graph') load(event.data.graph, event.data.settings);
   });
 
   vscode.postMessage({ type: 'ready' });

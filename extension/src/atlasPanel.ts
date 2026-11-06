@@ -59,7 +59,11 @@ export class AtlasPanel {
   private update(graph: AtlasGraph): void {
     this.graph = graph;
     this.remember(graph);
-    void this.panel.webview.postMessage({ type: 'graph', graph });
+    void this.panel.webview.postMessage({ type: 'graph', graph, settings: this.settings() });
+  }
+
+  private settings(): { zoomSpeed: number } {
+    return { zoomSpeed: vscode.workspace.getConfiguration('dotnetAtlas').get<number>('zoomSpeed', 1) };
   }
 
   private remember(graph: AtlasGraph): void {
@@ -71,7 +75,7 @@ export class AtlasPanel {
     switch (message.type) {
       // The script in the webview is loaded and waits for data.
       case 'ready':
-        void this.panel.webview.postMessage({ type: 'graph', graph: this.graph });
+        void this.panel.webview.postMessage({ type: 'graph', graph: this.graph, settings: this.settings() });
         break;
 
       case 'open':
