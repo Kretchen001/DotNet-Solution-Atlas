@@ -19,6 +19,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('dotnetAtlas.openMap', () => openMap(context)),
     vscode.commands.registerCommand('dotnetAtlas.openSample', () => openSample(context)),
     vscode.commands.registerCommand('dotnetAtlas.compareWithGit', () => compareWithGit(context)),
+    vscode.commands.registerCommand('dotnetAtlas.reloadMap', () => reloadMap(context)),
   );
 }
 
@@ -38,6 +39,22 @@ async function openMap(context: vscode.ExtensionContext): Promise<void> {
   }
 
   AtlasPanel.show(context.extensionUri, graph);
+}
+
+/** Analyzes the solution of the open map again, e.g. after files changed. */
+async function reloadMap(context: vscode.ExtensionContext): Promise<void> {
+  const target = AtlasPanel.currentTarget();
+  if (!target || !path.isAbsolute(target)) {
+    void vscode.window.showInformationMessage('DotNet Solution Atlas: open the map of a solution first.');
+    return;
+  }
+
+  const graph = await analyze(context, target);
+  if (graph) {
+    AtlasPanel.show(context.extensionUri, graph);
+  } else {
+    AtlasPanel.reloadFailed();
+  }
 }
 
 /** Compares the open map with the same solution in another Git revision. */
@@ -72,6 +89,7 @@ async function compareWithGit(context: vscode.ExtensionContext): Promise<void> {
           output: channel,
           token,
           progress: (message) => progress.report({ message }),
+          readXaml: vscode.workspace.getConfiguration('dotnetAtlas').get<boolean>('analyzeXaml', true),
         }),
     );
 
@@ -112,6 +130,7 @@ async function analyze(context: vscode.ExtensionContext, target: string): Promis
           dotnetPath,
           output: channel,
           token,
+          readXaml: vscode.workspace.getConfiguration('dotnetAtlas').get<boolean>('analyzeXaml', true),
         }),
     );
   } catch (error) {

@@ -54,6 +54,11 @@
         "category": "DotNet Solution Atlas"
       },
       {
+        "command": "dotnetAtlas.reloadMap",
+        "title": "Analyze the solution of the open map again",
+        "category": "DotNet Solution Atlas"
+      },
+      {
         "command": "dotnetAtlas.compareWithGit",
         "title": "Compare the open map with a Git commit, branch or tag",
         "category": "DotNet Solution Atlas"
@@ -93,6 +98,28 @@
           "type": "string",
           "default": ".atlas.json",
           "description": "Name of the file with the architecture rules (layers and what they may use). It is looked for next to the analyzed solution, then in the workspace folders."
+        },
+        "dotnetAtlas.analyzeXaml": {
+          "type": "boolean",
+          "default": true,
+          "description": "Read the XAML files (.xaml, .axaml) of the projects. Types that are only used in XAML (windows, user controls, converters, view models) then get a \"XAML references\" relationship and do not look unused. Switch off to speed up the analysis or if XAML is not relevant. Takes effect with the next analysis."
+        },
+        "dotnetAtlas.ignoreUnused": {
+          "type": "object",
+          "default": {},
+          "description": "Types that are never listed under \"Unused candidates\", for all solutions. Same keys and patterns as \"ignoreUnused\" in the rules file (* matches any characters); the lists are added to the defaults and to the rules file.",
+          "properties": {
+            "namespaces": { "type": "array", "items": { "type": "string" }, "description": "Namespaces, e.g. \"MyCompany.Generated*\"." },
+            "types": { "type": "array", "items": { "type": "string" }, "description": "Full names of types, e.g. \"Shop.Api.Startup\"." },
+            "baseTypes": { "type": "array", "items": { "type": "string" }, "description": "Types derived from these base classes or interfaces, e.g. \"MyCompany.Plugins.IPlugin\"." },
+            "attributes": { "type": "array", "items": { "type": "string" }, "description": "Types or members marked with these attributes, e.g. \"MyCompany.Serialization.*\"." }
+          },
+          "additionalProperties": false
+        },
+        "dotnetAtlas.ignoreUnusedDefaults": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply the built-in exceptions for \"Unused candidates\": types derived from WPF, Avalonia, MAUI, ASP.NET Core or hosting classes, types with test or MEF attributes, types with a Main method."
         },
         "dotnetAtlas.analyzerPath": {
           "type": "string",

@@ -131,6 +131,7 @@ export interface CompareOptions {
   output: vscode.OutputChannel;
   token?: vscode.CancellationToken;
   progress?: (message: string) => void;
+  readXaml?: boolean;
 }
 
 /**
@@ -163,6 +164,7 @@ export async function analyzeRevision(options: CompareOptions): Promise<AtlasGra
       dotnetPath: options.dotnetPath,
       output,
       token,
+      readXaml: options.readXaml,
     });
   } finally {
     await git(root, ['worktree', 'remove', '--force', worktree]).catch(() => {

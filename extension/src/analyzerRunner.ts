@@ -27,6 +27,8 @@ export interface RunOptions {
   /** Receives the analyzer's progress and diagnostics. */
   output: vscode.OutputChannel;
   token?: vscode.CancellationToken;
+  /** False passes --no-xaml: XAML files are not read. Default true. */
+  readXaml?: boolean;
 }
 
 /** Runs the analyzer and resolves with the parsed graph. Rejects with an AnalyzerError. */
@@ -44,9 +46,10 @@ export function runAnalyzer(options: RunOptions): Promise<AtlasGraph> {
       return;
     }
 
-    output.appendLine(`> ${dotnetPath} "${analyzerDll}" "${target}"`);
+    const args = [analyzerDll, target, ...(options.readXaml === false ? ['--no-xaml'] : [])];
+    output.appendLine(`> ${dotnetPath} ${args.map((a) => `"${a}"`).join(' ')}`);
 
-    const child = cp.spawn(dotnetPath, [analyzerDll, target], { windowsHide: true });
+    const child = cp.spawn(dotnetPath, args, { windowsHide: true });
     const stdout: Buffer[] = [];
     let cancelled = false;
 

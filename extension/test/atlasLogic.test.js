@@ -99,6 +99,20 @@ test('findUnused hides framework-wired types and says why', () => {
   );
 });
 
+test('mergeIgnore adds settings and rules file to the defaults, which can be switched off', () => {
+  const settings = { types: ['A'] };
+  const rules = { types: ['B'], attributes: ['My.*'] };
+  const withDefaults = logic.mergeIgnore([settings, rules, null]);
+  assert.deepEqual(withDefaults.types, ['A', 'B']);
+  assert.ok(withDefaults.baseTypes.includes('System.Windows.*'));
+  assert.ok(withDefaults.attributes.includes('My.*'));
+
+  const without = logic.mergeIgnore([settings, rules], false);
+  assert.deepEqual(without.baseTypes, []);
+  assert.deepEqual(without.attributes, ['My.*']);
+  assert.deepEqual(logic.mergeIgnore(null, false).types, []);
+});
+
 test('findUnused without exceptions equals unusedCandidates', () => {
   const nodes = [node('A', '', 'App', { baseTypes: ['System.Windows.Window'] })];
   assert.equal(logic.findUnused(nodes, [], null).candidates.length, 1);

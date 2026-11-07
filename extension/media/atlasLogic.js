@@ -236,11 +236,15 @@
     return { candidates, ignored };
   }
 
-  /** Default exceptions plus those of the rules file. */
-  function mergeIgnore(extra) {
+  /** The default exceptions (unless switched off) plus any number of further ones: settings, rules file. */
+  function mergeIgnore(extra, useDefaults = true) {
+    const sources = [].concat(extra || []);
     const merged = {};
     for (const key of ['namespaces', 'types', 'baseTypes', 'attributes']) {
-      merged[key] = [...DEFAULT_UNUSED_IGNORE[key], ...((extra && extra[key]) || [])];
+      merged[key] = [
+        ...(useDefaults ? DEFAULT_UNUSED_IGNORE[key] : []),
+        ...sources.flatMap((source) => (source && source[key]) || []),
+      ];
     }
     return merged;
   }
@@ -616,6 +620,7 @@
     registers: 'registers',
     events: 'events',
     annotated: 'annotated',
+    xaml: 'xaml',
   };
 
   /** Safe identifiers for the text formats: n0, n1, ... in the order of the nodes. */
@@ -778,7 +783,7 @@
       if (!a || !b) continue;
       const [x1, y1] = clip(a, b);
       const [x2, y2] = clip(b, a);
-      const dash = edge.kind === 'implements' || edge.kind === 'registers' || edge.kind === 'annotated' ? ' stroke-dasharray="6 4"' : edge.kind === 'calls' || edge.kind === 'accesses' || edge.kind === 'events' ? ' stroke-dasharray="2 3"' : '';
+      const dash = edge.kind === 'implements' || edge.kind === 'registers' || edge.kind === 'annotated' || edge.kind === 'xaml' ? ' stroke-dasharray="6 4"' : edge.kind === 'calls' || edge.kind === 'accesses' || edge.kind === 'events' ? ' stroke-dasharray="2 3"' : '';
       out.push(
         `  <line x1="${tx(x1)}" y1="${ty(y1)}" x2="${tx(x2)}" y2="${ty(y2)}" stroke="${xml(colorOf(edge.kind))}" stroke-width="${Math.min(4, 1 + Math.log2(edge.weight || 1) / 2)}"${dash} marker-end="url(#arrow-${xml(edge.kind)})" opacity="0.85"/>`,
       );

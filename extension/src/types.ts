@@ -4,7 +4,7 @@
  */
 export type NodeKind = 'class' | 'interface' | 'struct' | 'record' | 'enum' | 'delegate';
 
-export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls' | 'accesses' | 'registers' | 'events' | 'annotated';
+export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls' | 'accesses' | 'registers' | 'events' | 'annotated' | 'xaml';
 
 /** What a member calls, accesses or uses. `member` is empty for a plain use of a type. */
 export interface AtlasMemberRef {
