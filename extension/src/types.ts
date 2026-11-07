@@ -6,6 +6,22 @@ export type NodeKind = 'class' | 'interface' | 'struct' | 'record' | 'enum' | 'd
 
 export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls' | 'accesses';
 
+/** What a member calls, accesses or uses. `member` is empty for a plain use of a type. */
+export interface AtlasMemberRef {
+  target: string;
+  member?: string;
+  kind: 'calls' | 'accesses' | 'uses';
+}
+
+/** A member of a type with the places in the solution it refers to. */
+export interface AtlasMember {
+  name: string;
+  kind: string;
+  file?: string;
+  line?: number;
+  refs: AtlasMemberRef[];
+}
+
 export interface AtlasNode {
   /** Fully qualified, unique name, e.g. `Shop.Domain.Order`. */
   id: string;
@@ -26,6 +42,8 @@ export interface AtlasNode {
   isStatic?: boolean;
   /** Language of the declaring project. */
   language?: 'csharp' | 'visualbasic';
+  /** The members with their references; missing in data of older analyzers. */
+  memberDetails?: AtlasMember[];
 }
 
 /** Points from the dependent type to the type it depends on. */

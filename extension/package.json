@@ -83,6 +83,11 @@
           ],
           "description": "How the map shows namespaces when it is opened. Can be changed in the toolbar of the map."
         },
+        "dotnetAtlas.rulesFile": {
+          "type": "string",
+          "default": ".atlas.json",
+          "description": "Name of the file with the architecture rules (layers and what they may use). It is looked for next to the analyzed solution, then in the workspace folders."
+        },
         "dotnetAtlas.analyzerPath": {
           "type": "string",
           "default": "",

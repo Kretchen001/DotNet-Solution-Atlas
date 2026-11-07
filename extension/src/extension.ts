@@ -42,7 +42,8 @@ async function openMap(context: vscode.ExtensionContext): Promise<void> {
 function openSample(context: vscode.ExtensionContext): void {
   const file = path.join(context.extensionPath, 'media', 'sample-graph.json');
   const graph = JSON.parse(fs.readFileSync(file, 'utf8')) as AtlasGraph;
-  AtlasPanel.show(context.extensionUri, graph);
+  const rules = JSON.parse(fs.readFileSync(path.join(context.extensionPath, 'media', 'sample-rules.json'), 'utf8')) as unknown;
+  AtlasPanel.show(context.extensionUri, graph, rules);
 }
 
 async function analyze(context: vscode.ExtensionContext, target: string): Promise<AtlasGraph | undefined> {

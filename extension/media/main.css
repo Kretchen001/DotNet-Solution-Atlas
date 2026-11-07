@@ -10,7 +10,7 @@ body {
 
 #app {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr) 260px;
+  grid-template-columns: 240px minmax(0, 1fr) 280px;
   height: 100vh;
 }
 
@@ -103,3 +103,19 @@ ul.links a:hover { text-decoration: underline; }
 ul.links .edge { color: var(--vscode-descriptionForeground); font-size: 11px; margin-left: 4px; }
 
 .hint { color: var(--vscode-descriptionForeground); }
+
+label.field { display: flex; flex-direction: column; gap: 3px; padding: 2px 0 6px; }
+#filters select { width: 100%; box-sizing: border-box; margin-bottom: 4px; }
+
+details { margin: 6px 0; }
+details > summary { cursor: pointer; padding: 2px 0; }
+details > summary .badge { margin-left: 4px; padding: 0 6px; border-radius: 8px; font-size: 11px; color: var(--vscode-badge-foreground); background: var(--vscode-badge-background); }
+details > summary .badge:empty { display: none; }
+details > div { padding: 4px 0 4px 8px; }
+
+.problem { margin: 4px 0; color: var(--vscode-errorForeground); word-break: break-word; }
+.row { display: flex; gap: 6px; margin: 6px 0; }
+#details .members details { margin: 2px 0; }
+#details .members summary { word-break: break-word; }
+#details .members .kind { color: var(--vscode-descriptionForeground); font-size: 11px; }
+#details .members .edge { margin-left: 6px; color: var(--vscode-descriptionForeground); font-size: 11px; }

@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { AtlasGraph } from './types';
@@ -8,6 +9,15 @@ interface WebviewMessage {
   type?: string;
   file?: unknown;
   line?: unknown;
+}
+
+/** The architecture rules file as the webview gets it: its content, or what went wrong. */
+interface RulesPayload {
+  file?: string;
+  data?: unknown;
+  error?: string;
+  /** True for the rules that ship with the sample map: there is no file to edit. */
+  sample?: boolean;
 }
 
 /**
@@ -21,10 +31,12 @@ export class AtlasPanel {
   private graph: AtlasGraph;
   /** Files the webview may ask to open: only those that belong to the graph. */
   private files = new Set<string>();
+  /** Rules that come with the sample map instead of a file. */
+  private sampleRules: unknown;
 
-  static show(extensionUri: vscode.Uri, graph: AtlasGraph): void {
+  static show(extensionUri: vscode.Uri, graph: AtlasGraph, sampleRules?: unknown): void {
     if (AtlasPanel.current) {
-      AtlasPanel.current.update(graph);
+      AtlasPanel.current.update(graph, sampleRules);
       AtlasPanel.current.panel.reveal();
       return;
     }
@@ -40,15 +52,17 @@ export class AtlasPanel {
       ],
     });
 
-    AtlasPanel.current = new AtlasPanel(panel, extensionUri, graph);
+    AtlasPanel.current = new AtlasPanel(panel, extensionUri, graph, sampleRules);
   }
 
   private constructor(
     private readonly panel: vscode.WebviewPanel,
     private readonly extensionUri: vscode.Uri,
     graph: AtlasGraph,
+    sampleRules?: unknown,
   ) {
     this.graph = graph;
+    this.sampleRules = sampleRules;
     this.remember(graph);
 
     this.panel.webview.html = this.html();
@@ -56,10 +70,101 @@ export class AtlasPanel {
     this.panel.onDidDispose(() => this.dispose(), undefined, this.disposables);
   }
 
-  private update(graph: AtlasGraph): void {
+  private update(graph: AtlasGraph, sampleRules?: unknown): void {
     this.graph = graph;
+    this.sampleRules = sampleRules;
     this.remember(graph);
-    void this.panel.webview.postMessage({ type: 'graph', graph, settings: this.settings() });
+    this.sendGraph();
+  }
+
+  private sendGraph(): void {
+    void this.panel.webview.postMessage({
+      type: 'graph',
+      graph: this.graph,
+      settings: this.settings(),
+      rules: this.loadRules() ?? {},
+    });
+  }
+
+  /** Where the rules file is looked for: next to the analyzed solution first, then in the workspace folders. */
+  private rulesDirectories(): string[] {
+    const directories: string[] = [];
+    if (path.isAbsolute(this.graph.root)) {
+      directories.push(path.dirname(this.graph.root));
+    }
+    for (const folder of vscode.workspace.workspaceFolders ?? []) {
+      directories.push(folder.uri.fsPath);
+    }
+    return directories;
+  }
+
+  private rulesFileName(): string {
+    return vscode.workspace.getConfiguration('dotnetAtlas').get<string>('rulesFile', '.atlas.json') || '.atlas.json';
+  }
+
+  private loadRules(): RulesPayload | undefined {
+    if (this.sampleRules !== undefined) {
+      return { file: 'Rules of the sample map', data: this.sampleRules, sample: true };
+    }
+
+    for (const directory of this.rulesDirectories()) {
+      const file = path.resolve(directory, this.rulesFileName());
+      if (!fs.existsSync(file)) {
+        continue;
+      }
+
+      try {
+        return { file, data: JSON.parse(fs.readFileSync(file, 'utf8')) as unknown };
+      } catch (error) {
+        return { file, error: `${path.basename(file)}: ${error instanceof Error ? error.message : String(error)}` };
+      }
+    }
+
+    return undefined;
+  }
+
+  /** Creates a rules file with an example next to the solution, or opens the one that exists. */
+  private async createRules(): Promise<void> {
+    // The sample has no file; look for (or create) a real one.
+    const existing = this.sampleRules === undefined ? this.loadRules() : undefined;
+    const directory = this.rulesDirectories()[0];
+    if (!existing && !directory) {
+      void vscode.window.showWarningMessage('DotNet Solution Atlas: open a folder first, so there is a place for the rules file.');
+      return;
+    }
+
+    const file = existing?.file ?? path.resolve(directory, this.rulesFileName());
+    if (!existing) {
+      fs.writeFileSync(file, this.rulesTemplate(), 'utf8');
+    }
+
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(file));
+    await vscode.window.showTextDocument(document, { viewColumn: vscode.ViewColumn.Beside });
+  }
+
+  /** An example with the usual layers, using the namespace prefix most types of the solution have. */
+  private rulesTemplate(): string {
+    const counts = new Map<string, number>();
+    for (const node of this.graph.nodes) {
+      const first = node.namespace.split('.')[0];
+      if (first) {
+        counts.set(first, (counts.get(first) ?? 0) + 1);
+      }
+    }
+    const prefix = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'MyApp';
+
+    const template = {
+      layers: [
+        { name: 'Domain', namespaces: [`${prefix}.Domain*`] },
+        { name: 'Application', namespaces: [`${prefix}.Application*`] },
+        { name: 'Infrastructure', namespaces: [`${prefix}.Infrastructure*`] },
+      ],
+      rules: [
+        { from: 'Domain', canOnlyUse: [] },
+        { from: 'Application', canOnlyUse: ['Domain'] },
+      ],
+    };
+    return JSON.stringify(template, null, 2) + '\n';
   }
 
   private settings(): { zoomSpeed: number; namespaceGrouping: string } {
@@ -71,7 +176,12 @@ export class AtlasPanel {
   }
 
   private remember(graph: AtlasGraph): void {
-    this.files = new Set(graph.nodes.flatMap((node) => (node.file ? [node.file] : [])));
+    this.files = new Set(
+      graph.nodes.flatMap((node) => [
+        ...(node.file ? [node.file] : []),
+        ...(node.memberDetails ?? []).flatMap((member) => (member.file ? [member.file] : [])),
+      ]),
+    );
     this.panel.title = `Atlas: ${path.basename(graph.root)}`;
   }
 
@@ -79,7 +189,15 @@ export class AtlasPanel {
     switch (message.type) {
       // The script in the webview is loaded and waits for data.
       case 'ready':
-        void this.panel.webview.postMessage({ type: 'graph', graph: this.graph, settings: this.settings() });
+        this.sendGraph();
+        break;
+
+      case 'reloadRules':
+        void this.panel.webview.postMessage({ type: 'rules', rules: this.loadRules() ?? {} });
+        break;
+
+      case 'createRules':
+        void this.createRules();
         break;
 
       case 'open':
@@ -123,6 +241,7 @@ export class AtlasPanel {
       asset('node_modules', 'dagre', 'dist', 'dagre.min.js'),
       asset('node_modules', 'cytoscape', 'dist', 'cytoscape.min.js'),
       asset('node_modules', 'cytoscape-dagre', 'cytoscape-dagre.js'),
+      asset('media', 'atlasLogic.js'),
       asset('media', 'main.js'),
     ]
       .map((src) => `<script nonce="${nonce}" src="${src}"></script>`)
@@ -150,6 +269,34 @@ export class AtlasPanel {
         <div id="projects"></div>
         <h3>Groups</h3>
         <div id="groups"></div>
+        <h3>Analysis</h3>
+        <label class="field">Node size
+          <select id="sizeBy" aria-label="What the height of a node shows">
+            <option value="uniform">Uniform</option>
+            <option value="coupling">Coupling</option>
+            <option value="fanIn">Used by others</option>
+            <option value="lines">Lines</option>
+          </select>
+        </label>
+        <label class="check"><input id="markCycles" type="checkbox" checked> Mark cycles</label>
+        <label class="check"><input id="showViolations" type="checkbox" checked> Mark rule violations</label>
+        <details>
+          <summary>Cycles <span id="cycleCount" class="badge"></span></summary>
+          <div id="cycles"></div>
+        </details>
+        <details>
+          <summary>Hubs</summary>
+          <select id="hubMetric" aria-label="Ranking of the hubs"></select>
+          <div id="hubs"></div>
+        </details>
+        <details>
+          <summary>Unused candidates <span id="unusedCount" class="badge"></span></summary>
+          <div id="unused"></div>
+        </details>
+        <details>
+          <summary>Architecture rules <span id="ruleCount" class="badge"></span></summary>
+          <div id="rules"></div>
+        </details>
       </aside>
       <main>
         <div id="toolbar">
@@ -161,6 +308,13 @@ export class AtlasPanel {
               <option value="off">Off</option>
               <option value="grouped">Grouped</option>
               <option value="nested">Nested</option>
+            </select>
+          </label>
+          <label class="check">Collapse
+            <select id="collapse" aria-label="Collapse namespaces or projects into one node">
+              <option value="none">Off</option>
+              <option value="namespace">Namespaces</option>
+              <option value="project">Projects</option>
             </select>
           </label>
           <button id="fit" type="button">Fit</button>
