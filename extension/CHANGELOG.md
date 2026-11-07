@@ -10,8 +10,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
-### Unreleased
+### 1.1.2 – 2026-11-07
 
+- Fixed: types that cannot be resolved (missing references in projects that were read from their files) no longer end the analysis with "Object reference not set to an instance of an object". The analyzer prints the stack trace of a failure.
 - Fixed: a solution with projects that MSBuild cannot load (COM references that only build with Visual Studio's MSBuild, a failing .NET Framework build host: `TypeLoadException ... ProjectCacheService`) no longer ends in "Analysis failed". The projects are tried one by one, and those that come back empty or not at all are read from their source files on disk (`[Fallback]` in the output).
 
 ### 1.1.1 – 2026-11-07
@@ -80,8 +81,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Deutsch
 
-### Unveröffentlicht
+### 1.1.2 – 2026-11-07
 
+- Behoben: Typen, die sich nicht auflösen lassen (fehlende Verweise in Projekten, die aus ihren Dateien gelesen wurden), beenden die Analyse nicht mehr mit „Object reference not set to an instance of an object“. Der Analyzer gibt bei einem Fehler den Stacktrace aus.
 - Behoben: Eine Solution mit Projekten, die MSBuild nicht laden kann (COM-Verweise, die sich nur mit dem MSBuild von Visual Studio bauen lassen; ein ausfallender .NET-Framework-Build-Host: `TypeLoadException ... ProjectCacheService`), endet nicht mehr mit „Analysis failed“. Die Projekte werden einzeln versucht, und solche, die leer oder gar nicht zurückkommen, werden aus ihren Quelldateien auf der Festplatte gelesen (`[Fallback]` in der Ausgabe).
 
 ### 1.1.1 – 2026-11-07
@@ -150,8 +152,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
-### 未发布
+### 1.1.2 – 2026-11-07
 
+- 修复：无法解析的类型（从文件读取的项目中缺少引用）不再使分析以“Object reference not set to an instance of an object”结束。分析器在失败时会输出堆栈跟踪。
 - 修复：包含 MSBuild 无法加载的项目的解决方案（只能用 Visual Studio 的 MSBuild 构建的 COM 引用；失败的 .NET Framework 构建宿主：`TypeLoadException ... ProjectCacheService`）不再以“Analysis failed”结束。分析器会逐个尝试项目，对于返回为空或根本没有返回的项目，则从磁盘上的源文件读取（输出中为 `[Fallback]`）。
 
 ### 1.1.1 – 2026-11-07
@@ -220,8 +223,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
-### Не выпущено
+### 1.1.2 – 2026-11-07
 
+- Исправлено: типы, которые не удаётся разрешить (отсутствующие ссылки в проектах, прочитанных из файлов), больше не приводят к завершению анализа с «Object reference not set to an instance of an object». При сбое анализатор выводит трассировку стека.
 - Исправлено: решение с проектами, которые MSBuild не может загрузить (COM-ссылки, собирающиеся только MSBuild из Visual Studio; сбой узла сборки .NET Framework: `TypeLoadException ... ProjectCacheService`), больше не заканчивается сообщением «Analysis failed». Проекты пробуются по одному, а те, что вернулись пустыми или не вернулись совсем, читаются из исходных файлов на диске (в выводе `[Fallback]`).
 
 ### 1.1.1 – 2026-11-07
@@ -290,8 +294,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Español
 
-### Sin publicar
+### 1.1.2 – 2026-11-07
 
+- Corregido: los tipos que no se pueden resolver (referencias que faltan en proyectos leídos desde sus archivos) ya no terminan el análisis con «Object reference not set to an instance of an object». El analizador muestra el seguimiento de la pila de un fallo.
 - Corregido: una solución con proyectos que MSBuild no puede cargar (referencias COM que solo se compilan con el MSBuild de Visual Studio; un host de compilación de .NET Framework que falla: `TypeLoadException ... ProjectCacheService`) ya no termina en «Analysis failed». Los proyectos se prueban uno a uno y los que vuelven vacíos o no vuelven se leen desde sus archivos fuente en el disco (`[Fallback]` en la salida).
 
 ### 1.1.1 – 2026-11-07

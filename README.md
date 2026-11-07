@@ -254,6 +254,7 @@ The limit: references to the framework, NuGet packages and COM libraries are not
 known for these projects. The relationships between the types of the solution are
 found, but calls into libraries are not resolved, and the exceptions for unused
 types that depend on framework base types (WPF and others) do not apply to them.
+Types that cannot be resolved are skipped and never stop the analysis.
 
 ### Keeping the map up to date
 
@@ -637,7 +638,8 @@ Die Grenze: Verweise auf das Framework, NuGet-Pakete und COM-Bibliotheken sind f
 diese Projekte nicht bekannt. Die Beziehungen zwischen den Typen der Solution
 werden gefunden, Aufrufe in Bibliotheken aber nicht aufgelöst, und die Ausnahmen
 für ungenutzte Typen, die auf Framework-Basistypen beruhen (WPF und andere),
-greifen dort nicht.
+greifen dort nicht. Typen, die sich nicht auflösen lassen, werden übersprungen und
+stoppen die Analyse nie.
 
 ### Die Karte aktuell halten
 
@@ -956,7 +958,7 @@ MSBuild 构建的项目（例如因为 COM 引用，错误 MSB4803），或其 .
 `[Fallback]` 或 `[Skipped]` 列出它们。
 
 局限：这些项目的框架、NuGet 包和 COM 库引用未知。解决方案内类型之间的关系可以找到，但对库的调用无法解析，
-依赖框架基类的未使用类型例外（WPF 等）对它们不适用。
+依赖框架基类的未使用类型例外（WPF 等）对它们不适用。无法解析的类型会被跳过，不会中断分析。
 
 ### 保持地图为最新
 
@@ -1311,6 +1313,7 @@ MSB4803) или у которых не работает узел сборки .N
 Ограничение: ссылки на фреймворк, пакеты NuGet и COM-библиотеки для этих проектов неизвестны.
 Связи между типами решения находятся, но вызовы в библиотеки не разрешаются, а исключения для
 неиспользуемых типов, основанные на базовых типах фреймворка (WPF и другие), к ним не применяются.
+Типы, которые не удаётся разрешить, пропускаются и никогда не останавливают анализ.
 
 ### Актуальность карты
 
@@ -1676,7 +1679,7 @@ indica como `[Fallback]` o `[Skipped]`.
 El límite: las referencias al framework, a paquetes NuGet y a bibliotecas COM no se conocen para
 estos proyectos. Se encuentran las relaciones entre los tipos de la solución, pero las llamadas a
 bibliotecas no se resuelven y las excepciones para tipos sin usar que dependen de tipos base del
-framework (WPF y otros) no se aplican a ellos.
+framework (WPF y otros) no se aplican a ellos. Los tipos que no se pueden resolver se omiten y nunca detienen el análisis.
 
 ### Mantener el mapa al día
 
