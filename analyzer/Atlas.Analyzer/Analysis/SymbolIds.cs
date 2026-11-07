@@ -16,6 +16,13 @@ internal static class SymbolIds
     /// </summary>
     public static string For(INamedTypeSymbol type)
     {
+        // A type that cannot be resolved (missing reference, project loaded without its packages) has no
+        // containing namespace. It cannot be a type of the solution, so its id must not match one.
+        if (type.TypeKind == TypeKind.Error)
+        {
+            return "?" + type.Name;
+        }
+
         var builder = new StringBuilder();
         Append(type.OriginalDefinition, builder);
         return builder.ToString();
@@ -28,9 +35,9 @@ internal static class SymbolIds
             Append(outer, builder);
             builder.Append('.');
         }
-        else if (!type.ContainingNamespace.IsGlobalNamespace)
+        else if (type.ContainingNamespace is { IsGlobalNamespace: false } containing)
         {
-            builder.Append(type.ContainingNamespace.ToDisplayString()).Append('.');
+            builder.Append(containing.ToDisplayString()).Append('.');
         }
 
         builder.Append(type.Name);

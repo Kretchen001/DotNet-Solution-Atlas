@@ -89,6 +89,7 @@ internal static class Cli
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Analysis failed: {ex.Message}");
+            Console.Error.WriteLine(ex.StackTrace);
             return 3;
         }
     }
