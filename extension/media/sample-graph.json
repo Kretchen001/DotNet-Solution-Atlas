@@ -296,6 +296,17 @@
       "lines": 72,
       "isStatic": true,
       "language": "visualbasic"
+    },
+    {
+      "id": "Shop.Api.AuditAttribute",
+      "name": "AuditAttribute",
+      "kind": "class",
+      "namespace": "Shop.Api",
+      "project": "Shop.Api",
+      "members": 0,
+      "methods": 0,
+      "lines": 8,
+      "language": "csharp"
     }
   ],
   "edges": [
@@ -399,12 +410,6 @@
       "source": "Shop.Domain.Order",
       "target": "Shop.Domain.Entity",
       "kind": "inherits",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.Order",
-      "target": "Shop.Domain.OrderChangedHandler",
-      "kind": "uses",
       "weight": 1
     },
     {
@@ -561,6 +566,60 @@
       "source": "Shop.Reporting.ReportFormatter",
       "target": "Shop.Reporting.CsvWriter",
       "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Infrastructure.SqlOrderRepository",
+      "kind": "registers",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Domain.IOrderRepository",
+      "kind": "registers",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Infrastructure.StripeGateway",
+      "kind": "registers",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Domain.IPaymentGateway",
+      "kind": "registers",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Infrastructure.SerilogLogger",
+      "kind": "registers",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.<top-level statements>",
+      "target": "Shop.Domain.IAppLogger",
+      "kind": "registers",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.OrderChangedHandler",
+      "kind": "events",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Api.AuditAttribute",
+      "kind": "annotated",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.CustomersController",
+      "target": "Shop.Api.AuditAttribute",
+      "kind": "annotated",
       "weight": 1
     }
   ]
