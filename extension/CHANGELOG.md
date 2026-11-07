@@ -14,6 +14,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 - First stable version. It contains everything from the 0.x versions: the map with relationships, namespace frames, collapsing, analysis, architecture rules, members, export and the comparison with Git.
 - Added: the architecture rules are explained in detail in the README (getting started, the file format, patterns, what counts as a violation, tips), in five languages.
+- Added: "Focus in map" in the details pane centres the map on the selected type or group.
+- Changed: large maps load and react much faster. Beyond 80 types, or when the types are densely connected, a faster layered layout replaces dagre; large maps are drawn with straight lines. 1000 types with 5000 relationships load in about 3 seconds.
 
 ### 0.6.0 – 2026-11-07
 
@@ -64,6 +66,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 - Erste stabile Version. Sie enthält alles aus den 0.x-Versionen: die Karte mit Beziehungen, Namespace-Rahmen, Zusammenfassen, Analyse, Architekturregeln, Member, Export und den Vergleich mit Git.
 - Neu: Die Architekturregeln sind im README ausführlich erklärt (erste Schritte, Dateiformat, Muster, was als Verstoß zählt, Tipps), in fünf Sprachen.
+- Neu: „Focus in map“ im Detailbereich zentriert die Karte auf den gewählten Typ oder die gewählte Gruppe.
+- Geändert: Große Karten laden und reagieren deutlich schneller. Ab 80 Typen oder bei dicht verbundenen Typen ersetzt ein schnelleres Ebenen-Layout dagre; große Karten werden mit geraden Linien gezeichnet. 1000 Typen mit 5000 Beziehungen laden in etwa 3 Sekunden.
 
 ### 0.6.0 – 2026-11-07
 
@@ -114,6 +118,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 - 首个稳定版本。它包含 0.x 版本的全部功能：带关系的地图、命名空间框、折叠、分析、架构规则、成员、导出以及与 Git 的比较。
 - 新增：README 中详细说明了架构规则（快速开始、文件格式、模式、什么算违规、提示），提供五种语言。
+- 新增：详情面板中的“Focus in map”会将地图居中到所选类型或分组。
+- 变更：大型地图的加载和响应明显更快。超过 80 个类型或类型之间连接密集时，由更快的分层布局取代 dagre；大型地图使用直线绘制。1000 个类型、5000 条关系约 3 秒即可加载。
 
 ### 0.6.0 – 2026-11-07
 
@@ -164,6 +170,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 - Первая стабильная версия. Она включает всё из версий 0.x: карту со связями, рамки пространств имён, свёртку, анализ, архитектурные правила, члены, экспорт и сравнение с Git.
 - Добавлено: архитектурные правила подробно описаны в README (начало работы, формат файла, шаблоны, что считается нарушением, советы) на пяти языках.
+- Добавлено: «Focus in map» в панели сведений центрирует карту на выбранном типе или группе.
+- Изменено: большие карты загружаются и реагируют заметно быстрее. Более чем при 80 типах или при плотно связанных типах dagre заменяет более быстрая послойная раскладка; большие карты рисуются прямыми линиями. 1000 типов с 5000 связями загружаются примерно за 3 секунды.
 
 ### 0.6.0 – 2026-11-07
 
@@ -214,6 +222,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 - Primera versión estable. Incluye todo lo de las versiones 0.x: el mapa con relaciones, marcos de espacios de nombres, contracción, análisis, reglas de arquitectura, miembros, exportación y la comparación con Git.
 - Añadido: las reglas de arquitectura se explican en detalle en el README (primeros pasos, formato del archivo, patrones, qué cuenta como infracción, consejos), en cinco idiomas.
+- Añadido: «Focus in map» en el panel de detalles centra el mapa en el tipo o grupo seleccionado.
+- Cambiado: los mapas grandes cargan y reaccionan mucho más rápido. A partir de 80 tipos, o con tipos muy conectados, un diseño por capas más rápido sustituye a dagre; los mapas grandes se dibujan con líneas rectas. 1000 tipos con 5000 relaciones cargan en unos 3 segundos.
 
 ### 0.6.0 – 2026-11-07
 
