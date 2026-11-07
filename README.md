@@ -50,7 +50,7 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 - Layered layout, so that interfaces and implementations are easy to tell apart
 - Filters by type kind, project and language; search by name
 - Focus mode: only the selected type and its neighbours
-- Group by namespace: dashed frames around the types of each namespace (switchable)
+- Group by namespace: dashed frames around the types of each namespace, optionally nested (Off, Grouped, Nested)
 - Details pane with metrics, and jump to the source file
 - Groups: connected groups of types and types without any relationship, to
   find parts of the code that are cut off from the rest
@@ -121,6 +121,7 @@ Basic part can be looked at separately.
 | `dotnetAtlas.dotnetPath`   | `dotnet` | Path or name of the dotnet executable used to run the analyzer           |
 | `dotnetAtlas.analyzerPath` | empty    | Path to `Atlas.Analyzer.dll`; empty uses the analyzer bundled with the extension |
 | `dotnetAtlas.zoomSpeed`    | `1`      | Speed of zooming with the mouse wheel (0.1 to 10), applies to the next map |
+| `dotnetAtlas.namespaceGrouping` | `off` | Namespace frames when a map opens: `off`, `grouped` or `nested` (changeable in the toolbar) |
 
 ### Requirements
 
@@ -186,7 +187,7 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
   unterscheiden lassen
 - Filter nach Typart, Projekt und Sprache; Suche nach Namen
 - Fokusmodus: nur der gewählte Typ und seine Nachbarn
-- Nach Namespace gruppieren: gestrichelte Rahmen um die Typen jedes Namespace (schaltbar)
+- Nach Namespace gruppieren: gestrichelte Rahmen um die Typen jedes Namespace, auch verschachtelt (Off, Grouped, Nested)
 - Detailbereich mit Kennzahlen und Sprung zur Quelldatei
 - Gruppen: zusammenhängende Gruppen von Typen und Typen ohne jede Beziehung, um
   vom Rest abgeschnittene Teile des Codes zu finden
@@ -264,6 +265,7 @@ sich der C#- und der Visual-Basic-Teil getrennt betrachten lassen.
 | `dotnetAtlas.dotnetPath`   | `dotnet` | Pfad oder Name der dotnet-Programmdatei, mit der der Analyzer gestartet wird     |
 | `dotnetAtlas.analyzerPath` | leer     | Pfad zu `Atlas.Analyzer.dll`; leer verwendet den mitgelieferten Analyzer         |
 | `dotnetAtlas.zoomSpeed`    | `1`      | Geschwindigkeit beim Zoomen mit dem Mausrad (0,1 bis 10), gilt für die nächste Karte |
+| `dotnetAtlas.namespaceGrouping` | `off` | Namespace-Rahmen beim Öffnen der Karte: `off`, `grouped` oder `nested` (in der Werkzeugleiste änderbar) |
 
 ### Voraussetzungen
 
@@ -322,7 +324,7 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 - 分层布局，方便区分接口和实现
 - 按类型种类、项目和语言过滤；按名称搜索
 - 聚焦模式：只显示选中的类型及其相邻类型
-- 按命名空间分组：在每个命名空间的类型周围绘制虚线框（可开关）
+- 按命名空间分组：在每个命名空间的类型周围绘制虚线框，可嵌套显示（Off、Grouped、Nested）
 - 详情面板显示统计信息，并可跳转到源文件
 - 分组：显示相互连通的类型组，以及没有任何关系的类型，用于找出与其余代码隔离的部分
 
@@ -385,6 +387,7 @@ Visual Basic 的模块（Module）会显示为静态类；编译器生成的 `My
 | `dotnetAtlas.dotnetPath`   | `dotnet` | 用于运行分析器的 dotnet 可执行文件的路径或名称             |
 | `dotnetAtlas.analyzerPath` | 空       | `Atlas.Analyzer.dll` 的路径；为空时使用扩展自带的分析器    |
 | `dotnetAtlas.zoomSpeed`    | `1`      | 鼠标滚轮缩放速度（0.1 到 10），在下次打开地图时生效        |
+| `dotnetAtlas.namespaceGrouping` | `off` | 打开地图时的命名空间框：`off`、`grouped` 或 `nested`（可在工具栏中更改） |
 
 ### 环境要求
 
@@ -448,7 +451,7 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 - Многоуровневая раскладка, чтобы интерфейсы и реализации легко различались
 - Фильтры по виду типа, проекту и языку; поиск по имени
 - Режим фокуса: только выбранный тип и его соседи
-- Группировка по пространствам имён: пунктирные рамки вокруг типов каждого пространства (переключается)
+- Группировка по пространствам имён: пунктирные рамки вокруг типов каждого пространства, при желании вложенные (Off, Grouped, Nested)
 - Панель сведений с метриками и переход к исходному файлу
 - Группы: связные группы типов и типы без каких-либо связей — для поиска частей
   кода, отрезанных от остального
@@ -525,6 +528,7 @@ C# и Visual Basic, при необходимости — в одном реше
 | `dotnetAtlas.dotnetPath`   | `dotnet`     | Путь или имя исполняемого файла dotnet, которым запускается анализатор     |
 | `dotnetAtlas.analyzerPath` | пусто        | Путь к `Atlas.Analyzer.dll`; если пусто, используется анализатор из состава расширения |
 | `dotnetAtlas.zoomSpeed`    | `1`          | Скорость масштабирования колесом мыши (от 0,1 до 10), действует при следующем открытии карты |
+| `dotnetAtlas.namespaceGrouping` | `off` | Рамки пространств имён при открытии карты: `off`, `grouped` или `nested` (можно изменить на панели инструментов) |
 
 ### Требования
 
@@ -589,7 +593,7 @@ organizada en capas esta solución?».
 - Diseño por capas, para distinguir fácilmente interfaces e implementaciones
 - Filtros por tipo, proyecto y lenguaje; búsqueda por nombre
 - Modo de enfoque: solo el tipo seleccionado y sus vecinos
-- Agrupar por espacio de nombres: marcos discontinuos alrededor de los tipos de cada espacio (activable)
+- Agrupar por espacio de nombres: marcos discontinuos alrededor de los tipos de cada espacio, también anidados (Off, Grouped, Nested)
 - Panel de detalles con métricas y salto al archivo de origen
 - Grupos: grupos conectados de tipos y tipos sin ninguna relación, para
   encontrar partes del código aisladas del resto
@@ -663,6 +667,7 @@ separado la parte en C# y la parte en Visual Basic.
 | `dotnetAtlas.dotnetPath`   | `dotnet`          | Ruta o nombre del ejecutable de dotnet con el que se inicia el analizador        |
 | `dotnetAtlas.analyzerPath` | vacío             | Ruta a `Atlas.Analyzer.dll`; vacío usa el analizador incluido en la extensión    |
 | `dotnetAtlas.zoomSpeed`    | `1`               | Velocidad del zoom con la rueda del ratón (0,1 a 10), se aplica al abrir el siguiente mapa |
+| `dotnetAtlas.namespaceGrouping` | `off` | Marcos de espacios de nombres al abrir el mapa: `off`, `grouped` o `nested` (se cambia en la barra de herramientas) |
 
 ### Requisitos
 

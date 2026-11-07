@@ -12,7 +12,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Unreleased
 
-- Added: "Group by namespace" switch in the map toolbar; draws a frame around the types of each namespace.
+- Added: namespace frames in the map (toolbar choice Off, Grouped, Nested); nested frames place a namespace inside its parent namespace. Starting value: setting `dotnetAtlas.namespaceGrouping`.
+- Changed: the map opens in the active editor group instead of beside it; code opened from the map goes beside the map.
 
 ### 0.3.0 – 2026-11-07
 
@@ -41,7 +42,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Unveröffentlicht
 
-- Neu: Schalter „Group by namespace“ in der Werkzeugleiste der Karte; zeichnet einen Rahmen um die Typen jedes Namespace.
+- Neu: Namespace-Rahmen in der Karte (Auswahl in der Werkzeugleiste: Off, Grouped, Nested); verschachtelt liegt ein Namespace im Rahmen seines übergeordneten Namespace. Startwert: Einstellung `dotnetAtlas.namespaceGrouping`.
+- Geändert: Die Karte öffnet sich in der aktiven Editorgruppe statt daneben; aus der Karte geöffneter Code erscheint neben der Karte.
 
 ### 0.3.0 – 2026-11-07
 
@@ -70,7 +72,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### 未发布
 
-- 新增：地图工具栏中的“Group by namespace”开关；在每个命名空间的类型周围绘制边框。
+- 新增：地图中的命名空间框（工具栏选项 Off、Grouped、Nested）；嵌套时，命名空间位于其父命名空间的框内。初始值：设置 `dotnetAtlas.namespaceGrouping`。
+- 变更：地图在当前编辑器组中打开，而不是在旁边；从地图打开的代码显示在地图旁边。
 
 ### 0.3.0 – 2026-11-07
 
@@ -99,7 +102,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Не выпущено
 
-- Добавлено: переключатель «Group by namespace» на панели инструментов карты; рисует рамку вокруг типов каждого пространства имён.
+- Добавлено: рамки пространств имён на карте (выбор на панели инструментов: Off, Grouped, Nested); при вложенном режиме пространство имён лежит в рамке родительского. Начальное значение: параметр `dotnetAtlas.namespaceGrouping`.
+- Изменено: карта открывается в активной группе редактора, а не рядом; код, открытый из карты, появляется рядом с картой.
 
 ### 0.3.0 – 2026-11-07
 
@@ -128,7 +132,8 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Sin publicar
 
-- Añadido: interruptor «Group by namespace» en la barra de herramientas del mapa; dibuja un marco alrededor de los tipos de cada espacio de nombres.
+- Añadido: marcos de espacios de nombres en el mapa (opción de la barra de herramientas: Off, Grouped, Nested); en modo anidado un espacio de nombres queda dentro del marco de su espacio padre. Valor inicial: el ajuste `dotnetAtlas.namespaceGrouping`.
+- Cambiado: el mapa se abre en el grupo de editores activo en lugar de al lado; el código abierto desde el mapa aparece junto al mapa.
 
 ### 0.3.0 – 2026-11-07
 
