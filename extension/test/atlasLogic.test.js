@@ -47,6 +47,19 @@ test('findCycles ignores edges inside one namespace', () => {
   assert.deepEqual(logic.findCycles(nodes, [edge('a', 'b'), edge('b', 'a')], 'namespace'), []);
 });
 
+test('connectedComponents groups by connection, largest first, and ignores unknown ids', () => {
+  const ids = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const edges = [edge('A', 'B'), edge('C', 'B'), edge('D', 'E'), edge('A', 'X'), edge('F', 'F')];
+  assert.deepEqual(logic.connectedComponents(ids, edges), [['A', 'B', 'C'], ['D', 'E'], ['F']]);
+  assert.deepEqual(logic.connectedComponents([], edges), []);
+});
+
+test('connectedComponents handles a long chain', () => {
+  const ids = Array.from({ length: 50000 }, (_, i) => 'n' + i);
+  const edges = ids.slice(1).map((id, i) => edge(ids[i], id));
+  assert.equal(logic.connectedComponents(ids, edges)[0].length, 50000);
+});
+
 test('metrics counts distinct neighbours and the instability', () => {
   const nodes = [node('A'), node('B'), node('C')];
   const edges = [edge('A', 'C', 'uses'), edge('A', 'C', 'calls'), edge('B', 'C'), edge('C', 'A')];

@@ -108,6 +108,41 @@
     return stronglyConnected(keys, merged);
   }
 
+  /**
+   * The connected groups (weakly connected components) of a graph, largest first. Edges to unknown ids are ignored.
+   * Union-find, so that 10 000 relationships take a few milliseconds.
+   * @param {string[]} ids
+   * @param {{source: string, target: string}[]} edges
+   * @returns {string[][]}
+   */
+  function connectedComponents(ids, edges) {
+    const parent = new Map(ids.map((id) => [id, id]));
+    const find = (id) => {
+      let root = id;
+      while (parent.get(root) !== root) root = parent.get(root);
+      for (let next; id !== root; id = next) {
+        next = parent.get(id);
+        parent.set(id, root);
+      }
+      return root;
+    };
+
+    for (const edge of edges) {
+      if (!parent.has(edge.source) || !parent.has(edge.target)) continue;
+      const a = find(edge.source);
+      const b = find(edge.target);
+      if (a !== b) parent.set(a, b);
+    }
+
+    const groups = new Map();
+    for (const id of ids) {
+      const root = find(id);
+      if (!groups.has(root)) groups.set(root, []);
+      groups.get(root).push(id);
+    }
+    return [...groups.values()].sort((a, b) => b.length - a.length || a[0].localeCompare(b[0]));
+  }
+
   // ---------------------------------------------------------------- metrics
 
   /**
@@ -811,6 +846,7 @@
   return {
     stronglyConnected,
     findCycles,
+    connectedComponents,
     metrics,
     topBy,
     unusedCandidates,
