@@ -10,6 +10,13 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### 0.5.0 – 2026-11-07
+
+- Added: export of the map as shown (filters, collapsed groups and namespace frames included): PNG, SVG, Mermaid, Graphviz DOT and JSON ("Export…" in the toolbar).
+- Added: three new relationships, each with its own filter entry: `registers` (dependency injection registrations such as `AddScoped<IOrders, Orders>()`, `AddHostedService<T>()`, also the `typeof` overloads), `events` (subscribing to, unsubscribing from and raising events; before, these were property accesses) and `annotated` (attributes; before, these were plain uses).
+- Added: tests for the analyzer (xUnit, in-memory workspace) and a GitHub Actions workflow that builds and tests the analyzer and the extension.
+- Fixed: with namespace frames on, two types of one frame could be drawn on top of each other.
+
 ### 0.4.0 – 2026-11-07
 
 - Added: analysis in the sidebar: dependency cycles between types, namespaces and projects (marked in red), hub ranking, candidates for unused types, and node height by coupling, usage or size.
@@ -43,6 +50,13 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### 0.5.0 – 2026-11-07
+
+- Neu: Export der Karte, wie sie angezeigt wird (mit Filtern, zusammengefassten Gruppen und Namespace-Rahmen): PNG, SVG, Mermaid, Graphviz DOT und JSON („Export…“ in der Werkzeugleiste).
+- Neu: drei weitere Beziehungen mit eigenem Filtereintrag: `registers` (Registrierungen für Dependency Injection wie `AddScoped<IOrders, Orders>()`, `AddHostedService<T>()`, auch die `typeof`-Überladungen), `events` (Abonnieren, Abbestellen und Auslösen von Events; vorher Property-Zugriffe) und `annotated` (Attribute; vorher einfache Verwendung).
+- Neu: Tests für den Analyzer (xUnit, Workspace im Speicher) und ein GitHub-Actions-Workflow, der Analyzer und Erweiterung baut und testet.
+- Behoben: Bei eingeschalteten Namespace-Rahmen konnten zwei Typen eines Rahmens übereinander gezeichnet werden.
 
 ### 0.4.0 – 2026-11-07
 
@@ -78,6 +92,13 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 0.5.0 – 2026-11-07
+
+- 新增：导出当前显示的地图（包含过滤结果、折叠的分组和命名空间框）：PNG、SVG、Mermaid、Graphviz DOT 和 JSON（工具栏中的“Export…”）。
+- 新增：三种新的关系，各有独立的过滤项：`registers`（依赖注入注册，如 `AddScoped<IOrders, Orders>()`、`AddHostedService<T>()`，也包括 `typeof` 重载）、`events`（订阅、取消订阅和触发事件；此前算作属性访问）和 `annotated`（特性；此前算作普通使用）。
+- 新增：分析器测试（xUnit，内存工作区）以及构建并测试分析器和扩展的 GitHub Actions 工作流。
+- 修复：开启命名空间框时，同一个框内的两个类型可能被绘制在一起。
+
 ### 0.4.0 – 2026-11-07
 
 - 新增：侧边栏分析：类型、命名空间和项目之间的依赖循环（以红色标出）、枢纽排名、可能未使用的类型，以及按耦合度、使用量或规模调整节点高度。
@@ -112,6 +133,13 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### 0.5.0 – 2026-11-07
+
+- Добавлено: экспорт карты в том виде, как она показана (с фильтрами, свёрнутыми группами и рамками пространств имён): PNG, SVG, Mermaid, Graphviz DOT и JSON («Export…» на панели инструментов).
+- Добавлено: три новых вида связей, у каждого свой пункт в фильтре: `registers` (регистрации во внедрении зависимостей, например `AddScoped<IOrders, Orders>()`, `AddHostedService<T>()`, а также перегрузки с `typeof`), `events` (подписка, отписка и вызов событий; раньше это считалось обращением к свойствам) и `annotated` (атрибуты; раньше это считалось обычным использованием).
+- Добавлено: тесты анализатора (xUnit, рабочая область в памяти) и рабочий процесс GitHub Actions, который собирает и тестирует анализатор и расширение.
+- Исправлено: при включённых рамках пространств имён два типа одной рамки могли рисоваться друг поверх друга.
+
 ### 0.4.0 – 2026-11-07
 
 - Добавлено: анализ в боковой панели: циклические зависимости между типами, пространствами имён и проектами (красным), рейтинг узловых точек, кандидаты на неиспользуемые типы и высота узла по связанности, использованию или размеру.
@@ -145,6 +173,13 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### 0.5.0 – 2026-11-07
+
+- Añadido: exportación del mapa tal como se muestra (con filtros, grupos contraídos y marcos de espacios de nombres): PNG, SVG, Mermaid, Graphviz DOT y JSON («Export…» en la barra de herramientas).
+- Añadido: tres relaciones nuevas, cada una con su propia entrada en el filtro: `registers` (registros de inyección de dependencias como `AddScoped<IOrders, Orders>()`, `AddHostedService<T>()`, también las sobrecargas con `typeof`), `events` (suscribirse, anular la suscripción y disparar eventos; antes contaban como accesos a propiedades) y `annotated` (atributos; antes contaban como simple uso).
+- Añadido: pruebas del analizador (xUnit, espacio de trabajo en memoria) y un flujo de trabajo de GitHub Actions que compila y prueba el analizador y la extensión.
+- Corregido: con los marcos de espacios de nombres activados, dos tipos de un mismo marco podían dibujarse uno encima del otro.
 
 ### 0.4.0 – 2026-11-07
 
