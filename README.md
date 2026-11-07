@@ -65,11 +65,13 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 - Groups: connected groups of types and types without any relationship, to
   find parts of the code that are cut off from the rest
 - Export of the map as shown: PNG, SVG, Mermaid, Graphviz DOT or JSON
+- Comparison with a Git commit, branch or tag: new types and dependencies in
+  green, removed ones as red dashed ghosts, and a list of the changes (useful
+  to review a pull request)
 
 ### Planned features
 
 - Filter by namespace
-- Compare with a Git commit or branch
 
 ### Try it
 
@@ -117,6 +119,14 @@ The interface of the extension is in English.
 - Click a type to see its neighbours, double-click to open it in the editor.
 - Filter by type kind, project and language, search by name, or switch on
   "Focus on selection" to see only a type and its direct neighbours.
+- "Export…" saves the map as it is shown (filters, collapsed groups and
+  namespace frames included) as PNG, SVG, Mermaid, Graphviz DOT or JSON.
+- "Compare with Git…" asks for a branch, tag or commit and analyzes that
+  revision in a temporary checkout (your working directory is not touched, the
+  packages are restored there). New types and dependencies get a green border
+  or line, removed ones are drawn again as red dashed ghosts, and the sidebar
+  lists the changes. "Clear comparison" removes the marks. Needs a Git
+  repository and access to the package sources.
 
 ### Architecture rules
 
@@ -247,11 +257,13 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
 - Gruppen: zusammenhängende Gruppen von Typen und Typen ohne jede Beziehung, um
   vom Rest abgeschnittene Teile des Codes zu finden
 - Export der Karte, wie sie gerade angezeigt wird: PNG, SVG, Mermaid, Graphviz DOT oder JSON
+- Vergleich mit einem Git-Commit, Branch oder Tag: neue Typen und Abhängigkeiten
+  grün, entfernte als rote gestrichelte Geister, dazu eine Liste der Änderungen
+  (nützlich, um einen Pull Request zu prüfen)
 
 ### Geplante Funktionen
 
 - Filter nach Namespace
-- Vergleich mit einem Git-Commit oder Branch
 
 ### Ausprobieren
 
@@ -305,6 +317,16 @@ Die Oberfläche der Erweiterung ist englisch.
   Editor.
 - Nach Typart, Projekt und Sprache filtern, nach Namen suchen oder „Focus on
   selection“ einschalten, um nur einen Typ und seine direkten Nachbarn zu sehen.
+- „Export…“ speichert die Karte so, wie sie angezeigt wird (mit Filtern,
+  zusammengefassten Gruppen und Namespace-Rahmen), als PNG, SVG, Mermaid,
+  Graphviz DOT oder JSON.
+- „Compare with Git…“ fragt nach einem Branch, Tag oder Commit und analysiert
+  diesen Stand in einem temporären Checkout (dein Arbeitsverzeichnis bleibt
+  unberührt, die Pakete werden dort wiederhergestellt). Neue Typen und
+  Abhängigkeiten erhalten einen grünen Rand bzw. eine grüne Linie, entfernte
+  werden als rote gestrichelte Geister erneut gezeichnet, und die Seitenleiste
+  listet die Änderungen. „Clear comparison“ entfernt die Markierungen.
+  Voraussetzung sind ein Git-Repository und Zugriff auf die Paketquellen.
 
 ### Architekturregeln
 
@@ -424,11 +446,12 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 - 详情面板显示统计信息，并可跳转到源文件
 - 分组：显示相互连通的类型组，以及没有任何关系的类型，用于找出与其余代码隔离的部分
 - 导出当前显示的地图：PNG、SVG、Mermaid、Graphviz DOT 或 JSON
+- 与 Git 提交、分支或标签比较：新增的类型和依赖以绿色标出，已删除的以红色虚线“幽灵”显示，
+  并列出所有变更（便于审查拉取请求）
 
 ### 计划中的功能
 
 - 按命名空间过滤
-- 与 Git 提交或分支比较
 
 ### 试用
 
@@ -469,6 +492,12 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - 点击类型可查看其相邻类型，双击可在编辑器中打开。
 - 可按类型种类、项目和语言过滤，按名称搜索，或开启“Focus on selection”，
   只查看某个类型及其直接相邻的类型。
+- “Export…”按当前显示的样子（包含过滤结果、折叠的分组和命名空间框）将地图保存为
+  PNG、SVG、Mermaid、Graphviz DOT 或 JSON。
+- “Compare with Git…”会询问分支、标签或提交，并在临时检出目录中分析该版本
+  （不会改动你的工作目录，包会在临时目录中还原）。新增的类型和依赖以绿色边框或绿线标出，
+  已删除的以红色虚线“幽灵”重新绘制，侧边栏列出所有变更。“Clear comparison”清除标记。
+  需要 Git 仓库并能访问包源。
 
 ### 架构规则
 
@@ -591,11 +620,13 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 - Группы: связные группы типов и типы без каких-либо связей — для поиска частей
   кода, отрезанных от остального
 - Экспорт карты в том виде, как она показана: PNG, SVG, Mermaid, Graphviz DOT или JSON
+- Сравнение с коммитом, веткой или тегом Git: новые типы и зависимости —
+  зелёным, удалённые — красными пунктирными «призраками», плюс список изменений
+  (удобно для проверки pull request)
 
 ### Планируемые возможности
 
 - Фильтр по пространству имён
-- Сравнение с коммитом или веткой Git
 
 ### Попробовать
 
@@ -648,6 +679,15 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - Можно фильтровать по виду типа, проекту и языку, искать по имени или
   включить «Focus on selection», чтобы видеть только один тип и его прямых
   соседей.
+- «Export…» сохраняет карту в том виде, как она показана (с фильтрами,
+  свёрнутыми группами и рамками пространств имён) в PNG, SVG, Mermaid,
+  Graphviz DOT или JSON.
+- «Compare with Git…» запрашивает ветку, тег или коммит и анализирует это
+  состояние во временной копии (рабочий каталог не затрагивается, пакеты
+  восстанавливаются там же). Новые типы и зависимости получают зелёную рамку
+  или линию, удалённые рисуются снова как красные пунктирные «призраки», а
+  боковая панель перечисляет изменения. «Clear comparison» убирает отметки.
+  Нужны репозиторий Git и доступ к источникам пакетов.
 
 ### Архитектурные правила
 
@@ -777,11 +817,13 @@ organizada en capas esta solución?».
 - Grupos: grupos conectados de tipos y tipos sin ninguna relación, para
   encontrar partes del código aisladas del resto
 - Exportación del mapa tal como se muestra: PNG, SVG, Mermaid, Graphviz DOT o JSON
+- Comparación con un commit, una rama o una etiqueta de Git: los tipos y
+  dependencias nuevos en verde, los eliminados como «fantasmas» rojos
+  discontinuos, y una lista de los cambios (útil para revisar un pull request)
 
 ### Funciones previstas
 
 - Filtro por espacio de nombres
-- Comparación con un commit o una rama de Git
 
 ### Probarlo
 
@@ -832,6 +874,15 @@ La interfaz de la extensión está en inglés.
   editor.
 - Filtra por tipo, proyecto y lenguaje, busca por nombre, o activa «Focus on
   selection» para ver solo un tipo y sus vecinos directos.
+- «Export…» guarda el mapa tal como se muestra (con filtros, grupos contraídos
+  y marcos de espacios de nombres) como PNG, SVG, Mermaid, Graphviz DOT o JSON.
+- «Compare with Git…» pide una rama, etiqueta o commit y analiza esa versión en
+  una copia temporal (tu directorio de trabajo no se toca; los paquetes se
+  restauran allí). Los tipos y dependencias nuevos reciben un borde o una línea
+  verde, los eliminados se dibujan de nuevo como «fantasmas» rojos
+  discontinuos, y el panel lateral enumera los cambios. «Clear comparison»
+  quita las marcas. Requiere un repositorio Git y acceso a los orígenes de
+  paquetes.
 
 ### Reglas de arquitectura
 
