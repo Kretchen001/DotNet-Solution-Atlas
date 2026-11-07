@@ -315,6 +315,30 @@
     return { groups, edges: [...merged.values()], representative };
   }
 
+  // ------------------------------------------------------------- comparison
+
+  const edgeKey = (edge) => `${edge.source}\u0000${edge.target}\u0000${edge.kind}`;
+
+  /**
+   * What changed between an earlier graph and the current one. Types are told apart by their id,
+   * dependencies by (source, target, kind); a changed weight is not a change.
+   * @returns {{addedNodes: string[], removedNodes: object[], addedEdges: object[], removedEdges: object[]}}
+   *   removed nodes are returned as they were, because they are not in the current graph any more
+   */
+  function diffGraphs(previous, current) {
+    const before = new Set(previous.nodes.map((n) => n.id));
+    const after = new Set(current.nodes.map((n) => n.id));
+    const edgesBefore = new Set(previous.edges.map(edgeKey));
+    const edgesAfter = new Set(current.edges.map(edgeKey));
+
+    return {
+      addedNodes: current.nodes.filter((n) => !before.has(n.id)).map((n) => n.id).sort(),
+      removedNodes: previous.nodes.filter((n) => !after.has(n.id)).sort((a, b) => a.id.localeCompare(b.id)),
+      addedEdges: current.edges.filter((e) => !edgesBefore.has(edgeKey(e))),
+      removedEdges: previous.edges.filter((e) => !edgesAfter.has(edgeKey(e))),
+    };
+  }
+
   // ----------------------------------------------------------------- export
 
   const EDGE_LABELS = {
@@ -524,6 +548,8 @@
     assignLayers,
     findViolations,
     collapse,
+    diffGraphs,
+    edgeKey,
     toMermaid,
     toDot,
     toJson,

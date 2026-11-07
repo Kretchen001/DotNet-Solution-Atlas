@@ -239,3 +239,27 @@ test('toSvg draws frames, edges and escaped labels inside the canvas', () => {
 test('toSvg copes with an empty map', () => {
   assert.match(logic.toSvg({ nodes: [], edges: [] }), /<svg [^>]*width="148"/);
 });
+
+test('diffGraphs finds added and removed types and dependencies', () => {
+  const previous = {
+    nodes: [node('A'), node('B'), node('Old')],
+    edges: [edge('A', 'B'), edge('A', 'Old'), edge('B', 'A', 'calls', 1)],
+  };
+  const current = {
+    nodes: [node('A'), node('B'), node('New')],
+    edges: [edge('A', 'B', 'uses', 5), edge('A', 'New'), edge('B', 'A', 'uses')],
+  };
+
+  const diff = logic.diffGraphs(previous, current);
+  assert.deepEqual(diff.addedNodes, ['New']);
+  assert.deepEqual(diff.removedNodes.map((n) => n.id), ['Old']);
+  assert.deepEqual(diff.addedEdges.map((e) => [e.source, e.target, e.kind]), [['A', 'New', 'uses'], ['B', 'A', 'uses']]);
+  assert.deepEqual(diff.removedEdges.map((e) => [e.source, e.target, e.kind]), [['A', 'Old', 'uses'], ['B', 'A', 'calls']]);
+});
+
+test('diffGraphs ignores a changed weight and reports nothing for equal graphs', () => {
+  const graph = { nodes: [node('A'), node('B')], edges: [edge('A', 'B', 'uses', 1)] };
+  const same = { nodes: [node('B'), node('A')], edges: [edge('A', 'B', 'uses', 9)] };
+  const diff = logic.diffGraphs(graph, same);
+  assert.deepEqual([diff.addedNodes, diff.removedNodes, diff.addedEdges, diff.removedEdges], [[], [], [], []]);
+});
