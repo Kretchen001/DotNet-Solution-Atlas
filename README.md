@@ -23,8 +23,10 @@ their relationships (inheritance, implementation, usage) as connections. The
 goal is to answer questions such as "what depends on this type?", "where are
 the hubs of this codebase?" and "how is this solution layered?" at a glance.
 
-> Status: early development (version 0.1). Expect rough edges. Visual Basic
-> support is new and less tested.
+> Status: version 1.1. The features described here work and are covered by
+> tests, but the extension has seen few real-world solutions so far. Visual
+> Basic and XAML support are newer and less tested. It is not published in the
+> Marketplace yet; it is installed from a `.vsix` file.
 
 ### How it works
 
@@ -352,8 +354,11 @@ Verwendung) als Verbindungen. Ziel ist es, auf einen Blick Fragen zu
 beantworten wie „Was hängt von diesem Typ ab?“, „Wo sind die Knotenpunkte
 dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
 
-> Status: frühe Entwicklung (Version 0.1). Es gibt noch Ecken und Kanten. Die
-> Unterstützung für Visual Basic ist neu und weniger getestet.
+> Status: Version 1.1. Die hier beschriebenen Funktionen laufen und sind durch
+> Tests abgedeckt, die Erweiterung hat aber bisher nur wenige echte Solutions
+> gesehen. Die Unterstützung für Visual Basic und XAML ist neuer und weniger
+> getestet. Sie ist noch nicht im Marketplace veröffentlicht; die Installation
+> erfolgt über eine `.vsix`-Datei.
 
 ### Wie es funktioniert
 
@@ -701,7 +706,8 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 显示为连线。目标是让你一眼就能回答这样的问题：“哪些类型依赖这个类型？”
 “这份代码的枢纽在哪里？”“这个解决方案是如何分层的？”
 
-> 状态：早期开发（0.1 版）。仍有不完善之处。Visual Basic 支持是新增的，测试较少。
+> 状态：1.1 版。这里描述的功能均可使用并有测试覆盖，但扩展目前接触过的真实解决方案还不多。
+> Visual Basic 和 XAML 支持较新，测试较少。尚未发布到 Marketplace，需通过 `.vsix` 文件安装。
 
 ### 工作原理
 
@@ -972,8 +978,10 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 вроде «что зависит от этого типа?», «где узловые точки этой кодовой базы?» и
 «как устроены слои этого решения?».
 
-> Статус: ранняя разработка (версия 0.1). Возможны шероховатости. Поддержка
-> Visual Basic появилась недавно и протестирована меньше.
+> Статус: версия 1.1. Описанные здесь функции работают и покрыты тестами, но
+> расширение пока видело мало реальных решений. Поддержка Visual Basic и XAML
+> новее и протестирована меньше. В Marketplace оно ещё не опубликовано;
+> устанавливается из файла `.vsix`.
 
 ### Как это работает
 
@@ -1308,8 +1316,10 @@ objetivo es responder de un vistazo a preguntas como «¿qué depende de este
 tipo?», «¿dónde están los puntos clave de este código?» y «¿cómo está
 organizada en capas esta solución?».
 
-> Estado: desarrollo temprano (versión 0.1). Quedan asperezas. La
-> compatibilidad con Visual Basic es nueva y está menos probada.
+> Estado: versión 1.1. Las funciones descritas aquí funcionan y están cubiertas
+> por pruebas, pero la extensión ha visto pocas soluciones reales hasta ahora.
+> La compatibilidad con Visual Basic y XAML es más nueva y está menos probada.
+> Aún no está publicada en el Marketplace; se instala desde un archivo `.vsix`.
 
 ### Cómo funciona
 
