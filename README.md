@@ -45,8 +45,9 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 
 - Types: classes, interfaces, structs, records, enums, delegates, and
   top-level statements (`Program.cs` without a class) as a node of their own
-- Relationships: inheritance, implementation, use of types, method calls and
-  property/field access, each of them can be switched on and off
+- Relationships: inheritance, implementation, use of types, method calls,
+  property/field access, dependency injection registrations, events and
+  attributes, each of them can be switched on and off
 - Layered layout, so that interfaces and implementations are easy to tell apart
 - Filters by type kind, project and language; search by name
 - Focus mode: only the selected type and its neighbours
@@ -63,11 +64,12 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 - Details pane with metrics, and jump to the source file
 - Groups: connected groups of types and types without any relationship, to
   find parts of the code that are cut off from the rest
+- Export of the map as shown: PNG, SVG, Mermaid, Graphviz DOT or JSON
 
 ### Planned features
 
 - Filter by namespace
-- Export as SVG, PNG, Mermaid or DOT
+- Compare with a Git commit or branch
 
 ### Try it
 
@@ -99,7 +101,12 @@ The interface of the extension is in English.
     attributes, generic arguments and constraints, inferred `var` types)
   - orange dotted line: a method, constructor, operator or delegate is called,
     including static helpers and extension methods
-  - purple dotted line: a property, indexer, field or event is accessed
+  - purple dotted line: a property, indexer or field is accessed
+  - green dashed line: a type is registered with the dependency injection
+    container (`services.AddScoped<IOrders, Orders>()`, `AddHostedService<T>()`,
+    ...); the arrow points at the service and at the implementation
+  - red dotted line: an event is subscribed to, unsubscribed from or raised
+  - yellow dashed line: a type is marked with an attribute class of the solution
 - Each kind of relationship can be switched on and off in the "Relationships"
   filter. All of them are shown by default; switch some off if the map gets
   too busy.
@@ -170,7 +177,7 @@ Basic part can be looked at separately.
 
 | Path         | Content                                 |
 | ------------ | --------------------------------------- |
-| `analyzer/`  | .NET console tool (Roslyn)              |
+| `analyzer/`  | .NET console tool (Roslyn) and its tests |
 | `extension/` | VS Code extension (TypeScript, webview) |
 
 ### License
@@ -218,8 +225,9 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
 
 - Typen: Klassen, Interfaces, Structs, Records, Enums, Delegates und
   Top-Level-Statements (`Program.cs` ohne Klasse) als eigener Knoten
-- Beziehungen: Vererbung, Implementierung, Verwendung von Typen, Methodenaufrufe
-  und Property-/Feldzugriffe, jede Art lässt sich einzeln ein- und ausschalten
+- Beziehungen: Vererbung, Implementierung, Verwendung von Typen, Methodenaufrufe,
+  Property-/Feldzugriffe, Registrierungen für Dependency Injection, Events und
+  Attribute, jede Art lässt sich einzeln ein- und ausschalten
 - Geschichtetes Layout, damit sich Interfaces und Implementierungen gut
   unterscheiden lassen
 - Filter nach Typart, Projekt und Sprache; Suche nach Namen
@@ -238,11 +246,12 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
 - Detailbereich mit Kennzahlen und Sprung zur Quelldatei
 - Gruppen: zusammenhängende Gruppen von Typen und Typen ohne jede Beziehung, um
   vom Rest abgeschnittene Teile des Codes zu finden
+- Export der Karte, wie sie gerade angezeigt wird: PNG, SVG, Mermaid, Graphviz DOT oder JSON
 
 ### Geplante Funktionen
 
 - Filter nach Namespace
-- Export als SVG, PNG, Mermaid oder DOT
+- Vergleich mit einem Git-Commit oder Branch
 
 ### Ausprobieren
 
@@ -276,8 +285,14 @@ Die Oberfläche der Erweiterung ist englisch.
     `var`-Typen)
   - orange gepunktete Linie: eine Methode, ein Konstruktor, ein Operator oder
     ein Delegate wird aufgerufen, auch statische Helfer und Erweiterungsmethoden
-  - lila gepunktete Linie: auf eine Property, einen Indexer, ein Feld oder ein
-    Event wird zugegriffen
+  - lila gepunktete Linie: auf eine Property, einen Indexer oder ein Feld wird
+    zugegriffen
+  - grün gestrichelte Linie: ein Typ wird beim Dependency-Injection-Container
+    registriert (`services.AddScoped<IOrders, Orders>()`, `AddHostedService<T>()`,
+    ...); der Pfeil zeigt auf den Dienst und auf die Implementierung
+  - rot gepunktete Linie: ein Event wird abonniert, abbestellt oder ausgelöst
+  - gelb gestrichelte Linie: ein Typ ist mit einer Attributklasse der Solution
+    markiert
 - Jede Beziehungsart lässt sich im Filter „Relationships“ ein- und
   ausschalten. Standardmäßig sind alle sichtbar; schalte einige aus, wenn die
   Karte zu voll wird.
@@ -351,7 +366,7 @@ sich der C#- und der Visual-Basic-Teil getrennt betrachten lassen.
 
 | Pfad         | Inhalt                                       |
 | ------------ | -------------------------------------------- |
-| `analyzer/`  | .NET-Konsolenprogramm (Roslyn)               |
+| `analyzer/`  | .NET-Konsolenprogramm (Roslyn) und seine Tests |
 | `extension/` | VS-Code-Erweiterung (TypeScript, Webview)    |
 
 ### Lizenz
@@ -394,7 +409,7 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 
 - 类型：类、接口、结构体、记录、枚举、委托，以及顶级语句（没有类的 `Program.cs`）
   会作为单独的节点显示
-- 关系：继承、实现、类型使用、方法调用、属性/字段访问，每一种都可以单独开关
+- 关系：继承、实现、类型使用、方法调用、属性/字段访问、依赖注入注册、事件和特性，每一种都可以单独开关
 - 分层布局，方便区分接口和实现
 - 按类型种类、项目和语言过滤；按名称搜索
 - 聚焦模式：只显示选中的类型及其相邻类型
@@ -408,11 +423,12 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 - 成员：类型的详情列出其成员，以及每个成员调用、访问或使用了什么
 - 详情面板显示统计信息，并可跳转到源文件
 - 分组：显示相互连通的类型组，以及没有任何关系的类型，用于找出与其余代码隔离的部分
+- 导出当前显示的地图：PNG、SVG、Mermaid、Graphviz DOT 或 JSON
 
 ### 计划中的功能
 
 - 按命名空间过滤
-- 导出为 SVG、PNG、Mermaid 或 DOT
+- 与 Git 提交或分支比较
 
 ### 试用
 
@@ -442,7 +458,10 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   - 虚线：接口实现
   - 细灰线：使用了某个类型（签名、`new`、类型转换、`typeof`、特性、泛型参数和约束、推断出的 `var` 类型）
   - 橙色点线：调用了方法、构造函数、运算符或委托，包括静态辅助类和扩展方法
-  - 紫色点线：访问了属性、索引器、字段或事件
+  - 紫色点线：访问了属性、索引器或字段
+  - 绿色虚线：类型被注册到依赖注入容器（`services.AddScoped<IOrders, Orders>()`、`AddHostedService<T>()` 等），箭头指向服务和实现
+  - 红色点线：订阅、取消订阅或触发了事件
+  - 黄色虚线：类型被解决方案中的特性类标注
 - 每一种关系都可以在“Relationships”过滤器中单独开关。默认全部显示；
   如果地图过于拥挤，可以关闭其中一些。
 - “Groups”列出可见类型中相互连通的组，以及没有任何关系的类型。点击某个组会缩放到该组，
@@ -504,7 +523,7 @@ Visual Basic 的模块（Module）会显示为静态类；编译器生成的 `My
 
 | 路径         | 内容                                  |
 | ------------ | ------------------------------------- |
-| `analyzer/`  | .NET 命令行工具（Roslyn）             |
+| `analyzer/`  | .NET 命令行工具（Roslyn）及其测试     |
 | `extension/` | VS Code 扩展（TypeScript、Webview）   |
 
 ### 许可证
@@ -551,8 +570,9 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 
 - Типы: классы, интерфейсы, структуры, записи, перечисления, делегаты, а также
   операторы верхнего уровня (`Program.cs` без класса) как отдельный узел
-- Связи: наследование, реализация, использование типов, вызовы методов и доступ
-  к свойствам и полям; каждый вид можно включать и отключать отдельно
+- Связи: наследование, реализация, использование типов, вызовы методов, доступ
+  к свойствам и полям, регистрации во внедрении зависимостей, события и
+  атрибуты; каждый вид можно включать и отключать отдельно
 - Многоуровневая раскладка, чтобы интерфейсы и реализации легко различались
 - Фильтры по виду типа, проекту и языку; поиск по имени
 - Режим фокуса: только выбранный тип и его соседи
@@ -570,11 +590,12 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 - Панель сведений с метриками и переход к исходному файлу
 - Группы: связные группы типов и типы без каких-либо связей — для поиска частей
   кода, отрезанных от остального
+- Экспорт карты в том виде, как она показана: PNG, SVG, Mermaid, Graphviz DOT или JSON
 
 ### Планируемые возможности
 
 - Фильтр по пространству имён
-- Экспорт в SVG, PNG, Mermaid или DOT
+- Сравнение с коммитом или веткой Git
 
 ### Попробовать
 
@@ -607,8 +628,14 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
     `typeof`, атрибуты, аргументы и ограничения обобщений, выводимые типы `var`)
   - оранжевая точечная линия: вызывается метод, конструктор, оператор или
     делегат, включая статические вспомогательные классы и методы расширения
-  - фиолетовая точечная линия: выполняется обращение к свойству, индексатору,
-    полю или событию
+  - фиолетовая точечная линия: выполняется обращение к свойству, индексатору
+    или полю
+  - зелёная пунктирная линия: тип регистрируется в контейнере внедрения
+    зависимостей (`services.AddScoped<IOrders, Orders>()`,
+    `AddHostedService<T>()` и т. д.); стрелка указывает на службу и на реализацию
+  - красная точечная линия: на событие подписываются, отписываются от него или
+    его вызывают
+  - жёлтая пунктирная линия: тип помечен классом атрибута из решения
 - Каждый вид связи можно включать и отключать в фильтре «Relationships». По
   умолчанию показаны все; отключите часть, если карта становится слишком
   загруженной.
@@ -682,7 +709,7 @@ C# и Visual Basic, при необходимости — в одном реше
 
 | Путь         | Содержимое                                       |
 | ------------ | ------------------------------------------------ |
-| `analyzer/`  | консольная утилита .NET (Roslyn)                 |
+| `analyzer/`  | консольная утилита .NET (Roslyn) и её тесты      |
 | `extension/` | расширение VS Code (TypeScript, веб-представление) |
 
 ### Лицензия
@@ -729,9 +756,9 @@ organizada en capas esta solución?».
 
 - Tipos: clases, interfaces, structs, records, enums, delegados y las
   instrucciones de nivel superior (`Program.cs` sin clase) como un nodo propio
-- Relaciones: herencia, implementación, uso de tipos, llamadas a métodos y
-  acceso a propiedades y campos; cada una se puede activar y desactivar por
-  separado
+- Relaciones: herencia, implementación, uso de tipos, llamadas a métodos,
+  acceso a propiedades y campos, registros de inyección de dependencias,
+  eventos y atributos; cada una se puede activar y desactivar por separado
 - Diseño por capas, para distinguir fácilmente interfaces e implementaciones
 - Filtros por tipo, proyecto y lenguaje; búsqueda por nombre
 - Modo de enfoque: solo el tipo seleccionado y sus vecinos
@@ -749,11 +776,12 @@ organizada en capas esta solución?».
 - Panel de detalles con métricas y salto al archivo de origen
 - Grupos: grupos conectados de tipos y tipos sin ninguna relación, para
   encontrar partes del código aisladas del resto
+- Exportación del mapa tal como se muestra: PNG, SVG, Mermaid, Graphviz DOT o JSON
 
 ### Funciones previstas
 
 - Filtro por espacio de nombres
-- Exportación como SVG, PNG, Mermaid o DOT
+- Comparación con un commit o una rama de Git
 
 ### Probarlo
 
@@ -786,7 +814,13 @@ La interfaz de la extensión está en inglés.
     atributos, argumentos y restricciones genéricas, tipos inferidos con `var`)
   - línea naranja de puntos: se llama a un método, constructor, operador o
     delegado, incluidos los ayudantes estáticos y los métodos de extensión
-  - línea morada de puntos: se accede a una propiedad, indizador, campo o evento
+  - línea morada de puntos: se accede a una propiedad, indizador o campo
+  - línea verde discontinua: un tipo se registra en el contenedor de inyección
+    de dependencias (`services.AddScoped<IOrders, Orders>()`,
+    `AddHostedService<T>()`, ...); la flecha apunta al servicio y a la
+    implementación
+  - línea roja de puntos: se suscribe, se anula la suscripción o se dispara un evento
+  - línea amarilla discontinua: un tipo está marcado con una clase de atributo de la solución
 - Cada tipo de relación se puede activar y desactivar en el filtro
   «Relationships». Por defecto se muestran todas; desactiva algunas si el mapa
   se satura.
@@ -858,7 +892,7 @@ separado la parte en C# y la parte en Visual Basic.
 
 | Ruta         | Contenido                                        |
 | ------------ | ------------------------------------------------ |
-| `analyzer/`  | herramienta de consola de .NET (Roslyn)          |
+| `analyzer/`  | herramienta de consola de .NET (Roslyn) y sus pruebas |
 | `extension/` | extensión de VS Code (TypeScript, webview)       |
 
 ### Licencia
