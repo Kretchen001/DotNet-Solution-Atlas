@@ -35,6 +35,7 @@
     projects: new Set(),
     query: '',
     focus: false,
+    namespaces: false,
     selected: null,
   };
 
@@ -42,6 +43,19 @@
   let lastVisibleKey = '';
 
   const $ = (id) => document.getElementById(id);
+
+  // Namespace frames are compound nodes next to the type nodes; they are not types themselves.
+  function namespaceId(namespace) {
+    return 'ns:' + namespace;
+  }
+
+  function parentOf(node) {
+    return state.namespaces && node.namespace ? namespaceId(node.namespace) : undefined;
+  }
+
+  function typeNodes() {
+    return cy.nodes('[!isNamespace]');
+  }
 
   function el(tag, props, ...children) {
     const node = document.createElement(tag);
@@ -154,7 +168,15 @@
     cy = cytoscape({
       container: $('cy'),
       elements: [
-        ...graph.nodes.map((n) => ({ group: 'nodes', data: { ...n, label: n.name } })),
+        ...[...new Set(graph.nodes.map((n) => n.namespace).filter(Boolean))].map((namespace) => ({
+          group: 'nodes',
+          data: { id: namespaceId(namespace), label: namespace, isNamespace: true },
+          classes: 'namespace hidden',
+        })),
+        ...graph.nodes.map((n) => ({
+          group: 'nodes',
+          data: { ...n, label: n.name, ...(parentOf(n) ? { parent: parentOf(n) } : {}) },
+        })),
         ...graph.edges.map((e, i) => ({
           group: 'edges',
           data: { id: 'edge:' + i, source: e.source, target: e.target, kind: e.kind, weight: e.weight },
@@ -166,7 +188,7 @@
       wheelSensitivity: (settings && settings.zoomSpeed) || 1,
       style: [
         {
-          selector: 'node',
+          selector: 'node[!isNamespace]',
           style: {
             label: 'data(label)',
             shape: 'round-rectangle',
@@ -206,17 +228,36 @@
           selector: 'edge[kind = "accesses"]',
           style: { 'line-style': 'dotted', 'line-color': accessColor, 'target-arrow-color': accessColor },
         },
+        {
+          selector: 'node.namespace',
+          style: {
+            label: 'data(label)',
+            shape: 'round-rectangle',
+            padding: '18px',
+            'background-color': fg,
+            'background-opacity': 0.06,
+            'border-width': 1,
+            'border-style': 'dashed',
+            'border-color': edgeColor,
+            'text-valign': 'top',
+            'text-halign': 'center',
+            'text-margin-y': -4,
+            'font-size': 11,
+            color: edgeColor,
+            events: 'no',
+          },
+        },
         { selector: 'node:selected', style: { 'border-width': 3, 'border-color': accent } },
         { selector: '.faded', style: { opacity: 0.15 } },
         { selector: '.hidden', style: { display: 'none' } },
       ],
     });
 
-    cy.on('tap', 'node', (event) => select(event.target.id()));
+    cy.on('tap', 'node[!isNamespace]', (event) => select(event.target.id()));
     cy.on('tap', (event) => {
       if (event.target === cy) select(null);
     });
-    cy.on('dbltap', 'node', (event) => openNode(event.target));
+    cy.on('dbltap', 'node[!isNamespace]', (event) => openNode(event.target));
   }
 
   function select(id) {
@@ -238,13 +279,18 @@
     const neighbourhood = hasSelection ? selected.closedNeighborhood() : null;
 
     cy.batch(() => {
-      cy.nodes().forEach((node) => {
+      typeNodes().forEach((node) => {
         const visible =
           state.kinds.has(node.data('kind')) &&
           state.projects.has(node.data('project')) &&
           state.languages.has(languageOf(node.data())) &&
           (!state.focus || !neighbourhood || neighbourhood.contains(node));
         node.toggleClass('hidden', !visible);
+      });
+
+      // A namespace frame shows only while grouping is on and it still contains a visible type.
+      cy.nodes('.namespace').forEach((frame) => {
+        frame.toggleClass('hidden', !state.namespaces || frame.children().not('.hidden').empty());
       });
 
       cy.edges().forEach((edge) => {
@@ -258,7 +304,7 @@
       const shown = cy.elements().not('.hidden');
 
       if (query) {
-        cy.nodes().not('.hidden').forEach((node) => {
+        typeNodes().not('.hidden').forEach((node) => {
           if (!node.id().toLowerCase().includes(query)) node.addClass('faded');
         });
       } else if (hasSelection && !state.focus) {
@@ -266,7 +312,7 @@
       }
     });
 
-    const visibleKey = cy.elements().not('.hidden').map((e) => e.id()).sort().join('|');
+    const visibleKey = (state.namespaces ? 'ns#' : '') + cy.elements().not('.hidden').map((e) => e.id()).sort().join('|');
     if (visibleKey !== lastVisibleKey) {
       lastVisibleKey = visibleKey;
       layout();
@@ -302,7 +348,7 @@
     const box = $('groups');
     box.replaceChildren();
 
-    const components = cy.elements().not('.hidden').components()
+    const components = cy.elements().not('.hidden').not('.namespace').components()
       .map((component) => component.nodes())
       .sort((a, b) => b.length - a.length);
     const groups = components.filter((nodes) => nodes.length > 1);
@@ -428,6 +474,18 @@
 
   $('focus').addEventListener('change', (e) => {
     state.focus = e.target.checked;
+    applyView();
+  });
+
+  $('namespaces').addEventListener('change', (e) => {
+    state.namespaces = e.target.checked;
+    if (!cy) return;
+    cy.batch(() => {
+      typeNodes().forEach((node) => {
+        const parent = parentOf(node.data());
+        node.move({ parent: parent === undefined ? null : parent });
+      });
+    });
     applyView();
   });
 

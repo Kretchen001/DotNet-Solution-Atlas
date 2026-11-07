@@ -151,6 +151,7 @@ export class AtlasPanel {
           <span id="root"></span>
           <input id="search" type="search" placeholder="Search types" aria-label="Search types">
           <label class="check"><input id="focus" type="checkbox"> Focus on selection</label>
+          <label class="check"><input id="namespaces" type="checkbox"> Group by namespace</label>
           <button id="fit" type="button">Fit</button>
           <button id="relayout" type="button">Re-layout</button>
         </div>
