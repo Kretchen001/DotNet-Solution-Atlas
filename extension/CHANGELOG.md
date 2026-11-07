@@ -12,6 +12,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Unreleased
 
+- Added: XAML files (`.xaml`, `.axaml`) are read. Types that are only used there (windows, user controls, converters, view models) get a new "XAML references" relationship and no longer appear as unused. Setting `dotnetAtlas.analyzeXaml` switches it off.
+- Added: global exceptions for unused candidates with the settings `dotnetAtlas.ignoreUnused` and `dotnetAtlas.ignoreUnusedDefaults`.
+- Added: when source files change, the map shows a bar with a "Reload map" button (command "Analyze the solution of the open map again").
 - Added: types that a framework wires up by itself (WPF/XAML, ASP.NET Core, hosted services, test classes, `Main`) no longer appear under "Unused candidates"; the list shows how many were hidden and why. Own exceptions go under `ignoreUnused` in the rules file; a checkbox switches them off.
 - Added: namespaces can be switched off one by one ("Namespaces" list in the sidebar, with a box to narrow it).
 - Added: "all / none" in the heading of every filter list (relationships, types, languages, projects, namespaces).
@@ -70,6 +73,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Unveröffentlicht
 
+- Neu: XAML-Dateien (`.xaml`, `.axaml`) werden gelesen. Typen, die nur dort benutzt werden (Fenster, UserControls, Converter, ViewModels), erhalten die neue Beziehung „XAML references“ und erscheinen nicht mehr als ungenutzt. Die Einstellung `dotnetAtlas.analyzeXaml` schaltet das ab.
+- Neu: globale Ausnahmen für ungenutzte Kandidaten über die Einstellungen `dotnetAtlas.ignoreUnused` und `dotnetAtlas.ignoreUnusedDefaults`.
+- Neu: Ändern sich Quelldateien, zeigt die Karte einen Hinweis mit der Schaltfläche „Reload map“ (Befehl „Analyze the solution of the open map again“).
 - Neu: Typen, die ein Framework selbst einbindet (WPF/XAML, ASP.NET Core, Hosted Services, Testklassen, `Main`), erscheinen nicht mehr unter „Unused candidates“; die Liste zeigt, wie viele ausgeblendet wurden und warum. Eigene Ausnahmen stehen unter `ignoreUnused` in der Regeldatei; ein Kontrollkästchen schaltet sie ab.
 - Neu: Namespaces lassen sich einzeln ausschalten (Liste „Namespaces“ in der Seitenleiste, mit einem Feld zum Eingrenzen).
 - Neu: „all / none“ in der Überschrift jeder Filterliste (Beziehungen, Typen, Sprachen, Projekte, Namespaces).
@@ -128,6 +134,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### 未发布
 
+- 新增：读取 XAML 文件（`.xaml`、`.axaml`）。只在其中使用的类型（窗口、用户控件、转换器、视图模型）获得新的“XAML references”关系，不再显示为未使用。设置项 `dotnetAtlas.analyzeXaml` 可将其关闭。
+- 新增：通过设置项 `dotnetAtlas.ignoreUnused` 与 `dotnetAtlas.ignoreUnusedDefaults` 为未使用候选设置全局例外。
+- 新增：源文件发生更改时，地图显示带有“Reload map”按钮的提示条（命令“Analyze the solution of the open map again”）。
 - 新增：由框架自行接入的类型（WPF/XAML、ASP.NET Core、托管服务、测试类、`Main`）不再出现在“Unused candidates”中；列表会显示隐藏的数量及原因。自定义例外写在规则文件的 `ignoreUnused` 下，复选框可将其关闭。
 - 新增：可以逐个关闭命名空间（侧边栏中的“Namespaces”列表，带有用于缩小范围的输入框）。
 - 新增：每个过滤列表（关系、类型、语言、项目、命名空间）的标题中都有“all / none”。
@@ -186,6 +195,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Не выпущено
 
+- Добавлено: читаются файлы XAML (`.xaml`, `.axaml`). Типы, которые используются только в них (окна, пользовательские элементы управления, конвертеры, модели представления), получают новую связь «XAML references» и больше не считаются неиспользуемыми. Параметр `dotnetAtlas.analyzeXaml` отключает это.
+- Добавлено: глобальные исключения для неиспользуемых кандидатов через параметры `dotnetAtlas.ignoreUnused` и `dotnetAtlas.ignoreUnusedDefaults`.
+- Добавлено: при изменении исходных файлов карта показывает полосу с кнопкой «Reload map» (команда «Analyze the solution of the open map again»).
 - Добавлено: типы, которые подключает сам фреймворк (WPF/XAML, ASP.NET Core, размещённые службы, тестовые классы, `Main`), больше не попадают в «Unused candidates»; список показывает, сколько скрыто и почему. Собственные исключения задаются в `ignoreUnused` в файле правил; флажок их отключает.
 - Добавлено: пространства имён можно отключать по одному (список «Namespaces» в боковой панели с полем для сужения списка).
 - Добавлено: «all / none» в заголовке каждого списка фильтров (связи, типы, языки, проекты, пространства имён).
@@ -244,6 +256,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Sin publicar
 
+- Añadido: se leen los archivos XAML (`.xaml`, `.axaml`). Los tipos que solo se usan allí (ventanas, controles de usuario, convertidores, modelos de vista) reciben la nueva relación «XAML references» y ya no aparecen como sin usar. El ajuste `dotnetAtlas.analyzeXaml` lo desactiva.
+- Añadido: excepciones globales para los candidatos sin usar con los ajustes `dotnetAtlas.ignoreUnused` y `dotnetAtlas.ignoreUnusedDefaults`.
+- Añadido: cuando cambian los archivos fuente, el mapa muestra una barra con el botón «Reload map» (comando «Analyze the solution of the open map again»).
 - Añadido: los tipos que el propio framework enlaza (WPF/XAML, ASP.NET Core, servicios hospedados, clases de prueba, `Main`) ya no aparecen en «Unused candidates»; la lista indica cuántos se ocultaron y por qué. Las excepciones propias van en `ignoreUnused` del archivo de reglas; una casilla las desactiva.
 - Añadido: los espacios de nombres se pueden desactivar uno a uno (lista «Namespaces» en el panel lateral, con un campo para reducirla).
 - Añadido: «all / none» en el título de cada lista de filtros (relaciones, tipos, idiomas, proyectos, espacios de nombres).

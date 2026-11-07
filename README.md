@@ -106,6 +106,7 @@ The interface of the extension is in English.
     ...); the arrow points at the service and at the implementation
   - red dotted line: an event is subscribed to, unsubscribed from or raised
   - yellow dashed line: a type is marked with an attribute class of the solution
+  - blue dashed line: a type is named in a XAML file (element, `{x:Type}`, `{x:Static}`, loaded XAML file); the arrow starts at the type of that file
 - Each kind of relationship can be switched on and off in the "Relationships"
   filter. All of them are shown by default; switch some off if the map gets
   too busy.
@@ -233,6 +234,16 @@ violation without any setup.
   sidebar shows whether it goes down over time. Together with "Compare with
   Git…" you can also see which violations a branch introduces.
 
+### Keeping the map up to date
+
+The map is a snapshot. While it is open, the extension watches the source files
+of the solution (`.cs`, `.vb`, project files, `.xaml`, `.axaml`; not `bin`,
+`obj` or `node_modules`). After a change a bar appears above the toolbar with the
+number of changed files. "Reload map" analyzes the solution again (also
+available as the command "Analyze the solution of the open map again"),
+"Dismiss" hides the bar. A reload starts with the default filters and clears a
+comparison with Git.
+
 ### Unused types
 
 "Unused candidates" in the sidebar lists types that nothing in the analyzed
@@ -268,9 +279,23 @@ interfaces (also those of the framework, as full names without type arguments),
 }
 ```
 
-The checkbox "Apply exceptions" switches all exceptions off. Types that are
-only used in XAML (a converter in a `StaticResource`, a view model in a
-`DataContext`) are not detected as used; XAML files are not analyzed.
+The checkbox "Apply exceptions" switches all exceptions off.
+
+**XAML.** The analyzer also reads the `.xaml` and `.axaml` files of the
+projects. A type that a XAML file names (as an element such as
+`<local:OrderView/>`, in `{x:Type}`, `{x:Static}`, a markup extension, an
+attached property, or as the target of a style or template) is referenced by
+the type of that file (`x:Class`) through the relationship "XAML references".
+A window started through `StartupUri` and merged resource dictionaries count
+as well; resource dictionaries are attributed to the `Application` class.
+Not detected are references that only exist at runtime: a window opened from
+a string, bindings by property name, a `DataContext` that is set in code.
+Set `dotnetAtlas.analyzeXaml` to `false` to skip the XAML files.
+
+**Global exceptions.** The setting `dotnetAtlas.ignoreUnused` takes the same
+keys as the rules file and applies to all solutions. With
+`dotnetAtlas.ignoreUnusedDefaults` set to `false` the built-in exceptions are
+dropped. Built-in exceptions, settings and rules file are added together.
 
 ### Supported languages
 
@@ -417,6 +442,7 @@ Die Oberfläche der Erweiterung ist englisch.
   - rot gepunktete Linie: ein Event wird abonniert, abbestellt oder ausgelöst
   - gelb gestrichelte Linie: ein Typ ist mit einer Attributklasse der Solution
     markiert
+  - blaue gestrichelte Linie: ein Typ wird in einer XAML-Datei genannt (Element, `{x:Type}`, `{x:Static}`, geladene XAML-Datei); der Pfeil beginnt am Typ dieser Datei
 - Jede Beziehungsart lässt sich im Filter „Relationships“ ein- und
   ausschalten. Standardmäßig sind alle sichtbar; schalte einige aus, wenn die
   Karte zu voll wird.
@@ -554,6 +580,17 @@ eigene Regeln mit, sodass du einen Verstoß ohne jede Einrichtung siehst.
   der Seitenleiste zeigt, ob sie mit der Zeit sinkt. Zusammen mit „Compare with
   Git…“ siehst du außerdem, welche Verstöße ein Branch neu einführt.
 
+### Die Karte aktuell halten
+
+Die Karte ist eine Momentaufnahme. Solange sie offen ist, beobachtet die
+Erweiterung die Quelldateien der Solution (`.cs`, `.vb`, Projektdateien,
+`.xaml`, `.axaml`; nicht `bin`, `obj` oder `node_modules`). Nach einer Änderung
+erscheint über der Werkzeugleiste ein Hinweis mit der Zahl der geänderten
+Dateien. „Reload map“ analysiert die Solution erneut (auch als Befehl „Analyze
+the solution of the open map again“), „Dismiss“ blendet den Hinweis aus. Nach
+dem Neuladen gelten wieder die Standardfilter, und ein Vergleich mit Git wird
+zurückgesetzt.
+
 ### Ungenutzte Typen
 
 „Unused candidates“ in der Seitenleiste listet Typen auf, auf die im
@@ -590,10 +627,25 @@ Attributklassen am Typ und seinen Mitgliedern.
 }
 ```
 
-Das Kontrollkästchen „Apply exceptions“ schaltet alle Ausnahmen ab. Typen, die
-nur in XAML benutzt werden (ein Converter in einer `StaticResource`, ein
-ViewModel im `DataContext`), werden nicht als benutzt erkannt; XAML-Dateien
-werden nicht analysiert.
+Das Kontrollkästchen „Apply exceptions“ schaltet alle Ausnahmen ab.
+
+**XAML.** Der Analyzer liest auch die `.xaml`- und `.axaml`-Dateien der
+Projekte. Ein Typ, den eine XAML-Datei nennt (als Element wie
+`<local:OrderView/>`, in `{x:Type}`, `{x:Static}`, einer Markup-Erweiterung,
+einer Attached Property oder als Ziel eines Styles oder Templates), wird vom Typ
+dieser Datei (`x:Class`) über die Beziehung „XAML references“ referenziert. Ein
+über `StartupUri` gestartetes Fenster und eingebundene Resource Dictionaries
+zählen ebenfalls; Resource Dictionaries werden der `Application`-Klasse
+zugerechnet. Nicht erkannt werden Verweise, die erst zur Laufzeit entstehen: ein
+Fenster, das über eine Zeichenfolge geöffnet wird, Bindings über Eigenschaftsnamen,
+ein `DataContext`, der im Code gesetzt wird. Mit `dotnetAtlas.analyzeXaml` auf
+`false` werden die XAML-Dateien übersprungen.
+
+**Globale Ausnahmen.** Die Einstellung `dotnetAtlas.ignoreUnused` hat dieselben
+Schlüssel wie die Regeldatei und gilt für alle Solutions. Mit
+`dotnetAtlas.ignoreUnusedDefaults` auf `false` entfallen die eingebauten
+Ausnahmen. Eingebaute Ausnahmen, Einstellung und Regeldatei werden zusammen
+angewendet.
 
 ### Unterstützte Sprachen
 
@@ -719,6 +771,7 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   - 绿色虚线：类型被注册到依赖注入容器（`services.AddScoped<IOrders, Orders>()`、`AddHostedService<T>()` 等），箭头指向服务和实现
   - 红色点线：订阅、取消订阅或触发了事件
   - 黄色虚线：类型被解决方案中的特性类标注
+  - 蓝色虚线：XAML 文件中提到某个类型（元素、`{x:Type}`、`{x:Static}`、加载的 XAML 文件）；箭头从该文件的类型出发
 - 每一种关系都可以在“Relationships”过滤器中单独开关。默认全部显示；
   如果地图过于拥挤，可以关闭其中一些。
 - “Groups”列出可见类型中相互连通的组，以及没有任何关系的类型。点击某个组会缩放到该组，
@@ -816,6 +869,14 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - 已有的违规不是放弃规则的理由：侧边栏中的数字会显示它是否随时间下降。
   结合“Compare with Git…”，还可以看出某个分支新引入了哪些违规。
 
+### 保持地图为最新
+
+地图是一个快照。地图打开期间，扩展会监视解决方案的源文件（`.cs`、`.vb`、项目文件、
+`.xaml`、`.axaml`；不含 `bin`、`obj`、`node_modules`）。发生更改后，工具栏上方会出现提示条，
+显示已更改的文件数量。“Reload map”会重新分析解决方案（也可通过命令
+“Analyze the solution of the open map again”），“Dismiss”隐藏提示条。重新加载后恢复默认过滤器，
+并清除与 Git 的比较。
+
 ### 未使用的类型
 
 侧边栏的“Unused candidates”列出在已分析的代码中没有任何引用的类型。它们只是候选：
@@ -844,8 +905,19 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 }
 ```
 
-复选框“Apply exceptions”可关闭所有例外。只在 XAML 中使用的类型（`StaticResource` 中的
-转换器、`DataContext` 中的视图模型）不会被识别为已使用；XAML 文件不会被分析。
+复选框“Apply exceptions”可关闭所有例外。
+
+**XAML。** 分析器也会读取项目中的 `.xaml` 和 `.axaml` 文件。XAML 文件中提到的类型
+（作为 `<local:OrderView/>` 之类的元素、在 `{x:Type}`、`{x:Static}`、标记扩展、
+附加属性中，或作为样式、模板的目标）会通过“XAML references”关系被该文件的类型
+（`x:Class`）引用。通过 `StartupUri` 启动的窗口和合并的资源字典同样计入；
+资源字典归到 `Application` 类。无法识别只在运行时产生的引用：通过字符串打开的窗口、
+按属性名称的绑定、在代码中设置的 `DataContext`。将 `dotnetAtlas.analyzeXaml`
+设为 `false` 可跳过 XAML 文件。
+
+**全局例外。** 设置项 `dotnetAtlas.ignoreUnused` 的键与规则文件相同，对所有解决方案生效。
+将 `dotnetAtlas.ignoreUnusedDefaults` 设为 `false` 会去掉内置例外。内置例外、
+设置项和规则文件会合并使用。
 
 ### 支持的语言
 
@@ -987,6 +1059,7 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   - красная точечная линия: на событие подписываются, отписываются от него или
     его вызывают
   - жёлтая пунктирная линия: тип помечен классом атрибута из решения
+  - синяя пунктирная линия: тип назван в файле XAML (элемент, `{x:Type}`, `{x:Static}`, загружаемый файл XAML); стрелка начинается у типа этого файла
 - Каждый вид связи можно включать и отключать в фильтре «Relationships». По
   умолчанию показаны все; отключите часть, если карта становится слишком
   загруженной.
@@ -1119,6 +1192,15 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   боковой панели показывает, уменьшается ли оно со временем. Вместе с «Compare
   with Git…» можно увидеть и то, какие нарушения вносит ветка.
 
+### Актуальность карты
+
+Карта — это снимок. Пока она открыта, расширение следит за исходными файлами решения
+(`.cs`, `.vb`, файлы проектов, `.xaml`, `.axaml`; не `bin`, `obj` и `node_modules`).
+После изменения над панелью инструментов появляется полоса с числом изменённых файлов.
+«Reload map» анализирует решение заново (также командой «Analyze the solution of the
+open map again»), «Dismiss» скрывает полосу. После перезагрузки действуют фильтры по
+умолчанию, а сравнение с Git сбрасывается.
+
 ### Неиспользуемые типы
 
 «Unused candidates» в боковой панели перечисляет типы, на которые в проанализированном
@@ -1153,9 +1235,22 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 }
 ```
 
-Флажок «Apply exceptions» отключает все исключения. Типы, которые используются только
-в XAML (конвертер в `StaticResource`, модель представления в `DataContext`), не
-распознаются как используемые; файлы XAML не анализируются.
+Флажок «Apply exceptions» отключает все исключения.
+
+**XAML.** Анализатор читает также файлы `.xaml` и `.axaml` проектов. Тип, который
+назван в файле XAML (как элемент вроде `<local:OrderView/>`, в `{x:Type}`,
+`{x:Static}`, расширении разметки, присоединённом свойстве или как цель стиля либо
+шаблона), считается использованным типом этого файла (`x:Class`) — через связь
+«XAML references». Окно, запускаемое через `StartupUri`, и подключаемые словари
+ресурсов тоже учитываются; словари ресурсов относятся к классу `Application`.
+Не распознаются ссылки, возникающие только во время выполнения: окно, открываемое по
+строке, привязки по имени свойства, `DataContext`, заданный в коде. Если
+`dotnetAtlas.analyzeXaml` равно `false`, файлы XAML пропускаются.
+
+**Глобальные исключения.** Параметр `dotnetAtlas.ignoreUnused` имеет те же ключи, что
+и файл правил, и действует для всех решений. При `dotnetAtlas.ignoreUnusedDefaults`
+равном `false` встроенные исключения отключаются. Встроенные исключения, параметр и
+файл правил применяются вместе.
 
 ### Поддерживаемые языки
 
@@ -1299,6 +1394,7 @@ La interfaz de la extensión está en inglés.
     implementación
   - línea roja de puntos: se suscribe, se anula la suscripción o se dispara un evento
   - línea amarilla discontinua: un tipo está marcado con una clase de atributo de la solución
+  - línea azul discontinua: un tipo se nombra en un archivo XAML (elemento, `{x:Type}`, `{x:Static}`, archivo XAML cargado); la flecha parte del tipo de ese archivo
 - Cada tipo de relación se puede activar y desactivar en el filtro
   «Relationships». Por defecto se muestran todas; desactiva algunas si el mapa
   se satura.
@@ -1429,6 +1525,16 @@ Las *reglas* (`rules`) limitan lo que una capa puede usar:
   número del panel lateral muestra si baja con el tiempo. Junto con «Compare
   with Git…» también ves qué infracciones introduce una rama.
 
+### Mantener el mapa al día
+
+El mapa es una instantánea. Mientras está abierto, la extensión vigila los archivos
+fuente de la solución (`.cs`, `.vb`, archivos de proyecto, `.xaml`, `.axaml`; no
+`bin`, `obj` ni `node_modules`). Tras un cambio aparece una barra sobre la barra de
+herramientas con el número de archivos modificados. «Reload map» analiza la solución
+de nuevo (también con el comando «Analyze the solution of the open map again»),
+«Dismiss» oculta la barra. Al recargar vuelven los filtros predeterminados y se
+borra la comparación con Git.
+
 ### Tipos sin usar
 
 «Unused candidates» en la barra lateral enumera los tipos a los que nada en el código
@@ -1464,9 +1570,23 @@ argumentos de tipo) y `attributes` con las clases de atributo del tipo y sus mie
 }
 ```
 
-La casilla «Apply exceptions» desactiva todas las excepciones. Los tipos que solo se
-usan en XAML (un convertidor en un `StaticResource`, un modelo de vista en el
-`DataContext`) no se detectan como usados; los archivos XAML no se analizan.
+La casilla «Apply exceptions» desactiva todas las excepciones.
+
+**XAML.** El analizador también lee los archivos `.xaml` y `.axaml` de los
+proyectos. Un tipo que nombra un archivo XAML (como elemento, por ejemplo
+`<local:OrderView/>`, en `{x:Type}`, `{x:Static}`, una extensión de marcado, una
+propiedad adjunta o como destino de un estilo o plantilla) queda referenciado por
+el tipo de ese archivo (`x:Class`) mediante la relación «XAML references». Una
+ventana iniciada con `StartupUri` y los diccionarios de recursos combinados también
+cuentan; los diccionarios de recursos se atribuyen a la clase `Application`. No se
+detectan las referencias que solo existen en tiempo de ejecución: una ventana abierta
+a partir de una cadena, enlaces por nombre de propiedad, un `DataContext` asignado en
+el código. Con `dotnetAtlas.analyzeXaml` en `false` se omiten los archivos XAML.
+
+**Excepciones globales.** El ajuste `dotnetAtlas.ignoreUnused` tiene las mismas
+claves que el archivo de reglas y vale para todas las soluciones. Con
+`dotnetAtlas.ignoreUnusedDefaults` en `false` se quitan las excepciones integradas.
+Las excepciones integradas, el ajuste y el archivo de reglas se suman.
 
 ### Lenguajes compatibles
 
@@ -1487,6 +1607,21 @@ separado la parte en C# y la parte en Visual Basic.
 | `dotnetAtlas.zoomSpeed`    | `1`               | Velocidad del zoom con la rueda del ratón (0,1 a 10), se aplica al abrir el siguiente mapa |
 | `dotnetAtlas.namespaceGrouping` | `off` | Marcos de espacios de nombres al abrir el mapa: `off`, `grouped` o `nested` (se cambia en la barra de herramientas) |
 | `dotnetAtlas.rulesFile` | `.atlas.json` | Nombre del archivo con las reglas de arquitectura, se busca junto a la solución y en las carpetas del espacio de trabajo |
+| `dotnetAtlas.analyzeXaml` | `true` | Lee los archivos XAML de los proyectos, para que los tipos usados solo en XAML no aparezcan como sin usar. Se aplica desde el siguiente análisis |
+| `dotnetAtlas.ignoreUnused` | `{}` | Tipos que nunca se listan como sin usar, para todas las soluciones (`namespaces`, `types`, `baseTypes`, `attributes`; `*` equivale a cualquier carácter) |
+| `dotnetAtlas.ignoreUnusedDefaults` | `true` | Aplica las excepciones integradas para los candidatos sin usar (WPF, ASP.NET Core, pruebas, `Main`, ...) |
+| `dotnetAtlas.analyzeXaml` | `true` | Читать файлы XAML проектов, чтобы типы, используемые только в XAML, не считались неиспользуемыми. Вступает в силу при следующем анализе |
+| `dotnetAtlas.ignoreUnused` | `{}` | Типы, которые никогда не попадают в список неиспользуемых, для всех решений (`namespaces`, `types`, `baseTypes`, `attributes`; `*` заменяет любые символы) |
+| `dotnetAtlas.ignoreUnusedDefaults` | `true` | Применять встроенные исключения для неиспользуемых кандидатов (WPF, ASP.NET Core, тесты, `Main` и др.) |
+| `dotnetAtlas.analyzeXaml` | `true` | 读取项目中的 XAML 文件，使只在 XAML 中使用的类型不会显示为未使用。下次分析时生效 |
+| `dotnetAtlas.ignoreUnused` | `{}` | 永不列为未使用的类型，对所有解决方案生效（`namespaces`、`types`、`baseTypes`、`attributes`；`*` 匹配任意字符） |
+| `dotnetAtlas.ignoreUnusedDefaults` | `true` | 应用未使用候选的内置例外（WPF、ASP.NET Core、测试、`Main` 等） |
+| `dotnetAtlas.analyzeXaml` | `true` | Liest die XAML-Dateien der Projekte, damit Typen, die nur in XAML benutzt werden, nicht als ungenutzt erscheinen. Gilt ab der nächsten Analyse |
+| `dotnetAtlas.ignoreUnused` | `{}` | Typen, die nie als ungenutzt aufgelistet werden, für alle Solutions (`namespaces`, `types`, `baseTypes`, `attributes`; `*` steht für beliebige Zeichen) |
+| `dotnetAtlas.ignoreUnusedDefaults` | `true` | Wendet die eingebauten Ausnahmen für ungenutzte Kandidaten an (WPF, ASP.NET Core, Tests, `Main`, ...) |
+| `dotnetAtlas.analyzeXaml` | `true` | Read the XAML files of the projects, so that types used only in XAML are not shown as unused. Takes effect with the next analysis |
+| `dotnetAtlas.ignoreUnused` | `{}` | Types that are never listed as unused, for all solutions (`namespaces`, `types`, `baseTypes`, `attributes`; `*` matches any characters) |
+| `dotnetAtlas.ignoreUnusedDefaults` | `true` | Apply the built-in exceptions for unused candidates (WPF, ASP.NET Core, tests, `Main`, ...) |
 
 ### Requisitos
 
