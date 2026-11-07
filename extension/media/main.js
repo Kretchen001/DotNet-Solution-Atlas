@@ -35,7 +35,7 @@
     projects: new Set(),
     query: '',
     focus: false,
-    namespaces: false,
+    namespaces: 'off', // off | grouped | nested
     selected: null,
   };
 
@@ -50,7 +50,28 @@
   }
 
   function parentOf(node) {
-    return state.namespaces && node.namespace ? namespaceId(node.namespace) : undefined;
+    return state.namespaces !== 'off' && node.namespace ? namespaceId(node.namespace) : undefined;
+  }
+
+  /** The frame around a frame: only when nested, "Shop" for "Shop.Api". */
+  function frameParent(full) {
+    const dot = full.lastIndexOf('.');
+    return state.namespaces === 'nested' && dot > 0 ? namespaceId(full.slice(0, dot)) : undefined;
+  }
+
+  /** A nested frame shows only its own part of the name, because the frame around it shows the rest. */
+  function frameLabel(full) {
+    return state.namespaces === 'nested' ? full.slice(full.lastIndexOf('.') + 1) : full;
+  }
+
+  /** Every namespace that has types, plus all the namespaces above them, for the nested frames. */
+  function allNamespaces(graph) {
+    const all = new Set();
+    for (const namespace of new Set(graph.nodes.map((n) => n.namespace).filter(Boolean))) {
+      const parts = namespace.split('.');
+      for (let i = 1; i <= parts.length; i++) all.add(parts.slice(0, i).join('.'));
+    }
+    return [...all];
   }
 
   function typeNodes() {
@@ -81,6 +102,9 @@
 
   function load(graph, settings) {
     state.selected = null;
+    // The setting only gives the starting value; the toolbar can change it afterwards.
+    state.namespaces = ['off', 'grouped', 'nested'].includes(settings && settings.namespaceGrouping) ? settings.namespaceGrouping : 'off';
+    $('namespaces').value = state.namespaces;
     state.projects = new Set(graph.nodes.map((n) => n.project));
     lastVisibleKey = '';
 
@@ -168,9 +192,15 @@
     cy = cytoscape({
       container: $('cy'),
       elements: [
-        ...[...new Set(graph.nodes.map((n) => n.namespace).filter(Boolean))].map((namespace) => ({
+        ...allNamespaces(graph).map((namespace) => ({
           group: 'nodes',
-          data: { id: namespaceId(namespace), label: namespace, isNamespace: true },
+          data: {
+            id: namespaceId(namespace),
+            full: namespace,
+            label: frameLabel(namespace),
+            isNamespace: true,
+            ...(frameParent(namespace) ? { parent: frameParent(namespace) } : {}),
+          },
           classes: 'namespace hidden',
         })),
         ...graph.nodes.map((n) => ({
@@ -290,7 +320,8 @@
 
       // A namespace frame shows only while grouping is on and it still contains a visible type.
       cy.nodes('.namespace').forEach((frame) => {
-        frame.toggleClass('hidden', !state.namespaces || frame.children().not('.hidden').empty());
+        const hasVisibleType = frame.descendants().filter('[!isNamespace]').not('.hidden').nonempty();
+        frame.toggleClass('hidden', state.namespaces === 'off' || !hasVisibleType);
       });
 
       cy.edges().forEach((edge) => {
@@ -312,7 +343,7 @@
       }
     });
 
-    const visibleKey = (state.namespaces ? 'ns#' : '') + cy.elements().not('.hidden').map((e) => e.id()).sort().join('|');
+    const visibleKey = (state.namespaces === 'off' ? '' : state.namespaces + '#') + cy.elements().not('.hidden').map((e) => e.id()).sort().join('|');
     if (visibleKey !== lastVisibleKey) {
       lastVisibleKey = visibleKey;
       layout();
@@ -478,9 +509,15 @@
   });
 
   $('namespaces').addEventListener('change', (e) => {
-    state.namespaces = e.target.checked;
+    state.namespaces = e.target.value;
     if (!cy) return;
     cy.batch(() => {
+      // Frames first, so the frame a type moves into already has its own place.
+      cy.nodes('.namespace').forEach((frame) => {
+        const parent = frameParent(frame.data('full'));
+        frame.data('label', frameLabel(frame.data('full')));
+        frame.move({ parent: parent === undefined ? null : parent });
+      });
       typeNodes().forEach((node) => {
         const parent = parentOf(node.data());
         node.move({ parent: parent === undefined ? null : parent });

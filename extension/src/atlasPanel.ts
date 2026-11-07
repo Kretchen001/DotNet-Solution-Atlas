@@ -62,8 +62,12 @@ export class AtlasPanel {
     void this.panel.webview.postMessage({ type: 'graph', graph, settings: this.settings() });
   }
 
-  private settings(): { zoomSpeed: number } {
-    return { zoomSpeed: vscode.workspace.getConfiguration('dotnetAtlas').get<number>('zoomSpeed', 1) };
+  private settings(): { zoomSpeed: number; namespaceGrouping: string } {
+    const config = vscode.workspace.getConfiguration('dotnetAtlas');
+    return {
+      zoomSpeed: config.get<number>('zoomSpeed', 1),
+      namespaceGrouping: config.get<string>('namespaceGrouping', 'off'),
+    };
   }
 
   private remember(graph: AtlasGraph): void {
@@ -152,7 +156,13 @@ export class AtlasPanel {
           <span id="root"></span>
           <input id="search" type="search" placeholder="Search types" aria-label="Search types">
           <label class="check"><input id="focus" type="checkbox"> Focus on selection</label>
-          <label class="check"><input id="namespaces" type="checkbox"> Group by namespace</label>
+          <label class="check">Namespaces
+            <select id="namespaces" aria-label="Show namespaces as frames">
+              <option value="off">Off</option>
+              <option value="grouped">Grouped</option>
+              <option value="nested">Nested</option>
+            </select>
+          </label>
           <button id="fit" type="button">Fit</button>
           <button id="relayout" type="button">Re-layout</button>
         </div>

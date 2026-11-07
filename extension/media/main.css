@@ -57,6 +57,14 @@ input[type="search"] {
   border: 1px solid var(--vscode-input-border, transparent);
   border-radius: 2px;
 }
+select {
+  padding: 2px 6px;
+  color: var(--vscode-dropdown-foreground);
+  background: var(--vscode-dropdown-background);
+  border: 1px solid var(--vscode-dropdown-border, transparent);
+  border-radius: 2px;
+}
+
 input[type="search"]:focus { outline: 1px solid var(--vscode-focusBorder); }
 
 button {

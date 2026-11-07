@@ -68,6 +68,21 @@
           "maximum": 10,
           "description": "Speed of zooming with the mouse wheel in the map. 1 is the default, higher is faster. Takes effect the next time a map is opened."
         },
+        "dotnetAtlas.namespaceGrouping": {
+          "type": "string",
+          "default": "off",
+          "enum": [
+            "off",
+            "grouped",
+            "nested"
+          ],
+          "enumDescriptions": [
+            "Show the types without frames.",
+            "Draw a frame around the types of each namespace.",
+            "Like grouped, but a namespace frame is placed inside the frame of its parent namespace (Shop.Api inside Shop)."
+          ],
+          "description": "How the map shows namespaces when it is opened. Can be changed in the toolbar of the map."
+        },
         "dotnetAtlas.analyzerPath": {
           "type": "string",
           "default": "",
