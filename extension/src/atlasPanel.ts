@@ -29,7 +29,7 @@ export class AtlasPanel {
       return;
     }
 
-    const panel = vscode.window.createWebviewPanel('dotnetAtlas.map', 'DotNet Solution Atlas', vscode.ViewColumn.Beside, {
+    const panel = vscode.window.createWebviewPanel('dotnetAtlas.map', 'DotNet Solution Atlas', vscode.ViewColumn.Active, {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [
@@ -94,8 +94,9 @@ export class AtlasPanel {
     const position = new vscode.Position(lineIndex, 0);
     const document = await vscode.workspace.openTextDocument(vscode.Uri.file(file));
 
+    // Beside the map, so the map keeps its tab and its place.
     await vscode.window.showTextDocument(document, {
-      viewColumn: vscode.ViewColumn.One,
+      viewColumn: vscode.ViewColumn.Beside,
       selection: new vscode.Range(position, position),
     });
   }
