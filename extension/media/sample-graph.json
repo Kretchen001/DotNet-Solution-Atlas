@@ -10,7 +10,10 @@
       "members": 5,
       "methods": 4,
       "lines": 92,
-      "language": "csharp"
+      "language": "csharp",
+      "baseTypes": [
+        "Microsoft.AspNetCore.Mvc.ControllerBase"
+      ]
     },
     {
       "id": "Shop.Api.CustomersController",
@@ -21,7 +24,10 @@
       "members": 4,
       "methods": 3,
       "lines": 70,
-      "language": "csharp"
+      "language": "csharp",
+      "baseTypes": [
+        "Microsoft.AspNetCore.Mvc.ControllerBase"
+      ]
     },
     {
       "id": "Shop.Domain.Entity",
@@ -226,7 +232,10 @@
       "members": 0,
       "methods": 0,
       "lines": 3,
-      "language": "csharp"
+      "language": "csharp",
+      "baseTypes": [
+        "Microsoft.Extensions.Hosting.BackgroundService"
+      ]
     },
     {
       "id": "Shop.Reporting.ReportBuilder",

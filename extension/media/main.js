@@ -61,6 +61,7 @@
     expanded: new Set(), // "namespace:Shop.Api": groups the user opened while collapsing
     sizeBy: 'uniform', // uniform | coupling | fanIn | lines
     markCycles: true,
+    applyUnusedIgnore: true,
     showViolations: true,
     hubMetric: 'coupling',
     rulesInfo: null, // { file?, error? } from the extension
@@ -846,7 +847,11 @@
         namespace: L.findCycles(nodes, edges, 'namespace'),
         project: L.findCycles(nodes, edges, 'project'),
       },
-      unused: L.unusedCandidates(nodes, edges),
+      unused: L.findUnused(
+        nodes,
+        edges,
+        state.applyUnusedIgnore ? L.mergeIgnore(state.rules && state.rules.config.ignoreUnused) : null,
+      ),
       violations: state.rules ? L.findViolations(nodes, edges, state.rules.config) : [],
     };
 
@@ -978,26 +983,44 @@
   function renderUnused() {
     const box = $('unused');
     box.replaceChildren();
-    $('unusedCount').textContent = analysis.unused.length === 0 ? '' : String(analysis.unused.length);
+    const { candidates, ignored } = analysis.unused;
+    $('unusedCount').textContent = candidates.length === 0 ? '' : String(candidates.length);
 
-    if (analysis.unused.length === 0) {
+    const toggle = el('input', { type: 'checkbox', checked: state.applyUnusedIgnore });
+    toggle.addEventListener('change', () => {
+      state.applyUnusedIgnore = toggle.checked;
+      computeAnalysis();
+      renderAnalysis();
+    });
+    box.append(el('label', { className: 'check' }, toggle, el('span', { textContent: 'Apply exceptions (defaults and .atlas.json)' })));
+
+    if (candidates.length === 0) {
       box.append(el('p', { className: 'hint', textContent: 'Every type is referenced.' }));
-      return;
+    } else {
+      box.append(el('p', {
+        className: 'hint',
+        textContent: 'Nothing in the analyzed code refers to these. Types used through reflection, DI or serialization look the same; add them under "ignoreUnused" in the rules file.',
+      }));
+
+      const limit = 100;
+      const list = el('ul', { className: 'links' });
+      for (const node of candidates.slice(0, limit)) {
+        list.append(el('li', {}, link(node.name, () => select(node.id)), el('span', { className: 'edge', textContent: node.kind })));
+      }
+      box.append(list);
+      if (candidates.length > limit) {
+        box.append(el('p', { className: 'hint', textContent: `... and ${candidates.length - limit} more` }));
+      }
     }
 
-    box.append(el('p', {
-      className: 'hint',
-      textContent: 'Nothing in the analyzed code refers to these. Entry points and types used through reflection, DI or serialization look the same.',
-    }));
-
-    const limit = 100;
-    const list = el('ul', { className: 'links' });
-    for (const node of analysis.unused.slice(0, limit)) {
-      list.append(el('li', {}, link(node.name, () => select(node.id)), el('span', { className: 'edge', textContent: node.kind })));
-    }
-    box.append(list);
-    if (analysis.unused.length > limit) {
-      box.append(el('p', { className: 'hint', textContent: `... and ${analysis.unused.length - limit} more` }));
+    if (ignored.length > 0) {
+      const details = el('details', {}, el('summary', { textContent: `${ignored.length} hidden by exceptions` }));
+      const list = el('ul', { className: 'links' });
+      for (const entry of ignored.slice(0, 100)) {
+        list.append(el('li', {}, link(entry.node.name, () => select(entry.node.id)), el('span', { className: 'edge', textContent: entry.reason })));
+      }
+      details.append(list);
+      box.append(details);
     }
   }
 
