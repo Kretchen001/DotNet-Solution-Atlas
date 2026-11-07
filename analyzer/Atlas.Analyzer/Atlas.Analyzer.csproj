@@ -10,6 +10,10 @@
     <AssemblyName>Atlas.Analyzer</AssemblyName>
     <InvariantGlobalization>true</InvariantGlobalization>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <!-- Keep the published analyzer small: only English resources, no debug symbols. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
