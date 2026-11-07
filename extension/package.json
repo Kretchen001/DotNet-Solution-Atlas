@@ -94,6 +94,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "test": "node --test",
     "build:analyzer": "dotnet publish ../analyzer/Atlas.Analyzer -c Release -o analyzer",
     "vscode:prepublish": "npm run compile"
   },
