@@ -119,6 +119,9 @@ The interface of the extension is in English.
 - Click a type to see its neighbours, double-click to open it in the editor.
 - Filter by type kind, project and language, search by name, or switch on
   "Focus on selection" to see only a type and its direct neighbours.
+- "Focus in map" in the details on the right centres the map on the selected
+  type and its neighbours, for example after you picked it from a list on the
+  left.
 - "Export…" saves the map as it is shown (filters, collapsed groups and
   namespace frames included) as PNG, SVG, Mermaid, Graphviz DOT or JSON.
 - "Compare with Git…" asks for a branch, tag or commit and analyzes that
@@ -317,6 +320,8 @@ Die Oberfläche der Erweiterung ist englisch.
   Editor.
 - Nach Typart, Projekt und Sprache filtern, nach Namen suchen oder „Focus on
   selection“ einschalten, um nur einen Typ und seine direkten Nachbarn zu sehen.
+- „Focus in map“ in den Details rechts zentriert die Karte auf den gewählten Typ
+  und seine Nachbarn, zum Beispiel nachdem du ihn in einer Liste links gewählt hast.
 - „Export…“ speichert die Karte so, wie sie angezeigt wird (mit Filtern,
   zusammengefassten Gruppen und Namespace-Rahmen), als PNG, SVG, Mermaid,
   Graphviz DOT oder JSON.
@@ -492,6 +497,7 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - 点击类型可查看其相邻类型，双击可在编辑器中打开。
 - 可按类型种类、项目和语言过滤，按名称搜索，或开启“Focus on selection”，
   只查看某个类型及其直接相邻的类型。
+- 右侧详情中的“Focus in map”会将地图居中到所选类型及其相邻类型，例如在左侧列表中选中它之后。
 - “Export…”按当前显示的样子（包含过滤结果、折叠的分组和命名空间框）将地图保存为
   PNG、SVG、Mermaid、Graphviz DOT 或 JSON。
 - “Compare with Git…”会询问分支、标签或提交，并在临时检出目录中分析该版本
@@ -679,6 +685,8 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - Можно фильтровать по виду типа, проекту и языку, искать по имени или
   включить «Focus on selection», чтобы видеть только один тип и его прямых
   соседей.
+- «Focus in map» в сведениях справа центрирует карту на выбранном типе и его
+  соседях, например после выбора типа в списке слева.
 - «Export…» сохраняет карту в том виде, как она показана (с фильтрами,
   свёрнутыми группами и рамками пространств имён) в PNG, SVG, Mermaid,
   Graphviz DOT или JSON.
@@ -874,6 +882,8 @@ La interfaz de la extensión está en inglés.
   editor.
 - Filtra por tipo, proyecto y lenguaje, busca por nombre, o activa «Focus on
   selection» para ver solo un tipo y sus vecinos directos.
+- «Focus in map», en los detalles de la derecha, centra el mapa en el tipo
+  seleccionado y sus vecinos, por ejemplo tras elegirlo en una lista de la izquierda.
 - «Export…» guarda el mapa tal como se muestra (con filtros, grupos contraídos
   y marcos de espacios de nombres) como PNG, SVG, Mermaid, Graphviz DOT o JSON.
 - «Compare with Git…» pide una rama, etiqueta o commit y analiza esa versión en

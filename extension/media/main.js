@@ -959,6 +959,19 @@
   }
 
   /** Fades everything except the group, zooms to it and lists its members. */
+  /**
+   * Centres the map on a node and zooms so that it and its neighbours are in view, without
+   * zooming in further than 1.5 for a type that has hardly any neighbours.
+   */
+  function focusInMap(node) {
+    if (!cy || node.removed()) return;
+    const around = node.closedNeighborhood().nodes().not('.hidden, .collapsed, .namespace');
+    const box = around.boundingBox({ includeLabels: false, includeOverlays: false });
+    const level = Math.min(1.5, (0.85 * cy.width()) / Math.max(box.w, 1), (0.85 * cy.height()) / Math.max(box.h, 1));
+    cy.stop();
+    cy.animate({ zoom: Math.max(level, cy.minZoom()), center: { eles: node } }, { duration: 250 });
+  }
+
   function focusGroup(label, nodes) {
     select(null);
     shown().addClass('faded');
@@ -1026,9 +1039,11 @@
       box.append(el('p', { className: 'problem', textContent: 'Part of a dependency cycle.' }));
     }
 
+    const focus = el('button', { textContent: 'Focus in map', title: 'Centre the map on this type and its neighbours' });
+    focus.addEventListener('click', () => focusInMap(node));
     const open = el('button', { textContent: 'Open in editor', disabled: !node.data('file') });
     open.addEventListener('click', () => openNode(node));
-    box.append(open);
+    box.append(focus, ' ', open);
 
     if (state.collapse !== 'none' && state.expanded.has(groupKeyOf(node.data()))) {
       const collapse = el('button', { textContent: `Collapse ${state.collapse} again` });
@@ -1052,9 +1067,11 @@
       el('p', { className: 'sub', textContent: `Collapsed ${state.collapse}, ${members.length} types` }),
     );
 
+    const focus = el('button', { textContent: 'Focus in map', title: 'Centre the map on this group' });
+    focus.addEventListener('click', () => focusInMap(node));
     const expand = el('button', { textContent: 'Expand' });
     expand.addEventListener('click', () => expandGroup(node));
-    box.append(expand);
+    box.append(focus, ' ', expand);
 
     box.append(el('h3', { textContent: 'Depends on' }), linkList(node.outgoers('edge'), 'target'));
     box.append(el('h3', { textContent: 'Used by' }), linkList(node.incomers('edge'), 'source'));
