@@ -10,6 +10,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### Unreleased
+
+- Added: namespaces can be switched off one by one ("Namespaces" list in the sidebar, with a box to narrow it).
+- Added: "all / none" in the heading of every filter list (relationships, types, languages, projects, namespaces).
+
 ### 1.0.0 – 2026-11-07
 
 - First stable version. It contains everything from the 0.x versions: the map with relationships, namespace frames, collapsing, analysis, architecture rules, members, export and the comparison with Git.
@@ -61,6 +66,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### Unveröffentlicht
+
+- Neu: Namespaces lassen sich einzeln ausschalten (Liste „Namespaces“ in der Seitenleiste, mit einem Feld zum Eingrenzen).
+- Neu: „all / none“ in der Überschrift jeder Filterliste (Beziehungen, Typen, Sprachen, Projekte, Namespaces).
 
 ### 1.0.0 – 2026-11-07
 
@@ -114,6 +124,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 未发布
+
+- 新增：可以逐个关闭命名空间（侧边栏中的“Namespaces”列表，带有用于缩小范围的输入框）。
+- 新增：每个过滤列表（关系、类型、语言、项目、命名空间）的标题中都有“all / none”。
+
 ### 1.0.0 – 2026-11-07
 
 - 首个稳定版本。它包含 0.x 版本的全部功能：带关系的地图、命名空间框、折叠、分析、架构规则、成员、导出以及与 Git 的比较。
@@ -166,6 +181,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### Не выпущено
+
+- Добавлено: пространства имён можно отключать по одному (список «Namespaces» в боковой панели с полем для сужения списка).
+- Добавлено: «all / none» в заголовке каждого списка фильтров (связи, типы, языки, проекты, пространства имён).
+
 ### 1.0.0 – 2026-11-07
 
 - Первая стабильная версия. Она включает всё из версий 0.x: карту со связями, рамки пространств имён, свёртку, анализ, архитектурные правила, члены, экспорт и сравнение с Git.
@@ -217,6 +237,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### Sin publicar
+
+- Añadido: los espacios de nombres se pueden desactivar uno a uno (lista «Namespaces» en el panel lateral, con un campo para reducirla).
+- Añadido: «all / none» en el título de cada lista de filtros (relaciones, tipos, idiomas, proyectos, espacios de nombres).
 
 ### 1.0.0 – 2026-11-07
 

@@ -49,7 +49,8 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
   property/field access, dependency injection registrations, events and
   attributes, each of them can be switched on and off
 - Layered layout, so that interfaces and implementations are easy to tell apart
-- Filters by type kind, project and language; search by name
+- Filters by relationship, type kind, project, language and namespace (each
+  list has "all / none"); search by name
 - Focus mode: only the selected type and its neighbours
 - Group by namespace: dashed frames around the types of each namespace, optionally nested (Off, Grouped, Nested)
 - Collapse namespaces or projects into one node each, to get an overview of
@@ -68,10 +69,6 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 - Comparison with a Git commit, branch or tag: new types and dependencies in
   green, removed ones as red dashed ghosts, and a list of the changes (useful
   to review a pull request)
-
-### Planned features
-
-- Filter by namespace
 
 ### Try it
 
@@ -119,6 +116,10 @@ The interface of the extension is in English.
 - Click a type to see its neighbours, double-click to open it in the editor.
 - Filter by type kind, project and language, search by name, or switch on
   "Focus on selection" to see only a type and its direct neighbours.
+- Namespaces can be switched off one by one in the "Namespaces" list of the
+  sidebar; the box above the list narrows it. Every filter list has "all" and
+  "none" in its heading; with a narrowed namespace list they apply to the
+  namespaces that are listed.
 - "Focus in map" in the details on the right centres the map on the selected
   type and its neighbours, for example after you picked it from a list on the
   left.
@@ -315,7 +316,8 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
   Attribute, jede Art lässt sich einzeln ein- und ausschalten
 - Geschichtetes Layout, damit sich Interfaces und Implementierungen gut
   unterscheiden lassen
-- Filter nach Typart, Projekt und Sprache; Suche nach Namen
+- Filter nach Beziehung, Typart, Projekt, Sprache und Namespace (jede Liste hat
+  „all / none“); Suche nach Namen
 - Fokusmodus: nur der gewählte Typ und seine Nachbarn
 - Nach Namespace gruppieren: gestrichelte Rahmen um die Typen jedes Namespace, auch verschachtelt (Off, Grouped, Nested)
 - Namespaces oder Projekte zu je einem Knoten zusammenfassen, um große
@@ -335,10 +337,6 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
 - Vergleich mit einem Git-Commit, Branch oder Tag: neue Typen und Abhängigkeiten
   grün, entfernte als rote gestrichelte Geister, dazu eine Liste der Änderungen
   (nützlich, um einen Pull Request zu prüfen)
-
-### Geplante Funktionen
-
-- Filter nach Namespace
 
 ### Ausprobieren
 
@@ -392,6 +390,10 @@ Die Oberfläche der Erweiterung ist englisch.
   Editor.
 - Nach Typart, Projekt und Sprache filtern, nach Namen suchen oder „Focus on
   selection“ einschalten, um nur einen Typ und seine direkten Nachbarn zu sehen.
+- Namespaces lassen sich in der Liste „Namespaces“ der Seitenleiste einzeln
+  ausschalten; das Feld über der Liste grenzt sie ein. Jede Filterliste hat in
+  der Überschrift „all“ und „none“; bei eingegrenzter Namespace-Liste gelten sie
+  für die Namespaces, die aufgelistet sind.
 - „Focus in map“ in den Details rechts zentriert die Karte auf den gewählten Typ
   und seine Nachbarn, zum Beispiel nachdem du ihn in einer Liste links gewählt hast.
 - „Export…“ speichert die Karte so, wie sie angezeigt wird (mit Filtern,
@@ -589,7 +591,7 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
   会作为单独的节点显示
 - 关系：继承、实现、类型使用、方法调用、属性/字段访问、依赖注入注册、事件和特性，每一种都可以单独开关
 - 分层布局，方便区分接口和实现
-- 按类型种类、项目和语言过滤；按名称搜索
+- 按关系、类型种类、项目、语言和命名空间过滤（每个列表都有“all / none”）；按名称搜索
 - 聚焦模式：只显示选中的类型及其相邻类型
 - 按命名空间分组：在每个命名空间的类型周围绘制虚线框，可嵌套显示（Off、Grouped、Nested）
 - 将命名空间或项目分别折叠为一个节点，便于纵览大型解决方案
@@ -604,10 +606,6 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 - 导出当前显示的地图：PNG、SVG、Mermaid、Graphviz DOT 或 JSON
 - 与 Git 提交、分支或标签比较：新增的类型和依赖以绿色标出，已删除的以红色虚线“幽灵”显示，
   并列出所有变更（便于审查拉取请求）
-
-### 计划中的功能
-
-- 按命名空间过滤
 
 ### 试用
 
@@ -648,6 +646,8 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - 点击类型可查看其相邻类型，双击可在编辑器中打开。
 - 可按类型种类、项目和语言过滤，按名称搜索，或开启“Focus on selection”，
   只查看某个类型及其直接相邻的类型。
+- 可以在侧边栏的“Namespaces”列表中逐个关闭命名空间；列表上方的输入框可缩小列表范围。
+  每个过滤列表的标题中都有“all”和“none”；命名空间列表被缩小时，它们只作用于列出的命名空间。
 - 右侧详情中的“Focus in map”会将地图居中到所选类型及其相邻类型，例如在左侧列表中选中它之后。
 - “Export…”按当前显示的样子（包含过滤结果、折叠的分组和命名空间框）将地图保存为
   PNG、SVG、Mermaid、Graphviz DOT 或 JSON。
@@ -815,7 +815,8 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
   к свойствам и полям, регистрации во внедрении зависимостей, события и
   атрибуты; каждый вид можно включать и отключать отдельно
 - Многоуровневая раскладка, чтобы интерфейсы и реализации легко различались
-- Фильтры по виду типа, проекту и языку; поиск по имени
+- Фильтры по связям, виду типа, проекту, языку и пространству имён (у каждого
+  списка есть «all / none»); поиск по имени
 - Режим фокуса: только выбранный тип и его соседи
 - Группировка по пространствам имён: пунктирные рамки вокруг типов каждого пространства, при желании вложенные (Off, Grouped, Nested)
 - Свёртка пространств имён или проектов в один узел каждое, чтобы охватить
@@ -835,10 +836,6 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 - Сравнение с коммитом, веткой или тегом Git: новые типы и зависимости —
   зелёным, удалённые — красными пунктирными «призраками», плюс список изменений
   (удобно для проверки pull request)
-
-### Планируемые возможности
-
-- Фильтр по пространству имён
 
 ### Попробовать
 
@@ -891,6 +888,10 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - Можно фильтровать по виду типа, проекту и языку, искать по имени или
   включить «Focus on selection», чтобы видеть только один тип и его прямых
   соседей.
+- Пространства имён можно отключать по одному в списке «Namespaces» боковой
+  панели; поле над списком сужает его. В заголовке каждого списка фильтров есть
+  «all» и «none»; при суженном списке пространств имён они действуют на
+  перечисленные пространства.
 - «Focus in map» в сведениях справа центрирует карту на выбранном типе и его
   соседях, например после выбора типа в списке слева.
 - «Export…» сохраняет карту в том виде, как она показана (с фильтрами,
@@ -1089,7 +1090,8 @@ organizada en capas esta solución?».
   acceso a propiedades y campos, registros de inyección de dependencias,
   eventos y atributos; cada una se puede activar y desactivar por separado
 - Diseño por capas, para distinguir fácilmente interfaces e implementaciones
-- Filtros por tipo, proyecto y lenguaje; búsqueda por nombre
+- Filtros por relación, tipo, proyecto, lenguaje y espacio de nombres (cada
+  lista tiene «all / none»); búsqueda por nombre
 - Modo de enfoque: solo el tipo seleccionado y sus vecinos
 - Agrupar por espacio de nombres: marcos discontinuos alrededor de los tipos de cada espacio, también anidados (Off, Grouped, Nested)
 - Contraer espacios de nombres o proyectos en un nodo cada uno, para tener una
@@ -1109,10 +1111,6 @@ organizada en capas esta solución?».
 - Comparación con un commit, una rama o una etiqueta de Git: los tipos y
   dependencias nuevos en verde, los eliminados como «fantasmas» rojos
   discontinuos, y una lista de los cambios (útil para revisar un pull request)
-
-### Funciones previstas
-
-- Filtro por espacio de nombres
 
 ### Probarlo
 
@@ -1163,6 +1161,10 @@ La interfaz de la extensión está en inglés.
   editor.
 - Filtra por tipo, proyecto y lenguaje, busca por nombre, o activa «Focus on
   selection» para ver solo un tipo y sus vecinos directos.
+- Los espacios de nombres se pueden desactivar uno a uno en la lista
+  «Namespaces» del panel lateral; el campo sobre la lista la reduce. Cada lista
+  de filtros tiene «all» y «none» en su título; con la lista de espacios de
+  nombres reducida, se aplican a los espacios listados.
 - «Focus in map», en los detalles de la derecha, centra el mapa en el tipo
   seleccionado y sus vecinos, por ejemplo tras elegirlo en una lista de la izquierda.
 - «Export…» guarda el mapa tal como se muestra (con filtros, grupos contraídos
