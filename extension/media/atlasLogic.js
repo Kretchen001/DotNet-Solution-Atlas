@@ -168,6 +168,83 @@
       .sort((a, b) => a.id.localeCompare(b.id));
   }
 
+  /**
+   * Exceptions that are always applied: types that a framework creates by itself (XAML, MVC, hosting,
+   * test runners) have no reference in the code but are not unused. All patterns are globs.
+   */
+  const DEFAULT_UNUSED_IGNORE = {
+    namespaces: [],
+    types: [],
+    baseTypes: [
+      'System.Windows.*',
+      'Avalonia.*',
+      'Microsoft.UI.Xaml.*',
+      'Windows.UI.Xaml.*',
+      'Microsoft.Maui.*',
+      'Xamarin.Forms.*',
+      'Microsoft.AspNetCore.Mvc.ControllerBase',
+      'Microsoft.AspNetCore.Mvc.RazorPages.PageModel',
+      'Microsoft.AspNetCore.Components.*',
+      'Microsoft.AspNetCore.SignalR.Hub',
+      'Microsoft.Extensions.Hosting.BackgroundService',
+      'Microsoft.Extensions.Hosting.IHostedService',
+      'System.ServiceProcess.ServiceBase',
+    ],
+    attributes: [
+      'Xunit.*',
+      'NUnit.*',
+      'Microsoft.VisualStudio.TestTools.*',
+      'System.ComponentModel.Composition.*',
+    ],
+  };
+
+  /**
+   * Like unusedCandidates, but leaves out the types the exceptions cover and says why.
+   * @param {object|null} ignore patterns as in DEFAULT_UNUSED_IGNORE; null applies no exceptions
+   * @returns {{candidates: object[], ignored: {node: object, reason: string}[]}}
+   */
+  function findUnused(nodes, edges, ignore) {
+    const all = unusedCandidates(nodes, edges);
+    if (!ignore) return { candidates: all, ignored: [] };
+
+    const compile = (list) => (list || []).map((pattern) => ({ pattern, regex: globToRegExp(pattern) }));
+    const namespaces = compile(ignore.namespaces);
+    const types = compile(ignore.types);
+    const baseTypes = compile(ignore.baseTypes);
+    const attributes = compile(ignore.attributes);
+    const firstMatch = (rules, values) => {
+      for (const value of values) {
+        const hit = rules.find((r) => r.regex.test(value));
+        if (hit) return hit.pattern;
+      }
+      return null;
+    };
+
+    const candidates = [];
+    const ignored = [];
+    for (const node of all) {
+      let reason = null;
+      let hit;
+      if ((hit = firstMatch(types, [node.id]))) reason = `type ${hit}`;
+      else if ((hit = firstMatch(namespaces, [node.namespace || ''])) !== null) reason = `namespace ${hit}`;
+      else if ((hit = firstMatch(baseTypes, node.baseTypes || []))) reason = `derives from ${hit}`;
+      else if ((hit = firstMatch(attributes, node.attributes || []))) reason = `attribute ${hit}`;
+      else if ((node.memberDetails || []).some((m) => m.kind === 'method' && /^Main(\(|$)/.test(m.name))) reason = 'entry point Main';
+      if (reason) ignored.push({ node, reason });
+      else candidates.push(node);
+    }
+    return { candidates, ignored };
+  }
+
+  /** Default exceptions plus those of the rules file. */
+  function mergeIgnore(extra) {
+    const merged = {};
+    for (const key of ['namespaces', 'types', 'baseTypes', 'attributes']) {
+      merged[key] = [...DEFAULT_UNUSED_IGNORE[key], ...((extra && extra[key]) || [])];
+    }
+    return merged;
+  }
+
   // ------------------------------------------------------------------ rules
 
   /** Turns a pattern with * (any characters) into a regular expression that has to match completely. */
@@ -186,7 +263,7 @@
    */
   function parseRules(input) {
     const errors = [];
-    const config = { layers: [], rules: [] };
+    const config = { layers: [], rules: [], ignoreUnused: null };
 
     if (input === null || typeof input !== 'object' || Array.isArray(input)) {
       return { config, errors: ['The file has to contain a JSON object with "layers" and "rules".'] };
@@ -225,6 +302,24 @@
         if (!names.has(name)) errors.push(`rules[${index}]: unknown layer "${name}".`);
       }
       config.rules.push({ from: rule.from, cannotUse, canOnlyUse });
+    }
+
+    if (input.ignoreUnused !== undefined) {
+      const raw = input.ignoreUnused;
+      if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+        errors.push('"ignoreUnused" has to be an object with "namespaces", "types", "baseTypes" or "attributes".');
+      } else {
+        config.ignoreUnused = { namespaces: [], types: [], baseTypes: [], attributes: [] };
+        for (const key of Object.keys(raw)) {
+          if (!(key in config.ignoreUnused)) {
+            errors.push(`ignoreUnused: unknown key "${key}".`);
+          } else if (!Array.isArray(raw[key]) || raw[key].some((v) => typeof v !== 'string')) {
+            errors.push(`ignoreUnused.${key} has to be a list of strings.`);
+          } else {
+            config.ignoreUnused[key] = raw[key];
+          }
+        }
+      }
     }
 
     return { config, errors };
@@ -714,6 +809,9 @@
     metrics,
     topBy,
     unusedCandidates,
+    DEFAULT_UNUSED_IGNORE,
+    findUnused,
+    mergeIgnore,
     globToRegExp,
     parseRules,
     assignLayers,

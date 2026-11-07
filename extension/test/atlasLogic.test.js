@@ -75,6 +75,54 @@ test('unusedCandidates lists types without incoming edges, but not top-level sta
   assert.deepEqual(result.map((n) => n.id), ['A']);
 });
 
+test('findUnused hides framework-wired types and says why', () => {
+  const nodes = [
+    node('Shop.Plain', 'Shop'),
+    node('Shop.MainWindow', 'Shop', 'App', { baseTypes: ['System.Windows.Window'] }),
+    node('Shop.Tests', 'Shop', 'App', { attributes: ['Xunit.FactAttribute'] }),
+    node('Shop.Program', 'Shop', 'App', { memberDetails: [{ name: 'Main(string[])', kind: 'method', refs: [] }] }),
+    node('Shop.Generated.Thing', 'Shop.Generated'),
+    node('Shop.Special', 'Shop'),
+  ];
+  const ignore = logic.mergeIgnore({ namespaces: ['Shop.Generated*'], types: ['Shop.Special'] });
+  const { candidates, ignored } = logic.findUnused(nodes, [], ignore);
+  assert.deepEqual(candidates.map((n) => n.id), ['Shop.Plain']);
+  assert.deepEqual(
+    ignored.map((i) => [i.node.id, i.reason]).sort(),
+    [
+      ['Shop.Generated.Thing', 'namespace Shop.Generated*'],
+      ['Shop.MainWindow', 'derives from System.Windows.*'],
+      ['Shop.Program', 'entry point Main'],
+      ['Shop.Special', 'type Shop.Special'],
+      ['Shop.Tests', 'attribute Xunit.*'],
+    ],
+  );
+});
+
+test('findUnused without exceptions equals unusedCandidates', () => {
+  const nodes = [node('A', '', 'App', { baseTypes: ['System.Windows.Window'] })];
+  assert.equal(logic.findUnused(nodes, [], null).candidates.length, 1);
+});
+
+test('findUnused keeps referenced types out in both lists', () => {
+  const nodes = [node('A'), node('B', '', 'App', { baseTypes: ['System.Windows.Window'] })];
+  const result = logic.findUnused(nodes, [edge('A', 'B')], logic.mergeIgnore(null));
+  assert.deepEqual(result.candidates.map((n) => n.id), ['A']);
+  assert.equal(result.ignored.length, 0);
+});
+
+test('parseRules reads ignoreUnused and reports mistakes in it', () => {
+  const ok = logic.parseRules({ ignoreUnused: { baseTypes: ['My.Base*'], types: ['A'] } });
+  assert.deepEqual(ok.errors, []);
+  assert.deepEqual(ok.config.ignoreUnused.baseTypes, ['My.Base*']);
+  assert.deepEqual(ok.config.ignoreUnused.attributes, []);
+
+  const bad = logic.parseRules({ ignoreUnused: { baseTypes: 'x', bogus: [] } });
+  assert.equal(bad.errors.length, 2);
+  assert.equal(logic.parseRules({ ignoreUnused: [] }).errors.length, 1);
+  assert.equal(logic.parseRules({ layers: [] }).config.ignoreUnused, null);
+});
+
 test('globToRegExp matches completely and treats dots literally', () => {
   const re = logic.globToRegExp('Shop.Domain*');
   assert.ok(re.test('Shop.Domain'));
