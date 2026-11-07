@@ -10,6 +10,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### 1.1.1 – 2026-11-07
+
+- Added: `scripts/build-local.ps1` tests, builds and packages the extension on Windows and shows how to install the `.vsix`.
+- Changed: the README shows the icon, describes how to build from source and has an up-to-date status note (five languages).
+
 ### 1.1.0 – 2026-11-07
 
 - Added: XAML files (`.xaml`, `.axaml`) are read. Types that are only used there (windows, user controls, converters, view models) get a new "XAML references" relationship and no longer appear as unused. Setting `dotnetAtlas.analyzeXaml` switches it off.
@@ -70,6 +75,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### 1.1.1 – 2026-11-07
+
+- Neu: `scripts/build-local.ps1` testet, baut und verpackt die Erweiterung unter Windows und zeigt, wie man die `.vsix` installiert.
+- Geändert: Das README zeigt das Icon, beschreibt das Bauen aus dem Quellcode und hat einen aktuellen Status-Hinweis (fünf Sprachen).
 
 ### 1.1.0 – 2026-11-07
 
@@ -132,6 +142,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 1.1.1 – 2026-11-07
+
+- 新增：`scripts/build-local.ps1` 在 Windows 上测试、构建并打包扩展，并显示如何安装 `.vsix`。
+- 变更：README 显示图标、说明如何从源代码构建，并更新了状态说明（五种语言）。
+
 ### 1.1.0 – 2026-11-07
 
 - 新增：读取 XAML 文件（`.xaml`、`.axaml`）。只在其中使用的类型（窗口、用户控件、转换器、视图模型）获得新的“XAML references”关系，不再显示为未使用。设置项 `dotnetAtlas.analyzeXaml` 可将其关闭。
@@ -193,6 +208,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### 1.1.1 – 2026-11-07
+
+- Добавлено: `scripts/build-local.ps1` тестирует, собирает и упаковывает расширение в Windows и показывает, как установить `.vsix`.
+- Изменено: README показывает значок, описывает сборку из исходного кода и содержит актуальную заметку о статусе (пять языков).
+
 ### 1.1.0 – 2026-11-07
 
 - Добавлено: читаются файлы XAML (`.xaml`, `.axaml`). Типы, которые используются только в них (окна, пользовательские элементы управления, конвертеры, модели представления), получают новую связь «XAML references» и больше не считаются неиспользуемыми. Параметр `dotnetAtlas.analyzeXaml` отключает это.
@@ -253,6 +273,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### 1.1.1 – 2026-11-07
+
+- Añadido: `scripts/build-local.ps1` prueba, compila y empaqueta la extensión en Windows y muestra cómo instalar el `.vsix`.
+- Cambiado: el README muestra el icono, describe cómo compilar desde el código fuente y tiene una nota de estado actualizada (cinco idiomas).
 
 ### 1.1.0 – 2026-11-07
 
