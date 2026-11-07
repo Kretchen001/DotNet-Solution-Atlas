@@ -106,11 +106,11 @@ public sealed class SourceFallbackTests : IDisposable
 
         var files = SourceFallback.SourceFiles(project, LanguageNames.CSharp);
 
-        Assert.Equal(["Program.cs"], files.Select(Path.GetFileName).ToArray());
+        Assert.Equal(["Program.cs"], files.Select(f => Path.GetFileName(f)!).ToArray());
     }
 
     [Fact]
-    public void Project_references_of_a_created_project_are_added()
+    public async Task Project_references_of_a_created_project_are_added()
     {
         var core = Write("Core/Core.csproj", "<Project Sdk=\"Microsoft.NET.Sdk\" />");
         Write("Core/Money.cs", "namespace Core; public class Money { }");
@@ -120,7 +120,7 @@ public sealed class SourceFallbackTests : IDisposable
         using var workspace = new AdhocWorkspace();
         var solution = SourceFallback.Complete(workspace.CurrentSolution, [core, app]);
 
-        var graph = GraphBuilder.BuildAsync("test.sln", solution.Projects.ToList(), readXaml: false).GetAwaiter().GetResult();
+        var graph = await GraphBuilder.BuildAsync("test.sln", solution.Projects.ToList(), readXaml: false);
         Assert.Contains(graph.Edges, e => e.Source == "App.Cart" && e.Target == "Core.Money");
     }
 
@@ -146,6 +146,6 @@ public sealed class SourceFallbackTests : IDisposable
 
         var paths = SolutionFiles.ProjectPaths(solution);
 
-        Assert.Equal(["A.csproj", "B.vbproj"], paths.Select(Path.GetFileName).ToArray());
+        Assert.Equal(["A.csproj", "B.vbproj"], paths.Select(f => Path.GetFileName(f)!).ToArray());
     }
 }

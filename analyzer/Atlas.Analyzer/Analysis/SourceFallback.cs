@@ -53,8 +53,10 @@ internal static class SourceFallback
 
         var created = new Dictionary<string, ProjectId>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in projectPaths)
+        foreach (var projectPath in projectPaths)
         {
+            var path = Path.GetFullPath(projectPath);
+
             if (loaded.TryGetValue(path, out var existing))
             {
                 foreach (var project in existing.Where(p => !p.Documents.Any()))
