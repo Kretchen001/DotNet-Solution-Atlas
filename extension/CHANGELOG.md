@@ -12,6 +12,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Unreleased
 
+- Added: types that a framework wires up by itself (WPF/XAML, ASP.NET Core, hosted services, test classes, `Main`) no longer appear under "Unused candidates"; the list shows how many were hidden and why. Own exceptions go under `ignoreUnused` in the rules file; a checkbox switches them off.
 - Added: namespaces can be switched off one by one ("Namespaces" list in the sidebar, with a box to narrow it).
 - Added: "all / none" in the heading of every filter list (relationships, types, languages, projects, namespaces).
 
@@ -69,6 +70,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Unveröffentlicht
 
+- Neu: Typen, die ein Framework selbst einbindet (WPF/XAML, ASP.NET Core, Hosted Services, Testklassen, `Main`), erscheinen nicht mehr unter „Unused candidates“; die Liste zeigt, wie viele ausgeblendet wurden und warum. Eigene Ausnahmen stehen unter `ignoreUnused` in der Regeldatei; ein Kontrollkästchen schaltet sie ab.
 - Neu: Namespaces lassen sich einzeln ausschalten (Liste „Namespaces“ in der Seitenleiste, mit einem Feld zum Eingrenzen).
 - Neu: „all / none“ in der Überschrift jeder Filterliste (Beziehungen, Typen, Sprachen, Projekte, Namespaces).
 
@@ -126,6 +128,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### 未发布
 
+- 新增：由框架自行接入的类型（WPF/XAML、ASP.NET Core、托管服务、测试类、`Main`）不再出现在“Unused candidates”中；列表会显示隐藏的数量及原因。自定义例外写在规则文件的 `ignoreUnused` 下，复选框可将其关闭。
 - 新增：可以逐个关闭命名空间（侧边栏中的“Namespaces”列表，带有用于缩小范围的输入框）。
 - 新增：每个过滤列表（关系、类型、语言、项目、命名空间）的标题中都有“all / none”。
 
@@ -183,6 +186,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Не выпущено
 
+- Добавлено: типы, которые подключает сам фреймворк (WPF/XAML, ASP.NET Core, размещённые службы, тестовые классы, `Main`), больше не попадают в «Unused candidates»; список показывает, сколько скрыто и почему. Собственные исключения задаются в `ignoreUnused` в файле правил; флажок их отключает.
 - Добавлено: пространства имён можно отключать по одному (список «Namespaces» в боковой панели с полем для сужения списка).
 - Добавлено: «all / none» в заголовке каждого списка фильтров (связи, типы, языки, проекты, пространства имён).
 
@@ -240,6 +244,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ### Sin publicar
 
+- Añadido: los tipos que el propio framework enlaza (WPF/XAML, ASP.NET Core, servicios hospedados, clases de prueba, `Main`) ya no aparecen en «Unused candidates»; la lista indica cuántos se ocultaron y por qué. Las excepciones propias van en `ignoreUnused` del archivo de reglas; una casilla las desactiva.
 - Añadido: los espacios de nombres se pueden desactivar uno a uno (lista «Namespaces» en el panel lateral, con un campo para reducirla).
 - Añadido: «all / none» en el título de cada lista de filtros (relaciones, tipos, idiomas, proyectos, espacios de nombres).
 

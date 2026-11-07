@@ -233,6 +233,45 @@ violation without any setup.
   sidebar shows whether it goes down over time. Together with "Compare with
   Git…" you can also see which violations a branch introduces.
 
+### Unused types
+
+"Unused candidates" in the sidebar lists types that nothing in the analyzed
+code refers to. They are only candidates: a type that a framework creates by
+itself has no reference in the code and looks unused. Typical cases are WPF
+windows and controls that are only wired up in XAML, controllers, hosted
+services, test classes and types that are created through reflection or
+dependency injection.
+
+The following are therefore left out by default, and the list says how many
+types were hidden and why:
+
+- types derived from WPF, Avalonia, WinUI, MAUI or Xamarin.Forms classes,
+  ASP.NET Core controllers, Razor pages, Blazor components, SignalR hubs,
+  hosted services and Windows services
+- types with test or MEF attributes (xUnit, NUnit, MSTest, `System.ComponentModel.Composition`)
+- types with a `Main` method
+
+Add your own exceptions under `ignoreUnused` in the rules file (patterns work
+like the layer patterns, `*` matches any characters). A file may contain only
+this part. `types` match the full name, `baseTypes` the base classes and
+interfaces (also those of the framework, as full names without type arguments),
+`attributes` the attribute classes on the type and its members.
+
+```json
+{
+  "ignoreUnused": {
+    "namespaces": ["Shop.Generated*"],
+    "types": ["Shop.Api.Startup"],
+    "baseTypes": ["Shop.Plugins.IPlugin"],
+    "attributes": ["Shop.Serialization.*"]
+  }
+}
+```
+
+The checkbox "Apply exceptions" switches all exceptions off. Types that are
+only used in XAML (a converter in a `StaticResource`, a view model in a
+`DataContext`) are not detected as used; XAML files are not analyzed.
+
 ### Supported languages
 
 C# and Visual Basic, in the same solution if needed. F# is not supported,
@@ -515,6 +554,47 @@ eigene Regeln mit, sodass du einen Verstoß ohne jede Einrichtung siehst.
   der Seitenleiste zeigt, ob sie mit der Zeit sinkt. Zusammen mit „Compare with
   Git…“ siehst du außerdem, welche Verstöße ein Branch neu einführt.
 
+### Ungenutzte Typen
+
+„Unused candidates“ in der Seitenleiste listet Typen auf, auf die im
+analysierten Code nichts verweist. Das sind nur Kandidaten: Ein Typ, den ein
+Framework selbst erzeugt, hat keinen Verweis im Code und sieht ungenutzt aus.
+Typische Fälle sind WPF-Fenster und -Steuerelemente, die nur in XAML eingebunden
+werden, Controller, Hosted Services, Testklassen und Typen, die per Reflection
+oder Dependency Injection erzeugt werden.
+
+Deshalb werden standardmäßig ausgelassen, und die Liste nennt, wie viele Typen
+ausgeblendet wurden und warum:
+
+- Typen, die von Klassen aus WPF, Avalonia, WinUI, MAUI oder Xamarin.Forms,
+  von ASP.NET-Core-Controllern, Razor Pages, Blazor-Komponenten, SignalR-Hubs,
+  Hosted Services und Windows-Diensten abgeleitet sind
+- Typen mit Test- oder MEF-Attributen (xUnit, NUnit, MSTest, `System.ComponentModel.Composition`)
+- Typen mit einer `Main`-Methode
+
+Eigene Ausnahmen trägst du unter `ignoreUnused` in der Regeldatei ein (die
+Muster funktionieren wie die Schichtmuster, `*` steht für beliebige Zeichen).
+Die Datei darf auch nur diesen Teil enthalten. `types` passen auf den
+vollständigen Namen, `baseTypes` auf Basisklassen und Interfaces (auch die des
+Frameworks, als vollständige Namen ohne Typargumente), `attributes` auf die
+Attributklassen am Typ und seinen Mitgliedern.
+
+```json
+{
+  "ignoreUnused": {
+    "namespaces": ["Shop.Generated*"],
+    "types": ["Shop.Api.Startup"],
+    "baseTypes": ["Shop.Plugins.IPlugin"],
+    "attributes": ["Shop.Serialization.*"]
+  }
+}
+```
+
+Das Kontrollkästchen „Apply exceptions“ schaltet alle Ausnahmen ab. Typen, die
+nur in XAML benutzt werden (ein Converter in einer `StaticResource`, ein
+ViewModel im `DataContext`), werden nicht als benutzt erkannt; XAML-Dateien
+werden nicht analysiert.
+
 ### Unterstützte Sprachen
 
 C# und Visual Basic, bei Bedarf in derselben Solution. F# wird nicht
@@ -735,6 +815,37 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   也算作关系。请为这部分代码设置一个没有规则的层，或者不把它纳入任何层。
 - 已有的违规不是放弃规则的理由：侧边栏中的数字会显示它是否随时间下降。
   结合“Compare with Git…”，还可以看出某个分支新引入了哪些违规。
+
+### 未使用的类型
+
+侧边栏的“Unused candidates”列出在已分析的代码中没有任何引用的类型。它们只是候选：
+由框架自行创建的类型在代码中没有引用，看起来像是未使用。典型情况包括只在 XAML 中
+接入的 WPF 窗口和控件、控制器、托管服务、测试类，以及通过反射或依赖注入创建的类型。
+
+因此默认会排除以下内容，列表会说明有多少类型被隐藏以及原因：
+
+- 派生自 WPF、Avalonia、WinUI、MAUI 或 Xamarin.Forms 的类、ASP.NET Core 控制器、
+  Razor Pages、Blazor 组件、SignalR Hub、托管服务和 Windows 服务的类型
+- 带有测试或 MEF 特性的类型（xUnit、NUnit、MSTest、`System.ComponentModel.Composition`）
+- 含有 `Main` 方法的类型
+
+自定义例外写在规则文件的 `ignoreUnused` 下（模式与层模式相同，`*` 匹配任意字符）。
+文件可以只包含这一部分。`types` 匹配完整名称，`baseTypes` 匹配基类和接口
+（也包括框架的，使用不带类型参数的完整名称），`attributes` 匹配类型及其成员上的特性类。
+
+```json
+{
+  "ignoreUnused": {
+    "namespaces": ["Shop.Generated*"],
+    "types": ["Shop.Api.Startup"],
+    "baseTypes": ["Shop.Plugins.IPlugin"],
+    "attributes": ["Shop.Serialization.*"]
+  }
+}
+```
+
+复选框“Apply exceptions”可关闭所有例外。只在 XAML 中使用的类型（`StaticResource` 中的
+转换器、`DataContext` 中的视图模型）不会被识别为已使用；XAML 文件不会被分析。
 
 ### 支持的语言
 
@@ -1008,6 +1119,44 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   боковой панели показывает, уменьшается ли оно со временем. Вместе с «Compare
   with Git…» можно увидеть и то, какие нарушения вносит ветка.
 
+### Неиспользуемые типы
+
+«Unused candidates» в боковой панели перечисляет типы, на которые в проанализированном
+коде ничто не ссылается. Это только кандидаты: тип, который создаёт сам фреймворк,
+не имеет ссылок в коде и выглядит неиспользуемым. Типичные случаи — окна и элементы
+управления WPF, подключаемые только в XAML, контроллеры, размещённые службы,
+тестовые классы и типы, создаваемые через рефлексию или внедрение зависимостей.
+
+Поэтому по умолчанию исключаются перечисленные ниже типы, а список показывает,
+сколько типов скрыто и почему:
+
+- типы, производные от классов WPF, Avalonia, WinUI, MAUI или Xamarin.Forms,
+  контроллеров ASP.NET Core, Razor Pages, компонентов Blazor, хабов SignalR,
+  размещённых служб и служб Windows
+- типы с атрибутами тестов или MEF (xUnit, NUnit, MSTest, `System.ComponentModel.Composition`)
+- типы с методом `Main`
+
+Собственные исключения добавляются в `ignoreUnused` в файле правил (шаблоны работают
+как шаблоны слоёв, `*` заменяет любые символы). Файл может содержать только эту
+часть. `types` сопоставляются с полным именем, `baseTypes` — с базовыми классами и
+интерфейсами (в том числе фреймворка, полные имена без аргументов типов),
+`attributes` — с классами атрибутов на типе и его членах.
+
+```json
+{
+  "ignoreUnused": {
+    "namespaces": ["Shop.Generated*"],
+    "types": ["Shop.Api.Startup"],
+    "baseTypes": ["Shop.Plugins.IPlugin"],
+    "attributes": ["Shop.Serialization.*"]
+  }
+}
+```
+
+Флажок «Apply exceptions» отключает все исключения. Типы, которые используются только
+в XAML (конвертер в `StaticResource`, модель представления в `DataContext`), не
+распознаются как используемые; файлы XAML не анализируются.
+
 ### Поддерживаемые языки
 
 C# и Visual Basic, при необходимости — в одном решении. F# не поддерживается,
@@ -1279,6 +1428,45 @@ Las *reglas* (`rules`) limitan lo que una capa puede usar:
 - Las infracciones existentes no son motivo para renunciar a una regla: el
   número del panel lateral muestra si baja con el tiempo. Junto con «Compare
   with Git…» también ves qué infracciones introduce una rama.
+
+### Tipos sin usar
+
+«Unused candidates» en la barra lateral enumera los tipos a los que nada en el código
+analizado hace referencia. Son solo candidatos: un tipo que crea el propio framework no
+tiene referencias en el código y parece sin usar. Casos típicos son las ventanas y
+controles de WPF que solo se enlazan en XAML, los controladores, los servicios
+hospedados, las clases de prueba y los tipos que se crean mediante reflexión o
+inyección de dependencias.
+
+Por eso, de forma predeterminada se omiten los siguientes, y la lista indica cuántos
+tipos se ocultaron y por qué:
+
+- tipos derivados de clases de WPF, Avalonia, WinUI, MAUI o Xamarin.Forms, de
+  controladores de ASP.NET Core, Razor Pages, componentes Blazor, hubs de SignalR,
+  servicios hospedados y servicios de Windows
+- tipos con atributos de pruebas o MEF (xUnit, NUnit, MSTest, `System.ComponentModel.Composition`)
+- tipos con un método `Main`
+
+Tus propias excepciones van en `ignoreUnused` del archivo de reglas (los patrones
+funcionan como los de las capas, `*` equivale a cualquier carácter). El archivo puede
+contener solo esta parte. `types` coincide con el nombre completo, `baseTypes` con las
+clases base e interfaces (también las del framework, como nombres completos sin
+argumentos de tipo) y `attributes` con las clases de atributo del tipo y sus miembros.
+
+```json
+{
+  "ignoreUnused": {
+    "namespaces": ["Shop.Generated*"],
+    "types": ["Shop.Api.Startup"],
+    "baseTypes": ["Shop.Plugins.IPlugin"],
+    "attributes": ["Shop.Serialization.*"]
+  }
+}
+```
+
+La casilla «Apply exceptions» desactiva todas las excepciones. Los tipos que solo se
+usan en XAML (un convertidor en un `StaticResource`, un modelo de vista en el
+`DataContext`) no se detectan como usados; los archivos XAML no se analizan.
 
 ### Lenguajes compatibles
 
