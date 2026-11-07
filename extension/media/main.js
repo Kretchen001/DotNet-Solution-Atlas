@@ -47,6 +47,8 @@
   // slow for large maps (it inserts a helper node for every rank a long edge spans).
   const FAST_LAYOUT_LIMIT = 80;
   const FAST_LAYOUT_PAIRS = 200;
+  // Above this many drawn relationships the arrowheads are left out (except around the selected type).
+  const ARROWHEAD_LIMIT = 2500;
   const MAX_EXTRA_HEIGHT = 30;
 
   const state = {
@@ -566,6 +568,7 @@
           style: { width: 2, opacity: 0.9, 'line-color': warnColor, 'target-arrow-color': warnColor, 'line-style': 'dashed', 'z-index': 9 },
         },
         { selector: 'node:selected', style: { 'border-width': 3, 'border-color': accent } },
+        { selector: 'edge.noarrow', style: { 'target-arrow-shape': 'none' } },
         { selector: '.faded', style: { opacity: 0.15 } },
         { selector: '.hidden, .collapsed', style: { display: 'none' } },
       ],
@@ -693,12 +696,30 @@
         node.toggleClass('hidden', !visible);
       });
 
-      cy.edges().forEach((edge) => {
-        edge.toggleClass(
-          'hidden',
-          !state.edgeKinds.has(edge.data('kind')) || edge.source().hasClass('hidden') || edge.target().hasClass('hidden'),
-        );
+      // Plain ids and flags instead of edge.source() per edge: with 10 000 relationships that is the difference
+      // between a few and several hundred milliseconds.
+      const hiddenTypes = new Set();
+      typeNodes().forEach((node) => {
+        if (node.hasClass('hidden')) hiddenTypes.add(node.id());
       });
+
+      const allEdges = cy.edges().toArray();
+      let drawnEdges = 0;
+      const hiddenEdge = allEdges.map((edge) => {
+        const hide = !state.edgeKinds.has(edge.data('kind')) || hiddenTypes.has(edge.data('source')) || hiddenTypes.has(edge.data('target'));
+        if (!hide) drawnEdges++;
+        return hide;
+      });
+
+      // Arrowheads are the most expensive part of drawing a dense map. Without them the relationships of the
+      // selected type still show their direction.
+      const dense = drawnEdges > ARROWHEAD_LIMIT;
+      allEdges.forEach((edge, i) => {
+        if (edge.hasClass('hidden') !== hiddenEdge[i]) edge.toggleClass('hidden', hiddenEdge[i]);
+        const bare = dense && !hiddenEdge[i];
+        if (edge.hasClass('noarrow') !== bare) edge.toggleClass('noarrow', bare);
+      });
+      if (dense && neighbourhood) neighbourhood.edges().removeClass('noarrow');
 
       applyCollapse();
 
@@ -787,7 +808,7 @@
     cy.batch(() => {
       for (const [id, position] of positions) byId.get(id).position({ x: position.x, y: position.y });
     });
-    cy.fit(shown(), 30);
+    cy.fit(shown().nodes(), 30); // the nodes only: the bounding box of 10 000 edges takes hundreds of milliseconds
   }
 
   /**
@@ -820,7 +841,7 @@
         }
       }
     });
-    cy.fit(shown(), 30);
+    cy.fit(shown().nodes(), 30);
   }
 
   function openNode(node) {
@@ -1084,13 +1105,16 @@
     const box = $('groups');
     box.replaceChildren();
 
-    const components = shown().not('.namespace, .ghost').components()
-      .map((component) => component.nodes())
-      .sort((a, b) => b.length - a.length);
-    const groups = components.filter((nodes) => nodes.length > 1);
-    const isolated = cy.collection(components.filter((nodes) => nodes.length === 1).map((nodes) => nodes[0]));
-
+    // Plain ids and a union-find: cy.components() on 10 000 relationships takes a quarter of a second.
+    const drawn = shown();
+    const components = L.connectedComponents(
+      drawn.nodes().not('.namespace, .ghost').map((n) => n.id()),
+      drawn.edges().not('.ghost').map((e) => ({ source: e.data('source'), target: e.data('target') })),
+    );
     if (components.length === 0) return;
+
+    const groups = components.filter((ids) => ids.length > 1);
+    const isolated = components.filter((ids) => ids.length === 1).flat();
 
     box.append(el('p', {
       className: 'hint',
@@ -1098,13 +1122,18 @@
     }));
 
     const list = el('ul', { className: 'links' });
-    groups.forEach((nodes, index) => list.append(groupItem(`Group ${index + 1}`, nodes)));
+    groups.forEach((ids, index) => list.append(groupItem(`Group ${index + 1}`, ids)));
     if (isolated.length > 0) list.append(groupItem('Isolated types', isolated));
     box.append(list);
   }
 
-  function groupItem(label, nodes) {
-    return el('li', {}, link(label, () => focusGroup(label, nodes)), el('span', { className: 'edge', textContent: `${nodes.length} types` }));
+  /** The collection is only built when a group is opened. */
+  function groupItem(label, ids) {
+    const open = () => {
+      const wanted = new Set(ids);
+      focusGroup(label, cy.nodes().filter((n) => wanted.has(n.id())));
+    };
+    return el('li', {}, link(label, open), el('span', { className: 'edge', textContent: `${ids.length} types` }));
   }
 
   /** Fades everything except the group, zooms to it and lists its members. */
