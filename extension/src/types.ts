@@ -44,6 +44,10 @@ export interface AtlasNode {
   language?: 'csharp' | 'visualbasic';
   /** The members with their references; missing in data of older analyzers. */
   memberDetails?: AtlasMember[];
+  /** Every base class and interface, also of the framework, as `System.Windows.Window`. */
+  baseTypes?: string[];
+  /** Attribute classes on the type and on its members, as `Xunit.FactAttribute`. */
+  attributes?: string[];
 }
 
 /** Points from the dependent type to the type it depends on. */

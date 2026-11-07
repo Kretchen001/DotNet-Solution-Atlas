@@ -78,6 +78,15 @@ public sealed record AtlasMember(string Name, string Kind, string? File, int? Li
 /// <param name="IsStatic">True for static classes and Visual Basic modules.</param>
 /// <param name="Language">Language of the declaring project: <c>csharp</c> or <c>visualbasic</c>.</param>
 /// <param name="MemberDetails">The members with what each of them refers to; null for a type without members to show.</param>
+/// <param name="BaseTypes">
+/// Every base class and every interface of the type, also those of the framework, as namespace-qualified names
+/// without type arguments (<c>System.Windows.Window</c>). Lets the map tell types that a framework instantiates
+/// (windows, converters, controllers) from types that are really unused. Null if there are none.
+/// </param>
+/// <param name="Attributes">
+/// The attribute classes on the type and on its members, as namespace-qualified names
+/// (<c>Xunit.FactAttribute</c>). Null if there are none.
+/// </param>
 public sealed record AtlasNode(
     string Id,
     string Name,
@@ -91,7 +100,9 @@ public sealed record AtlasNode(
     int Lines,
     bool IsStatic,
     string Language,
-    IReadOnlyList<AtlasMember>? MemberDetails = null);
+    IReadOnlyList<AtlasMember>? MemberDetails = null,
+    IReadOnlyList<string>? BaseTypes = null,
+    IReadOnlyList<string>? Attributes = null);
 
 /// <param name="Source">Id of the dependent type.</param>
 /// <param name="Target">Id of the type it depends on.</param>

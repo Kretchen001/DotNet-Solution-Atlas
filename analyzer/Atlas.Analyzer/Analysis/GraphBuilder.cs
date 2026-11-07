@@ -175,7 +175,56 @@ internal static class GraphBuilder
             Methods: methods,
             Lines: lines,
             IsStatic: type.IsStatic || type.TypeKind == TypeKind.Module,
-            Language: LanguageId(compilation));
+            Language: LanguageId(compilation),
+            BaseTypes: OrNull(InheritedNames(type)),
+            Attributes: OrNull(AttributeNames(type)));
+    }
+
+    private static IReadOnlyList<string>? OrNull(List<string> names) => names.Count == 0 ? null : names;
+
+    /// <summary>Namespace-qualified names without type arguments: <c>System.Collections.Generic.IEnumerable</c>.</summary>
+    private static readonly SymbolDisplayFormat QualifiedName = new(
+        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        genericsOptions: SymbolDisplayGenericsOptions.None);
+
+    /// <summary>All base classes (except object) and all interfaces, direct and inherited, sorted.</summary>
+    private static List<string> InheritedNames(INamedTypeSymbol type)
+    {
+        var names = new HashSet<string>(StringComparer.Ordinal);
+
+        for (var baseType = type.BaseType; baseType is not null; baseType = baseType.BaseType)
+        {
+            if (baseType.SpecialType is not (SpecialType.System_Object or SpecialType.System_ValueType or SpecialType.System_Enum))
+            {
+                names.Add(baseType.OriginalDefinition.ToDisplayString(QualifiedName));
+            }
+        }
+
+        foreach (var implemented in type.AllInterfaces)
+        {
+            names.Add(implemented.OriginalDefinition.ToDisplayString(QualifiedName));
+        }
+
+        return [.. names.Order(StringComparer.Ordinal)];
+    }
+
+    /// <summary>The attribute classes on the type and on its members (a test class has them on its methods).</summary>
+    private static List<string> AttributeNames(INamedTypeSymbol type)
+    {
+        var names = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var symbol in type.GetMembers().Prepend<ISymbol>(type))
+        {
+            foreach (var attribute in symbol.GetAttributes())
+            {
+                if (attribute.AttributeClass is { } attributeClass)
+                {
+                    names.Add(attributeClass.ToDisplayString(QualifiedName));
+                }
+            }
+        }
+
+        return [.. names.Order(StringComparer.Ordinal)];
     }
 
     /// <summary>The language of a compilation as written in the JSON.</summary>
