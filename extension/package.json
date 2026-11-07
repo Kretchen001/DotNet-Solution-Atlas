@@ -23,6 +23,23 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dotnetAtlas",
+          "title": "DotNet Solution Atlas",
+          "icon": "$(type-hierarchy)"
+        }
+      ]
+    },
+    "views": {
+      "dotnetAtlas": [
+        {
+          "id": "dotnetAtlas.actions",
+          "name": "Map"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "dotnetAtlas.openMap",

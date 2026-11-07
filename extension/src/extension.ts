@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { ACTIONS_VIEW_ID, ActionsViewProvider } from './actionsView';
 import { AnalyzerError, resolveAnalyzerDll, runAnalyzer } from './analyzerRunner';
 import { AtlasPanel } from './atlasPanel';
 import { pickTarget } from './targetPicker';
@@ -13,6 +14,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     output,
+    vscode.window.registerTreeDataProvider(ACTIONS_VIEW_ID, new ActionsViewProvider()),
     vscode.commands.registerCommand('dotnetAtlas.openMap', () => openMap(context)),
     vscode.commands.registerCommand('dotnetAtlas.openSample', () => openSample(context)),
   );
