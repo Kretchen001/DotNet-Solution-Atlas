@@ -315,6 +315,177 @@
     return { groups, edges: [...merged.values()], representative };
   }
 
+  // ----------------------------------------------------------------- layout
+
+  /**
+   * A fast layered layout for large maps. dagre gives tidy results but inserts a helper node for every
+   * rank a long edge spans, which makes it far too slow for hundreds of types. Here a long edge is simply
+   * drawn across the layers.
+   *
+   * Rank: a type is drawn above the types it depends on. Cycles are treated as one unit so that all their
+   * members share a layer; types without any relationship are put into a layer of their own at the bottom.
+   * Order within a layer: types of one group (for example a namespace) stay together, and groups and types
+   * are sorted by the average position of their neighbours, a few sweeps in a row. Layers that would be
+   * wider than `maxRowWidth` continue in further rows.
+   *
+   * @param {{id: string}[]} nodes
+   * @param {{source: string, target: string}[]} edges
+   * @param {{size?: (node: object) => {w: number, h: number}, groupOf?: (node: object) => string,
+   *          gapX?: number, gapY?: number, maxRowWidth?: number, sweeps?: number}} [options]
+   * @returns {Map<string, {x: number, y: number, rank: number}>} centre of every node
+   */
+  function layeredLayout(nodes, edges, options) {
+    const opts = options || {};
+    const gapX = opts.gapX === undefined ? 24 : opts.gapX;
+    const gapY = opts.gapY === undefined ? 60 : opts.gapY;
+    const maxRowWidth = opts.maxRowWidth || 2400;
+    const sweeps = opts.sweeps === undefined ? 4 : opts.sweeps;
+    const sizeOf = opts.size || (() => ({ w: 120, h: 30 }));
+    const groupOf = opts.groupOf || (() => '');
+
+    const count = nodes.length;
+    const index = new Map(nodes.map((n, i) => [n.id, i]));
+    const out = nodes.map(() => new Set());
+    const neighbours = nodes.map(() => new Set());
+    for (const edge of edges) {
+      const a = index.get(edge.source);
+      const b = index.get(edge.target);
+      if (a === undefined || b === undefined || a === b) continue;
+      out[a].add(b);
+      neighbours[a].add(b);
+      neighbours[b].add(a);
+    }
+
+    // Cycles collapse into one unit.
+    const unit = new Array(count).fill(-1);
+    let units = 0;
+    for (const members of stronglyConnected(nodes.map((n) => n.id), edges)) {
+      for (const id of members) unit[index.get(id)] = units;
+      units++;
+    }
+    for (let i = 0; i < count; i++) if (unit[i] === -1) unit[i] = units++;
+
+    const unitOut = Array.from({ length: units }, () => new Set());
+    const unitIn = Array.from({ length: units }, () => new Set());
+    for (let a = 0; a < count; a++) {
+      for (const b of out[a]) {
+        if (unit[a] !== unit[b]) {
+          unitOut[unit[a]].add(unit[b]);
+          unitIn[unit[b]].add(unit[a]);
+        }
+      }
+    }
+
+    // Longest path from the types nothing depends on (Kahn's algorithm).
+    const rank = new Array(units).fill(0);
+    const waiting = unitIn.map((set) => set.size);
+    const queue = [];
+    for (let u = 0; u < units; u++) if (waiting[u] === 0) queue.push(u);
+    for (let head = 0; head < queue.length; head++) {
+      const u = queue[head];
+      for (const v of unitOut[u]) {
+        rank[v] = Math.max(rank[v], rank[u] + 1);
+        if (--waiting[v] === 0) queue.push(v);
+      }
+    }
+
+    // A type that nothing uses sits right above what it uses instead of at the very top.
+    for (let u = 0; u < units; u++) {
+      if (unitIn[u].size === 0 && unitOut[u].size > 0) {
+        let lowest = Infinity;
+        for (const v of unitOut[u]) lowest = Math.min(lowest, rank[v]);
+        rank[u] = lowest - 1;
+      }
+    }
+
+    // Types without any relationship form the last layer.
+    let maxRank = 0;
+    for (let i = 0; i < count; i++) {
+      if (neighbours[i].size > 0) maxRank = Math.max(maxRank, rank[unit[i]]);
+    }
+    const layerOf = nodes.map((_, i) => (neighbours[i].size === 0 ? maxRank + 1 : rank[unit[i]]));
+
+    const layers = [];
+    nodes.forEach((node, i) => {
+      (layers[layerOf[i]] = layers[layerOf[i]] || []).push(i);
+    });
+    for (let l = 0; l < layers.length; l++) if (!layers[l]) layers[l] = [];
+
+    const group = nodes.map((node) => String(groupOf(node)));
+    const byName = (a, b) => (nodes[a].id < nodes[b].id ? -1 : nodes[a].id > nodes[b].id ? 1 : 0);
+    for (const layer of layers) {
+      layer.sort((a, b) => (group[a] < group[b] ? -1 : group[a] > group[b] ? 1 : byName(a, b)));
+    }
+
+    // Position of every type within its layer, 0..1.
+    const place = new Array(count).fill(0.5);
+    const refresh = (layer) => layer.forEach((n, k) => { place[n] = (k + 0.5) / layer.length; });
+    layers.forEach(refresh);
+
+    const wanted = new Array(count).fill(0.5);
+    for (let sweep = 0; sweep < sweeps; sweep++) {
+      const order = sweep % 2 === 0 ? layers.map((_, l) => l) : layers.map((_, l) => layers.length - 1 - l);
+      for (const l of order) {
+        const layer = layers[l];
+        if (layer.length < 2 || (l === layers.length - 1 && layer.every((n) => neighbours[n].size === 0))) continue;
+
+        for (const n of layer) {
+          let sum = 0;
+          for (const m of neighbours[n]) sum += place[m];
+          wanted[n] = neighbours[n].size === 0 ? place[n] : sum / neighbours[n].size;
+        }
+
+        // Groups stay together; they are ordered by the mean wish of their members.
+        const groupWish = new Map();
+        for (const n of layer) {
+          const entry = groupWish.get(group[n]) || { sum: 0, count: 0 };
+          entry.sum += wanted[n];
+          entry.count++;
+          groupWish.set(group[n], entry);
+        }
+        const wish = (g) => groupWish.get(g).sum / groupWish.get(g).count;
+        layer.sort((a, b) => {
+          if (group[a] !== group[b]) return wish(group[a]) - wish(group[b]) || (group[a] < group[b] ? -1 : 1);
+          return wanted[a] - wanted[b] || byName(a, b);
+        });
+        refresh(layer);
+      }
+    }
+
+    // Coordinates: layers from top to bottom, wide layers wrapped into rows, every row centred on x = 0.
+    const result = new Map();
+    let top = 0;
+    layers.forEach((layer, l) => {
+      const rows = [];
+      let row = [];
+      let width = 0;
+      for (const n of layer) {
+        const { w } = sizeOf(nodes[n]);
+        if (row.length > 0 && width + gapX + w > maxRowWidth) {
+          rows.push(row);
+          row = [];
+          width = 0;
+        }
+        width += (row.length > 0 ? gapX : 0) + w;
+        row.push(n);
+      }
+      if (row.length > 0) rows.push(row);
+
+      for (const members of rows) {
+        const sizes = members.map((n) => sizeOf(nodes[n]));
+        const total = sizes.reduce((sum, s) => sum + s.w, 0) + gapX * (members.length - 1);
+        const height = Math.max(...sizes.map((s) => s.h));
+        let x = -total / 2;
+        members.forEach((n, k) => {
+          result.set(nodes[n].id, { x: x + sizes[k].w / 2, y: top + height / 2, rank: l });
+          x += sizes[k].w + gapX;
+        });
+        top += height + gapY;
+      }
+    });
+    return result;
+  }
+
   // ------------------------------------------------------------- comparison
 
   const edgeKey = (edge) => `${edge.source}\u0000${edge.target}\u0000${edge.kind}`;
@@ -548,6 +719,7 @@
     assignLayers,
     findViolations,
     collapse,
+    layeredLayout,
     diffGraphs,
     edgeKey,
     toMermaid,

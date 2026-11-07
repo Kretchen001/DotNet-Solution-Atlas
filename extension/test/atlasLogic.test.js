@@ -263,3 +263,72 @@ test('diffGraphs ignores a changed weight and reports nothing for equal graphs',
   const diff = logic.diffGraphs(graph, same);
   assert.deepEqual([diff.addedNodes, diff.removedNodes, diff.addedEdges, diff.removedEdges], [[], [], [], []]);
 });
+
+const fixed = { size: () => ({ w: 100, h: 30 }) };
+
+test('layeredLayout puts a type above the types it depends on', () => {
+  const nodes = [node('A'), node('B'), node('C')];
+  const pos = logic.layeredLayout(nodes, [edge('A', 'B'), edge('B', 'C'), edge('A', 'C')], fixed);
+  assert.ok(pos.get('A').y < pos.get('B').y);
+  assert.ok(pos.get('B').y < pos.get('C').y);
+});
+
+test('layeredLayout keeps the members of a cycle in one layer', () => {
+  const nodes = [node('A'), node('B'), node('C'), node('D')];
+  const pos = logic.layeredLayout(nodes, [edge('A', 'B'), edge('B', 'A'), edge('B', 'C'), edge('C', 'D')], fixed);
+  assert.equal(pos.get('A').y, pos.get('B').y);
+  assert.ok(pos.get('B').y < pos.get('C').y);
+});
+
+test('layeredLayout puts unrelated types into the last layer and a lone source right above its target', () => {
+  const nodes = [node('Top'), node('Mid'), node('Low'), node('Source'), node('Alone')];
+  const pos = logic.layeredLayout(nodes, [edge('Top', 'Mid'), edge('Mid', 'Low'), edge('Source', 'Low')], fixed);
+  assert.ok(pos.get('Alone').y > pos.get('Low').y);
+  assert.ok(pos.get('Source').y < pos.get('Low').y);
+  assert.equal(pos.get('Source').rank, pos.get('Low').rank - 1);
+});
+
+test('layeredLayout never lets two types of a layer overlap and wraps wide layers', () => {
+  const nodes = Array.from({ length: 40 }, (_, i) => node('N' + i));
+  const edges = nodes.slice(1).map((n) => edge('N0', n.id));
+  const pos = logic.layeredLayout(nodes, edges, { ...fixed, maxRowWidth: 600 });
+  const boxes = [...pos.values()];
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      const apart = Math.abs(boxes[i].x - boxes[j].x) >= 100 || Math.abs(boxes[i].y - boxes[j].y) >= 30;
+      assert.ok(apart, `${i} and ${j} overlap`);
+    }
+  }
+  const widest = Math.max(...boxes.map((b) => Math.abs(b.x))) * 2 + 100;
+  assert.ok(widest <= 600 + 1, `rows are at most 600 wide, got ${widest}`);
+});
+
+test('layeredLayout keeps the types of a group next to each other', () => {
+  const nodes = ['a1', 'b1', 'a2', 'b2', 'a3'].map((id) => node(id, id[0]));
+  const edges = nodes.map((n) => edge('root', n.id));
+  const all = [node('root', 'r'), ...nodes];
+  const pos = logic.layeredLayout(all, edges, { ...fixed, groupOf: (n) => n.namespace });
+  const order = nodes.map((n) => n.id).sort((x, y) => pos.get(x).x - pos.get(y).x).map((id) => id[0]).join('');
+  assert.ok(order === 'aaabb' || order === 'bbaaa', order);
+});
+
+test('layeredLayout is deterministic and handles an empty graph', () => {
+  const nodes = Array.from({ length: 30 }, (_, i) => node('N' + i));
+  const edges = nodes.slice(1).map((n, i) => edge(nodes[(i * 7) % 30].id, n.id));
+  const a = [...logic.layeredLayout(nodes, edges, fixed)];
+  const b = [...logic.layeredLayout(nodes, edges, fixed)];
+  assert.deepEqual(a, b);
+  assert.equal(logic.layeredLayout([], [], fixed).size, 0);
+});
+
+test('layeredLayout copes with a thousand types and five thousand edges quickly', () => {
+  const nodes = Array.from({ length: 1000 }, (_, i) => node('N' + i, 'ns' + (i % 40)));
+  let seed = 7;
+  const next = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  const edges = [];
+  for (let k = 0; k < 5000; k++) edges.push(edge('N' + Math.floor(next() * 1000), 'N' + Math.floor(next() * 1000)));
+  const started = Date.now();
+  const pos = logic.layeredLayout(nodes, edges, { ...fixed, groupOf: (n) => n.namespace });
+  assert.equal(pos.size, 1000);
+  assert.ok(Date.now() - started < 3000, `took ${Date.now() - started} ms`);
+});
