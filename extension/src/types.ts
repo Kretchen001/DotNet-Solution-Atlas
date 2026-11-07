@@ -4,13 +4,13 @@
  */
 export type NodeKind = 'class' | 'interface' | 'struct' | 'record' | 'enum' | 'delegate';
 
-export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls' | 'accesses';
+export type EdgeKind = 'inherits' | 'implements' | 'uses' | 'calls' | 'accesses' | 'registers' | 'events' | 'annotated';
 
 /** What a member calls, accesses or uses. `member` is empty for a plain use of a type. */
 export interface AtlasMemberRef {
   target: string;
   member?: string;
-  kind: 'calls' | 'accesses' | 'uses';
+  kind: 'calls' | 'accesses' | 'uses' | 'events' | 'annotated';
 }
 
 /** A member of a type with the places in the solution it refers to. */

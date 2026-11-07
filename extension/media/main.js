@@ -23,6 +23,9 @@
     { id: 'uses', label: 'Uses types', color: ['--vscode-descriptionForeground', '#8a8a8a'], line: 'solid' },
     { id: 'calls', label: 'Method calls', color: ['--vscode-charts-orange', '#d18616'], line: 'dotted' },
     { id: 'accesses', label: 'Property and field access', color: ['--vscode-charts-purple', '#b180d7'], line: 'dotted' },
+    { id: 'registers', label: 'DI registrations', color: ['--vscode-charts-green', '#3fa66b'], line: 'dashed' },
+    { id: 'events', label: 'Events', color: ['--vscode-charts-red', '#d9534f'], line: 'dotted' },
+    { id: 'annotated', label: 'Attributes', color: ['--vscode-charts-yellow', '#c9a227'], line: 'dashed' },
   ];
 
   const LANGUAGES = [
@@ -242,6 +245,10 @@
     const edgeColor = css('--vscode-descriptionForeground', '#8a8a8a');
     const callColor = css('--vscode-charts-orange', '#d18616');
     const accessColor = css('--vscode-charts-purple', '#b180d7');
+    const kindColor = (id) => {
+      const kind = EDGE_KINDS.find((k) => k.id === id);
+      return css(kind.color[0], kind.color[1]);
+    };
     const warnColor = css('--vscode-charts-red', '#f14c4c');
     const panel = css('--vscode-editorWidget-background', '#252526');
 
@@ -318,6 +325,14 @@
           selector: 'edge[kind = "accesses"]',
           style: { 'line-style': 'dotted', 'line-color': accessColor, 'target-arrow-color': accessColor },
         },
+        ...['registers', 'events', 'annotated'].map((id) => ({
+          selector: `edge[kind = "${id}"]`,
+          style: {
+            'line-style': EDGE_KINDS.find((k) => k.id === id).line,
+            'line-color': kindColor(id),
+            'target-arrow-color': kindColor(id),
+          },
+        })),
         {
           selector: 'node.namespace',
           style: {
@@ -894,7 +909,7 @@
     box.append(list);
   }
 
-  const REF_VERBS = { calls: 'calls', accesses: 'accesses', uses: 'uses' };
+  const REF_VERBS = { calls: 'calls', accesses: 'accesses', uses: 'uses', registers: 'registers', events: 'uses event of', annotated: 'is marked with' };
 
   /** The members of a type with what each of them calls, accesses or uses. */
   function memberList(node, members) {
