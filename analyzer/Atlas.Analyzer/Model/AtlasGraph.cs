@@ -22,7 +22,7 @@ public enum EdgeKind
 
     /// <summary>
     /// The source references the target in a signature (field, property, event, method) or names it in
-    /// code (<c>new</c>, <c>typeof</c>, casts, locals, attributes).
+    /// code (<c>new</c>, <c>typeof</c>, casts, locals). Attributes, registrations and events have their own kinds.
     /// </summary>
     Uses,
 
@@ -33,7 +33,7 @@ public enum EdgeKind
     Calls,
 
     /// <summary>
-    /// The source reads or writes a property, indexer, field or event of the target.
+    /// The source reads or writes a property, indexer or field of the target.
     /// Enum members count as well.
     /// </summary>
     Accesses,
