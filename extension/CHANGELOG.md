@@ -10,6 +10,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### 1.0.0 – 2026-11-07
+
+- First stable version. It contains everything from the 0.x versions: the map with relationships, namespace frames, collapsing, analysis, architecture rules, members, export and the comparison with Git.
+- Added: the architecture rules are explained in detail in the README (getting started, the file format, patterns, what counts as a violation, tips), in five languages.
+
 ### 0.6.0 – 2026-11-07
 
 - Added: compare the open map with a Git commit, branch or tag ("Compare with Git…" in the toolbar, also a command). New types and dependencies are marked in green, removed ones are drawn again as red dashed ghosts, and the sidebar lists the changes. The revision is analyzed in a temporary checkout; your working directory is not touched.
@@ -54,6 +59,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### 1.0.0 – 2026-11-07
+
+- Erste stabile Version. Sie enthält alles aus den 0.x-Versionen: die Karte mit Beziehungen, Namespace-Rahmen, Zusammenfassen, Analyse, Architekturregeln, Member, Export und den Vergleich mit Git.
+- Neu: Die Architekturregeln sind im README ausführlich erklärt (erste Schritte, Dateiformat, Muster, was als Verstoß zählt, Tipps), in fünf Sprachen.
 
 ### 0.6.0 – 2026-11-07
 
@@ -100,6 +110,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 1.0.0 – 2026-11-07
+
+- 首个稳定版本。它包含 0.x 版本的全部功能：带关系的地图、命名空间框、折叠、分析、架构规则、成员、导出以及与 Git 的比较。
+- 新增：README 中详细说明了架构规则（快速开始、文件格式、模式、什么算违规、提示），提供五种语言。
+
 ### 0.6.0 – 2026-11-07
 
 - 新增：将已打开的地图与 Git 提交、分支或标签比较（工具栏中的“Compare with Git…”，也可作为命令使用）。新增的类型和依赖以绿色标出，已删除的以红色虚线“幽灵”重新绘制，侧边栏列出所有变更。该版本在临时检出目录中分析，不会改动你的工作目录。
@@ -145,6 +160,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### 1.0.0 – 2026-11-07
+
+- Первая стабильная версия. Она включает всё из версий 0.x: карту со связями, рамки пространств имён, свёртку, анализ, архитектурные правила, члены, экспорт и сравнение с Git.
+- Добавлено: архитектурные правила подробно описаны в README (начало работы, формат файла, шаблоны, что считается нарушением, советы) на пяти языках.
+
 ### 0.6.0 – 2026-11-07
 
 - Добавлено: сравнение открытой карты с коммитом, веткой или тегом Git («Compare with Git…» на панели инструментов, также как команда). Новые типы и зависимости отмечаются зелёным, удалённые рисуются снова как красные пунктирные «призраки», а боковая панель перечисляет изменения. Состояние анализируется во временной копии; рабочий каталог не затрагивается.
@@ -189,6 +209,11 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### 1.0.0 – 2026-11-07
+
+- Primera versión estable. Incluye todo lo de las versiones 0.x: el mapa con relaciones, marcos de espacios de nombres, contracción, análisis, reglas de arquitectura, miembros, exportación y la comparación con Git.
+- Añadido: las reglas de arquitectura se explican en detalle en el README (primeros pasos, formato del archivo, patrones, qué cuenta como infracción, consejos), en cinco idiomas.
 
 ### 0.6.0 – 2026-11-07
 
