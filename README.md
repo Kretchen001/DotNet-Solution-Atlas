@@ -50,6 +50,7 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 - Layered layout, so that interfaces and implementations are easy to tell apart
 - Filters by type kind, project and language; search by name
 - Focus mode: only the selected type and its neighbours
+- Group by namespace: dashed frames around the types of each namespace (switchable)
 - Details pane with metrics, and jump to the source file
 - Groups: connected groups of types and types without any relationship, to
   find parts of the code that are cut off from the rest
@@ -185,6 +186,7 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
   unterscheiden lassen
 - Filter nach Typart, Projekt und Sprache; Suche nach Namen
 - Fokusmodus: nur der gewählte Typ und seine Nachbarn
+- Nach Namespace gruppieren: gestrichelte Rahmen um die Typen jedes Namespace (schaltbar)
 - Detailbereich mit Kennzahlen und Sprung zur Quelldatei
 - Gruppen: zusammenhängende Gruppen von Typen und Typen ohne jede Beziehung, um
   vom Rest abgeschnittene Teile des Codes zu finden
@@ -320,6 +322,7 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 - 分层布局，方便区分接口和实现
 - 按类型种类、项目和语言过滤；按名称搜索
 - 聚焦模式：只显示选中的类型及其相邻类型
+- 按命名空间分组：在每个命名空间的类型周围绘制虚线框（可开关）
 - 详情面板显示统计信息，并可跳转到源文件
 - 分组：显示相互连通的类型组，以及没有任何关系的类型，用于找出与其余代码隔离的部分
 
@@ -445,6 +448,7 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 - Многоуровневая раскладка, чтобы интерфейсы и реализации легко различались
 - Фильтры по виду типа, проекту и языку; поиск по имени
 - Режим фокуса: только выбранный тип и его соседи
+- Группировка по пространствам имён: пунктирные рамки вокруг типов каждого пространства (переключается)
 - Панель сведений с метриками и переход к исходному файлу
 - Группы: связные группы типов и типы без каких-либо связей — для поиска частей
   кода, отрезанных от остального
@@ -585,6 +589,7 @@ organizada en capas esta solución?».
 - Diseño por capas, para distinguir fácilmente interfaces e implementaciones
 - Filtros por tipo, proyecto y lenguaje; búsqueda por nombre
 - Modo de enfoque: solo el tipo seleccionado y sus vecinos
+- Agrupar por espacio de nombres: marcos discontinuos alrededor de los tipos de cada espacio (activable)
 - Panel de detalles con métricas y salto al archivo de origen
 - Grupos: grupos conectados de tipos y tipos sin ninguna relación, para
   encontrar partes del código aisladas del resto

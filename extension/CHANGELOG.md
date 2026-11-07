@@ -10,6 +10,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### Unreleased
+
+- Added: "Group by namespace" switch in the map toolbar; draws a frame around the types of each namespace.
+
 ### 0.3.0 – 2026-11-07
 
 - Added: project icon (a folded map with a coastline) for the extension and, in a single-colour version, for the Activity Bar.
@@ -34,6 +38,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### Unveröffentlicht
+
+- Neu: Schalter „Group by namespace“ in der Werkzeugleiste der Karte; zeichnet einen Rahmen um die Typen jedes Namespace.
 
 ### 0.3.0 – 2026-11-07
 
@@ -60,6 +68,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 未发布
+
+- 新增：地图工具栏中的“Group by namespace”开关；在每个命名空间的类型周围绘制边框。
+
 ### 0.3.0 – 2026-11-07
 
 - 新增：项目图标（带海岸线的折叠地图），用于扩展本身，并提供单色版本用于活动栏。
@@ -85,6 +97,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### Не выпущено
+
+- Добавлено: переключатель «Group by namespace» на панели инструментов карты; рисует рамку вокруг типов каждого пространства имён.
+
 ### 0.3.0 – 2026-11-07
 
 - Добавлено: значок проекта (сложенная карта с береговой линией) для расширения и, в одноцветном варианте, для панели действий.
@@ -109,6 +125,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### Sin publicar
+
+- Añadido: interruptor «Group by namespace» en la barra de herramientas del mapa; dibuja un marco alrededor de los tipos de cada espacio de nombres.
 
 ### 0.3.0 – 2026-11-07
 
