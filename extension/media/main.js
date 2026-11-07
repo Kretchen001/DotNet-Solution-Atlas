@@ -26,6 +26,7 @@
     { id: 'registers', label: 'DI registrations', color: ['--vscode-charts-green', '#3fa66b'], line: 'dashed' },
     { id: 'events', label: 'Events', color: ['--vscode-charts-red', '#d9534f'], line: 'dotted' },
     { id: 'annotated', label: 'Attributes', color: ['--vscode-charts-yellow', '#c9a227'], line: 'dashed' },
+    { id: 'xaml', label: 'XAML references', color: ['--vscode-charts-blue', '#3794ff'], line: 'dashed' },
   ];
 
   const LANGUAGES = [
@@ -62,6 +63,7 @@
     sizeBy: 'uniform', // uniform | coupling | fanIn | lines
     markCycles: true,
     applyUnusedIgnore: true,
+    settings: {},
     showViolations: true,
     hubMetric: 'coupling',
     rulesInfo: null, // { file?, error? } from the extension
@@ -153,6 +155,9 @@
 
   function load(graph, settings, rules) {
     currentGraph = graph;
+    state.settings = settings || {};
+    $('changedBar').hidden = true;
+    $('reloadMap').disabled = false;
     state.baseline = null;
     $('compare').hidden = false;
     $('clearCompare').hidden = true;
@@ -517,7 +522,7 @@
           selector: 'edge[kind = "accesses"]',
           style: { 'line-style': 'dotted', 'line-color': accessColor, 'target-arrow-color': accessColor },
         },
-        ...['registers', 'events', 'annotated'].map((id) => ({
+        ...['registers', 'events', 'annotated', 'xaml'].map((id) => ({
           selector: `edge[kind = "${id}"]`,
           style: {
             'line-style': EDGE_KINDS.find((k) => k.id === id).line,
@@ -850,7 +855,9 @@
       unused: L.findUnused(
         nodes,
         edges,
-        state.applyUnusedIgnore ? L.mergeIgnore(state.rules && state.rules.config.ignoreUnused) : null,
+        state.applyUnusedIgnore
+          ? L.mergeIgnore([state.settings.ignoreUnused, state.rules && state.rules.config.ignoreUnused], state.settings.ignoreUnusedDefaults !== false)
+          : null,
       ),
       violations: state.rules ? L.findViolations(nodes, edges, state.rules.config) : [],
     };
@@ -992,7 +999,7 @@
       computeAnalysis();
       renderAnalysis();
     });
-    box.append(el('label', { className: 'check' }, toggle, el('span', { textContent: 'Apply exceptions (defaults and .atlas.json)' })));
+    box.append(el('label', { className: 'check' }, toggle, el('span', { textContent: 'Apply exceptions (defaults, settings and .atlas.json)' })));
 
     if (candidates.length === 0) {
       box.append(el('p', { className: 'hint', textContent: 'Every type is referenced.' }));
@@ -1397,6 +1404,22 @@
     }
   });
 
+  /** Source files changed since the analysis: the map is out of date. */
+  function showChanged(count) {
+    $('reloadMap').disabled = false;
+    $('changedText').textContent = `${count} file${count === 1 ? '' : 's'} changed since the analysis, so the map may be out of date.`;
+    $('changedBar').hidden = false;
+  }
+
+  $('reloadMap').addEventListener('click', () => {
+    $('reloadMap').disabled = true;
+    vscode.postMessage({ type: 'reloadMap' });
+  });
+  $('dismissChanged').addEventListener('click', () => {
+    $('changedBar').hidden = true;
+    vscode.postMessage({ type: 'dismissChanged' });
+  });
+
   $('compare').addEventListener('click', () => vscode.postMessage({ type: 'compare' }));
   $('clearCompare').addEventListener('click', () => clearBaseline());
 
@@ -1440,6 +1463,7 @@
     if (message.type === 'graph') load(message.graph, message.settings, message.rules);
     else if (message.type === 'baseline') showBaseline(message.label, message.graph);
     else if (message.type === 'rules') setRulesInfo(message.rules);
+    else if (message.type === 'changed') showChanged(message.count);
   });
 
   vscode.postMessage({ type: 'ready' });

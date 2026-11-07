@@ -47,10 +47,19 @@ export class AtlasPanel {
   private files = new Set<string>();
   /** Rules that come with the sample map instead of a file. */
   private sampleRules: unknown;
+  /** Source files that changed since the analysis (the map is out of date). */
+  private readonly changed = new Set<string>();
+  private watcher: vscode.FileSystemWatcher | undefined;
+  private notifyTimer: NodeJS.Timeout | undefined;
 
   /** The solution or project file of the map that is open, if any. */
   static currentTarget(): string | undefined {
     return AtlasPanel.current?.graph.root;
+  }
+
+  /** The reload was cancelled or failed: the webview gets its button back. */
+  static reloadFailed(): void {
+    AtlasPanel.current?.notifyChanged();
   }
 
   /** Marks what changed since an earlier revision in the open map. */
@@ -101,6 +110,7 @@ export class AtlasPanel {
     this.graph = graph;
     this.sampleRules = sampleRules;
     this.remember(graph);
+    this.watchSources();
 
     this.panel.webview.html = this.html();
     this.panel.webview.onDidReceiveMessage((message: WebviewMessage) => this.onMessage(message), undefined, this.disposables);
@@ -111,7 +121,45 @@ export class AtlasPanel {
     this.graph = graph;
     this.sampleRules = sampleRules;
     this.remember(graph);
+    this.watchSources();
     this.sendGraph();
+  }
+
+  /**
+   * Watches the source files below the analyzed solution. The map is a snapshot, so a change is reported
+   * to the webview, which offers to analyze again. Build output and package folders are ignored.
+   */
+  private watchSources(): void {
+    this.watcher?.dispose();
+    this.watcher = undefined;
+    this.changed.clear();
+
+    if (!path.isAbsolute(this.graph.root)) {
+      return; // the sample map
+    }
+
+    const pattern = new vscode.RelativePattern(vscode.Uri.file(path.dirname(this.graph.root)), '**/*.{cs,vb,csproj,vbproj,props,targets,xaml,axaml}');
+    const watcher = vscode.workspace.createFileSystemWatcher(pattern);
+    const onChange = (uri: vscode.Uri): void => {
+      if (/[\\/](bin|obj|node_modules|\.git)[\\/]/i.test(uri.fsPath)) {
+        return;
+      }
+
+      this.changed.add(uri.fsPath);
+      clearTimeout(this.notifyTimer);
+      this.notifyTimer = setTimeout(() => this.notifyChanged(), 1000);
+    };
+
+    watcher.onDidChange(onChange);
+    watcher.onDidCreate(onChange);
+    watcher.onDidDelete(onChange);
+    this.watcher = watcher;
+  }
+
+  private notifyChanged(): void {
+    if (this.changed.size > 0) {
+      void this.panel.webview.postMessage({ type: 'changed', count: this.changed.size });
+    }
   }
 
   private sendGraph(): void {
@@ -204,11 +252,24 @@ export class AtlasPanel {
     return JSON.stringify(template, null, 2) + '\n';
   }
 
-  private settings(): { zoomSpeed: number; namespaceGrouping: string } {
+  private settings(): { zoomSpeed: number; namespaceGrouping: string; ignoreUnused: Record<string, string[]>; ignoreUnusedDefaults: boolean } {
     const config = vscode.workspace.getConfiguration('dotnetAtlas');
+
+    // The setting is user input: only lists of strings under the known keys go to the webview.
+    const raw = config.get<Record<string, unknown>>('ignoreUnused', {});
+    const ignoreUnused: Record<string, string[]> = {};
+    for (const key of ['namespaces', 'types', 'baseTypes', 'attributes']) {
+      const value = raw?.[key];
+      if (Array.isArray(value)) {
+        ignoreUnused[key] = value.filter((entry): entry is string => typeof entry === 'string');
+      }
+    }
+
     return {
       zoomSpeed: config.get<number>('zoomSpeed', 1),
       namespaceGrouping: config.get<string>('namespaceGrouping', 'off'),
+      ignoreUnused,
+      ignoreUnusedDefaults: config.get<boolean>('ignoreUnusedDefaults', true),
     };
   }
 
@@ -243,6 +304,14 @@ export class AtlasPanel {
 
       case 'compare':
         void vscode.commands.executeCommand('dotnetAtlas.compareWithGit');
+        break;
+
+      case 'reloadMap':
+        void vscode.commands.executeCommand('dotnetAtlas.reloadMap');
+        break;
+
+      case 'dismissChanged':
+        this.changed.clear();
         break;
 
       case 'save':
@@ -393,6 +462,11 @@ export class AtlasPanel {
         </details>
       </aside>
       <main>
+        <div id="changedBar" hidden>
+          <span id="changedText"></span>
+          <button id="reloadMap" type="button" title="Analyze the solution again">Reload map</button>
+          <button id="dismissChanged" type="button">Dismiss</button>
+        </div>
         <div id="toolbar">
           <span id="root"></span>
           <input id="search" type="search" placeholder="Search types" aria-label="Search types">
@@ -438,6 +512,8 @@ export class AtlasPanel {
 
   private dispose(): void {
     AtlasPanel.current = undefined;
+    clearTimeout(this.notifyTimer);
+    this.watcher?.dispose();
     this.panel.dispose();
     this.disposables.splice(0).forEach((d) => d.dispose());
   }

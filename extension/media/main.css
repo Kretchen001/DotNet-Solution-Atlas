@@ -59,6 +59,15 @@ main { position: relative; display: flex; flex-direction: column; min-width: 0; 
 }
 #root { font-weight: 600; margin-right: auto; }
 
+#changedBar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 6px 12px;
+  background: var(--vscode-inputValidation-warningBackground, #5a4a1a);
+  border-bottom: 1px solid var(--vscode-inputValidation-warningBorder, #b89500);
+}
+#changedBar[hidden] { display: none; }
+#changedText { margin-right: auto; }
+
 input[type="search"] {
   padding: 3px 8px;
   color: var(--vscode-input-foreground);
