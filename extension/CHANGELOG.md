@@ -10,8 +10,12 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
-### Unreleased
+### 0.4.0 – 2026-11-07
 
+- Added: analysis in the sidebar: dependency cycles between types, namespaces and projects (marked in red), hub ranking, candidates for unused types, and node height by coupling, usage or size.
+- Added: architecture rules in `.atlas.json` (layers, `cannotUse`, `canOnlyUse`); violations are drawn in red and listed. Setting `dotnetAtlas.rulesFile`.
+- Added: collapse namespaces or projects into one node (toolbar); double-click opens a group.
+- Added: members of a type with what each calls, accesses or uses, in the details pane. The analyzer writes them as `memberDetails`.
 - Added: namespace frames in the map (toolbar choice Off, Grouped, Nested); nested frames place a namespace inside its parent namespace. Starting value: setting `dotnetAtlas.namespaceGrouping`.
 - Changed: the map opens in the active editor group instead of beside it; code opened from the map goes beside the map.
 
@@ -40,8 +44,12 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Deutsch
 
-### Unveröffentlicht
+### 0.4.0 – 2026-11-07
 
+- Neu: Analyse in der Seitenleiste: Abhängigkeitszyklen zwischen Typen, Namespaces und Projekten (rot markiert), Ranking der Knotenpunkte, Kandidaten für ungenutzte Typen und Knotenhöhe nach Kopplung, Nutzung oder Größe.
+- Neu: Architekturregeln in `.atlas.json` (Schichten, `cannotUse`, `canOnlyUse`); Verstöße werden rot gezeichnet und aufgelistet. Einstellung `dotnetAtlas.rulesFile`.
+- Neu: Namespaces oder Projekte zu einem Knoten zusammenfassen (Werkzeugleiste); Doppelklick öffnet eine Gruppe.
+- Neu: Member eines Typs mit dem, was jeder aufruft, anspricht oder verwendet, im Detailbereich. Der Analyzer schreibt sie als `memberDetails`.
 - Neu: Namespace-Rahmen in der Karte (Auswahl in der Werkzeugleiste: Off, Grouped, Nested); verschachtelt liegt ein Namespace im Rahmen seines übergeordneten Namespace. Startwert: Einstellung `dotnetAtlas.namespaceGrouping`.
 - Geändert: Die Karte öffnet sich in der aktiven Editorgruppe statt daneben; aus der Karte geöffneter Code erscheint neben der Karte.
 
@@ -70,8 +78,12 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
-### 未发布
+### 0.4.0 – 2026-11-07
 
+- 新增：侧边栏分析：类型、命名空间和项目之间的依赖循环（以红色标出）、枢纽排名、可能未使用的类型，以及按耦合度、使用量或规模调整节点高度。
+- 新增：`.atlas.json` 中的架构规则（层、`cannotUse`、`canOnlyUse`）；违规以红色绘制并列出。设置项 `dotnetAtlas.rulesFile`。
+- 新增：将命名空间或项目折叠为一个节点（工具栏）；双击可展开分组。
+- 新增：详情面板中显示类型的成员，以及每个成员调用、访问或使用了什么。分析器将其写为 `memberDetails`。
 - 新增：地图中的命名空间框（工具栏选项 Off、Grouped、Nested）；嵌套时，命名空间位于其父命名空间的框内。初始值：设置 `dotnetAtlas.namespaceGrouping`。
 - 变更：地图在当前编辑器组中打开，而不是在旁边；从地图打开的代码显示在地图旁边。
 
@@ -100,8 +112,12 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
-### Не выпущено
+### 0.4.0 – 2026-11-07
 
+- Добавлено: анализ в боковой панели: циклические зависимости между типами, пространствами имён и проектами (красным), рейтинг узловых точек, кандидаты на неиспользуемые типы и высота узла по связанности, использованию или размеру.
+- Добавлено: архитектурные правила в `.atlas.json` (слои, `cannotUse`, `canOnlyUse`); нарушения рисуются красным и перечисляются. Параметр `dotnetAtlas.rulesFile`.
+- Добавлено: свёртка пространств имён или проектов в один узел (панель инструментов); двойной щелчок раскрывает группу.
+- Добавлено: члены типа с тем, что каждый из них вызывает, читает или использует, в панели сведений. Анализатор записывает их как `memberDetails`.
 - Добавлено: рамки пространств имён на карте (выбор на панели инструментов: Off, Grouped, Nested); при вложенном режиме пространство имён лежит в рамке родительского. Начальное значение: параметр `dotnetAtlas.namespaceGrouping`.
 - Изменено: карта открывается в активной группе редактора, а не рядом; код, открытый из карты, появляется рядом с картой.
 
@@ -130,8 +146,12 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Español
 
-### Sin publicar
+### 0.4.0 – 2026-11-07
 
+- Añadido: análisis en la barra lateral: ciclos de dependencia entre tipos, espacios de nombres y proyectos (en rojo), ranking de puntos clave, candidatos a tipos sin uso y altura del nodo según acoplamiento, uso o tamaño.
+- Añadido: reglas de arquitectura en `.atlas.json` (capas, `cannotUse`, `canOnlyUse`); las infracciones se dibujan en rojo y se enumeran. Ajuste `dotnetAtlas.rulesFile`.
+- Añadido: contraer espacios de nombres o proyectos en un nodo (barra de herramientas); un doble clic abre un grupo.
+- Añadido: miembros de un tipo con lo que cada uno llama, usa o a lo que accede, en el panel de detalles. El analizador los escribe como `memberDetails`.
 - Añadido: marcos de espacios de nombres en el mapa (opción de la barra de herramientas: Off, Grouped, Nested); en modo anidado un espacio de nombres queda dentro del marco de su espacio padre. Valor inicial: el ajuste `dotnetAtlas.namespaceGrouping`.
 - Cambiado: el mapa se abre en el grupo de editores activo en lugar de al lado; el código abierto desde el mapa aparece junto al mapa.
 
