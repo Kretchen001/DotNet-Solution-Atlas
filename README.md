@@ -51,6 +51,15 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 - Filters by type kind, project and language; search by name
 - Focus mode: only the selected type and its neighbours
 - Group by namespace: dashed frames around the types of each namespace, optionally nested (Off, Grouped, Nested)
+- Collapse namespaces or projects into one node each, to get an overview of
+  large solutions
+- Analysis: dependency cycles between types, namespaces and projects (marked in
+  red), a hub ranking (coupling, fan-in, fan-out, instability, size),
+  candidates for unused types, and node height by coupling, usage or size
+- Architecture rules: layers and what they may use, defined in `.atlas.json`;
+  violations are drawn in red and listed
+- Members: the details of a type list its members and what each of them calls,
+  accesses or uses
 - Details pane with metrics, and jump to the source file
 - Groups: connected groups of types and types without any relationship, to
   find parts of the code that are cut off from the rest
@@ -58,9 +67,7 @@ the hubs of this codebase?" and "how is this solution layered?" at a glance.
 ### Planned features
 
 - Filter by namespace
-- Heatmap by coupling to find hubs, and detection of dependency cycles
-- Namespaces and projects as visual groups
-- Export as SVG or PNG
+- Export as SVG, PNG, Mermaid or DOT
 
 ### Try it
 
@@ -104,6 +111,35 @@ The interface of the extension is in English.
 - Filter by type kind, project and language, search by name, or switch on
   "Focus on selection" to see only a type and its direct neighbours.
 
+### Architecture rules
+
+Create a file `.atlas.json` next to the solution (or in the workspace folder),
+or press "Create rules file" under "Architecture rules" in the map. It defines
+layers and what they may use:
+
+```json
+{
+  "layers": [
+    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
+    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
+    { "name": "Application", "projects": ["Shop.App"] }
+  ],
+  "rules": [
+    { "from": "Domain", "cannotUse": ["Infrastructure"] },
+    { "from": "Application", "canOnlyUse": ["Domain"] }
+  ]
+}
+```
+
+- A layer collects types by namespace or project. `*` stands for any
+  characters, the first matching layer wins.
+- `cannotUse` lists layers that must not be used, `canOnlyUse` lists the only
+  layers that may be used. A dependency inside a layer, or on a type without a
+  layer, is always allowed.
+- Violating relationships are drawn in red and listed; click an entry to find
+  it. "Reload" reads the file again. The file name can be changed with the
+  setting `dotnetAtlas.rulesFile`.
+
 ### Supported languages
 
 C# and Visual Basic, in the same solution if needed. F# is not supported,
@@ -122,6 +158,7 @@ Basic part can be looked at separately.
 | `dotnetAtlas.analyzerPath` | empty    | Path to `Atlas.Analyzer.dll`; empty uses the analyzer bundled with the extension |
 | `dotnetAtlas.zoomSpeed`    | `1`      | Speed of zooming with the mouse wheel (0.1 to 10), applies to the next map |
 | `dotnetAtlas.namespaceGrouping` | `off` | Namespace frames when a map opens: `off`, `grouped` or `nested` (changeable in the toolbar) |
+| `dotnetAtlas.rulesFile` | `.atlas.json` | Name of the architecture rules file, looked for next to the solution and in the workspace folders |
 
 ### Requirements
 
@@ -188,6 +225,16 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
 - Filter nach Typart, Projekt und Sprache; Suche nach Namen
 - Fokusmodus: nur der gewählte Typ und seine Nachbarn
 - Nach Namespace gruppieren: gestrichelte Rahmen um die Typen jedes Namespace, auch verschachtelt (Off, Grouped, Nested)
+- Namespaces oder Projekte zu je einem Knoten zusammenfassen, um große
+  Solutions zu überblicken
+- Analyse: Abhängigkeitszyklen zwischen Typen, Namespaces und Projekten (rot
+  markiert), Ranking der Knotenpunkte (Kopplung, Fan-in, Fan-out, Instabilität,
+  Größe), Kandidaten für ungenutzte Typen und Knotenhöhe nach Kopplung,
+  Nutzung oder Größe
+- Architekturregeln: Schichten und was sie verwenden dürfen, definiert in
+  `.atlas.json`; Verstöße werden rot gezeichnet und aufgelistet
+- Member: Die Details eines Typs listen seine Member und was jeder davon
+  aufruft, anspricht oder verwendet
 - Detailbereich mit Kennzahlen und Sprung zur Quelldatei
 - Gruppen: zusammenhängende Gruppen von Typen und Typen ohne jede Beziehung, um
   vom Rest abgeschnittene Teile des Codes zu finden
@@ -195,10 +242,7 @@ dieser Codebasis?“ und „Wie ist diese Solution geschichtet?“.
 ### Geplante Funktionen
 
 - Filter nach Namespace
-- Heatmap nach Kopplung, um Knotenpunkte zu finden, und Erkennung von
-  Abhängigkeitszyklen
-- Namespaces und Projekte als visuelle Gruppen
-- Export als SVG oder PNG
+- Export als SVG, PNG, Mermaid oder DOT
 
 ### Ausprobieren
 
@@ -247,6 +291,35 @@ Die Oberfläche der Erweiterung ist englisch.
 - Nach Typart, Projekt und Sprache filtern, nach Namen suchen oder „Focus on
   selection“ einschalten, um nur einen Typ und seine direkten Nachbarn zu sehen.
 
+### Architekturregeln
+
+Lege neben der Solution (oder im Workspace-Ordner) eine Datei `.atlas.json`
+an, oder drücke in der Karte unter „Architecture rules“ auf „Create rules
+file“. Sie definiert Schichten und was sie verwenden dürfen:
+
+```json
+{
+  "layers": [
+    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
+    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
+    { "name": "Application", "projects": ["Shop.App"] }
+  ],
+  "rules": [
+    { "from": "Domain", "cannotUse": ["Infrastructure"] },
+    { "from": "Application", "canOnlyUse": ["Domain"] }
+  ]
+}
+```
+
+- Eine Schicht sammelt Typen nach Namespace oder Projekt. `*` steht für
+  beliebige Zeichen, die erste passende Schicht gilt.
+- `cannotUse` nennt Schichten, die nicht verwendet werden dürfen, `canOnlyUse`
+  die einzigen Schichten, die verwendet werden dürfen. Eine Abhängigkeit
+  innerhalb einer Schicht oder auf einen Typ ohne Schicht ist immer erlaubt.
+- Verletzende Beziehungen werden rot gezeichnet und aufgelistet; ein Klick auf
+  einen Eintrag zeigt sie. „Reload“ liest die Datei neu ein. Der Dateiname lässt
+  sich mit der Einstellung `dotnetAtlas.rulesFile` ändern.
+
 ### Unterstützte Sprachen
 
 C# und Visual Basic, bei Bedarf in derselben Solution. F# wird nicht
@@ -266,6 +339,7 @@ sich der C#- und der Visual-Basic-Teil getrennt betrachten lassen.
 | `dotnetAtlas.analyzerPath` | leer     | Pfad zu `Atlas.Analyzer.dll`; leer verwendet den mitgelieferten Analyzer         |
 | `dotnetAtlas.zoomSpeed`    | `1`      | Geschwindigkeit beim Zoomen mit dem Mausrad (0,1 bis 10), gilt für die nächste Karte |
 | `dotnetAtlas.namespaceGrouping` | `off` | Namespace-Rahmen beim Öffnen der Karte: `off`, `grouped` oder `nested` (in der Werkzeugleiste änderbar) |
+| `dotnetAtlas.rulesFile` | `.atlas.json` | Name der Datei mit den Architekturregeln, gesucht neben der Solution und in den Workspace-Ordnern |
 
 ### Voraussetzungen
 
@@ -325,15 +399,20 @@ MIT, siehe [LICENSE](LICENSE). Frei nutzbar, veränderbar und weitergebbar. Auch
 - 按类型种类、项目和语言过滤；按名称搜索
 - 聚焦模式：只显示选中的类型及其相邻类型
 - 按命名空间分组：在每个命名空间的类型周围绘制虚线框，可嵌套显示（Off、Grouped、Nested）
+- 将命名空间或项目分别折叠为一个节点，便于纵览大型解决方案
+- 分析：类型、命名空间和项目之间的依赖循环（以红色标出）、枢纽排名（耦合度、
+  扇入、扇出、不稳定度、规模）、可能未使用的类型，以及按耦合度、使用量或规模
+  调整节点高度
+- 架构规则：在 `.atlas.json` 中定义各层及其可使用的内容；违规的关系以红色绘制
+  并列出
+- 成员：类型的详情列出其成员，以及每个成员调用、访问或使用了什么
 - 详情面板显示统计信息，并可跳转到源文件
 - 分组：显示相互连通的类型组，以及没有任何关系的类型，用于找出与其余代码隔离的部分
 
 ### 计划中的功能
 
 - 按命名空间过滤
-- 按耦合度生成热力图以找出枢纽，并检测依赖循环
-- 将命名空间和项目显示为可视化分组
-- 导出为 SVG 或 PNG
+- 导出为 SVG、PNG、Mermaid 或 DOT
 
 ### 试用
 
@@ -372,6 +451,31 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - 可按类型种类、项目和语言过滤，按名称搜索，或开启“Focus on selection”，
   只查看某个类型及其直接相邻的类型。
 
+### 架构规则
+
+在解决方案旁边（或工作区文件夹中）创建文件 `.atlas.json`，或在地图的
+“Architecture rules”下点击“Create rules file”。它定义各层及其可使用的内容：
+
+```json
+{
+  "layers": [
+    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
+    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
+    { "name": "Application", "projects": ["Shop.App"] }
+  ],
+  "rules": [
+    { "from": "Domain", "cannotUse": ["Infrastructure"] },
+    { "from": "Application", "canOnlyUse": ["Domain"] }
+  ]
+}
+```
+
+- 一个层按命名空间或项目收集类型。`*` 代表任意字符，先匹配到的层生效。
+- `cannotUse` 列出不得使用的层，`canOnlyUse` 列出唯一可使用的层。层内部的依赖，
+  以及对没有层的类型的依赖，始终允许。
+- 违规的关系以红色绘制并列出，点击条目即可定位。“Reload”重新读取该文件。文件名
+  可通过设置 `dotnetAtlas.rulesFile` 修改。
+
 ### 支持的语言
 
 支持 C# 和 Visual Basic，必要时可在同一解决方案中混合使用。不支持 F#，因为 Roslyn 不分析 F#。
@@ -388,6 +492,7 @@ Visual Basic 的模块（Module）会显示为静态类；编译器生成的 `My
 | `dotnetAtlas.analyzerPath` | 空       | `Atlas.Analyzer.dll` 的路径；为空时使用扩展自带的分析器    |
 | `dotnetAtlas.zoomSpeed`    | `1`      | 鼠标滚轮缩放速度（0.1 到 10），在下次打开地图时生效        |
 | `dotnetAtlas.namespaceGrouping` | `off` | 打开地图时的命名空间框：`off`、`grouped` 或 `nested`（可在工具栏中更改） |
+| `dotnetAtlas.rulesFile` | `.atlas.json` | 架构规则文件的名称，在解决方案旁边和工作区文件夹中查找 |
 
 ### 环境要求
 
@@ -452,6 +557,16 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 - Фильтры по виду типа, проекту и языку; поиск по имени
 - Режим фокуса: только выбранный тип и его соседи
 - Группировка по пространствам имён: пунктирные рамки вокруг типов каждого пространства, при желании вложенные (Off, Grouped, Nested)
+- Свёртка пространств имён или проектов в один узел каждое, чтобы охватить
+  взглядом большие решения
+- Анализ: циклические зависимости между типами, пространствами имён и проектами
+  (красным), рейтинг узловых точек (связанность, fan-in, fan-out,
+  нестабильность, размер), кандидаты на неиспользуемые типы и высота узла по
+  связанности, использованию или размеру
+- Архитектурные правила: слои и то, что им разрешено использовать, задаются в
+  `.atlas.json`; нарушения рисуются красным и перечисляются в списке
+- Члены: в сведениях о типе перечислены его члены и то, что каждый из них
+  вызывает, читает или использует
 - Панель сведений с метриками и переход к исходному файлу
 - Группы: связные группы типов и типы без каких-либо связей — для поиска частей
   кода, отрезанных от остального
@@ -459,10 +574,7 @@ MIT，详见 [LICENSE](LICENSE)。可自由使用、修改和分发。所使用�
 ### Планируемые возможности
 
 - Фильтр по пространству имён
-- Тепловая карта по степени связанности для поиска узловых точек и обнаружение
-  циклических зависимостей
-- Пространства имён и проекты как визуальные группы
-- Экспорт в SVG или PNG
+- Экспорт в SVG, PNG, Mermaid или DOT
 
 ### Попробовать
 
@@ -510,6 +622,35 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   включить «Focus on selection», чтобы видеть только один тип и его прямых
   соседей.
 
+### Архитектурные правила
+
+Создайте рядом с решением (или в папке рабочей области) файл `.atlas.json` либо
+нажмите «Create rules file» в разделе «Architecture rules» на карте. В нём
+задаются слои и то, что им разрешено использовать:
+
+```json
+{
+  "layers": [
+    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
+    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
+    { "name": "Application", "projects": ["Shop.App"] }
+  ],
+  "rules": [
+    { "from": "Domain", "cannotUse": ["Infrastructure"] },
+    { "from": "Application", "canOnlyUse": ["Domain"] }
+  ]
+}
+```
+
+- Слой собирает типы по пространству имён или проекту. `*` означает любые
+  символы, действует первый подходящий слой.
+- `cannotUse` перечисляет слои, которые использовать нельзя, `canOnlyUse` — единственные
+  слои, которые можно использовать. Зависимость внутри слоя или от типа без слоя
+  разрешена всегда.
+- Нарушающие связи рисуются красным и перечисляются; щелчок по записи показывает
+  связь. «Reload» перечитывает файл. Имя файла можно изменить параметром
+  `dotnetAtlas.rulesFile`.
+
 ### Поддерживаемые языки
 
 C# и Visual Basic, при необходимости — в одном решении. F# не поддерживается,
@@ -529,6 +670,7 @@ C# и Visual Basic, при необходимости — в одном реше
 | `dotnetAtlas.analyzerPath` | пусто        | Путь к `Atlas.Analyzer.dll`; если пусто, используется анализатор из состава расширения |
 | `dotnetAtlas.zoomSpeed`    | `1`          | Скорость масштабирования колесом мыши (от 0,1 до 10), действует при следующем открытии карты |
 | `dotnetAtlas.namespaceGrouping` | `off` | Рамки пространств имён при открытии карты: `off`, `grouped` или `nested` (можно изменить на панели инструментов) |
+| `dotnetAtlas.rulesFile` | `.atlas.json` | Имя файла с архитектурными правилами; ищется рядом с решением и в папках рабочей области |
 
 ### Требования
 
@@ -594,6 +736,16 @@ organizada en capas esta solución?».
 - Filtros por tipo, proyecto y lenguaje; búsqueda por nombre
 - Modo de enfoque: solo el tipo seleccionado y sus vecinos
 - Agrupar por espacio de nombres: marcos discontinuos alrededor de los tipos de cada espacio, también anidados (Off, Grouped, Nested)
+- Contraer espacios de nombres o proyectos en un nodo cada uno, para tener una
+  visión general de soluciones grandes
+- Análisis: ciclos de dependencia entre tipos, espacios de nombres y proyectos
+  (en rojo), ranking de puntos clave (acoplamiento, fan-in, fan-out,
+  inestabilidad, tamaño), candidatos a tipos sin uso y altura del nodo según
+  acoplamiento, uso o tamaño
+- Reglas de arquitectura: capas y lo que pueden usar, definidas en
+  `.atlas.json`; las infracciones se dibujan en rojo y se enumeran
+- Miembros: los detalles de un tipo enumeran sus miembros y lo que cada uno
+  llama, usa o a lo que accede
 - Panel de detalles con métricas y salto al archivo de origen
 - Grupos: grupos conectados de tipos y tipos sin ninguna relación, para
   encontrar partes del código aisladas del resto
@@ -601,10 +753,7 @@ organizada en capas esta solución?».
 ### Funciones previstas
 
 - Filtro por espacio de nombres
-- Mapa de calor por acoplamiento para encontrar puntos clave, y detección de
-  ciclos de dependencia
-- Espacios de nombres y proyectos como grupos visuales
-- Exportación como SVG o PNG
+- Exportación como SVG, PNG, Mermaid o DOT
 
 ### Probarlo
 
@@ -650,6 +799,35 @@ La interfaz de la extensión está en inglés.
 - Filtra por tipo, proyecto y lenguaje, busca por nombre, o activa «Focus on
   selection» para ver solo un tipo y sus vecinos directos.
 
+### Reglas de arquitectura
+
+Crea un archivo `.atlas.json` junto a la solución (o en la carpeta del espacio
+de trabajo), o pulsa «Create rules file» en «Architecture rules» dentro del
+mapa. Define capas y lo que pueden usar:
+
+```json
+{
+  "layers": [
+    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
+    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
+    { "name": "Application", "projects": ["Shop.App"] }
+  ],
+  "rules": [
+    { "from": "Domain", "cannotUse": ["Infrastructure"] },
+    { "from": "Application", "canOnlyUse": ["Domain"] }
+  ]
+}
+```
+
+- Una capa reúne tipos por espacio de nombres o proyecto. `*` representa
+  cualquier carácter y vale la primera capa que coincide.
+- `cannotUse` enumera las capas que no se pueden usar, `canOnlyUse` las únicas
+  capas que se pueden usar. Una dependencia dentro de una capa, o de un tipo sin
+  capa, siempre está permitida.
+- Las relaciones que infringen una regla se dibujan en rojo y se enumeran; un
+  clic en una entrada la localiza. «Reload» vuelve a leer el archivo. El nombre
+  del archivo se cambia con el ajuste `dotnetAtlas.rulesFile`.
+
 ### Lenguajes compatibles
 
 C# y Visual Basic, en la misma solución si hace falta. F# no es compatible,
@@ -668,6 +846,7 @@ separado la parte en C# y la parte en Visual Basic.
 | `dotnetAtlas.analyzerPath` | vacío             | Ruta a `Atlas.Analyzer.dll`; vacío usa el analizador incluido en la extensión    |
 | `dotnetAtlas.zoomSpeed`    | `1`               | Velocidad del zoom con la rueda del ratón (0,1 a 10), se aplica al abrir el siguiente mapa |
 | `dotnetAtlas.namespaceGrouping` | `off` | Marcos de espacios de nombres al abrir el mapa: `off`, `grouped` o `nested` (se cambia en la barra de herramientas) |
+| `dotnetAtlas.rulesFile` | `.atlas.json` | Nombre del archivo con las reglas de arquitectura, se busca junto a la solución y en las carpetas del espacio de trabajo |
 
 ### Requisitos
 
