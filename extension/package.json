@@ -107,7 +107,7 @@
     "watch": "tsc -watch -p ./",
     "test": "node --test",
     "build:analyzer": "dotnet publish ../analyzer/Atlas.Analyzer -c Release -o analyzer",
-    "package": "npm run build:analyzer && npx --yes @vscode/vsce package --allow-missing-repository",
+    "package": "npm run build:analyzer && npx --yes @vscode/vsce@2.32.0 package --allow-missing-repository",
     "vscode:prepublish": "npm run compile"
   },
   "dependencies": {
