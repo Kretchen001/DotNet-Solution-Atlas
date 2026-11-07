@@ -59,6 +59,3 @@ desktop.ini
 
 # --- Published analyzer, produced by "npm run build:analyzer" ---
 extension/analyzer/
-
-# --- Lokales Hilfsskript (Test, Build, Verpacken), nicht Teil des Repositorys ---
-/build-local.ps1
