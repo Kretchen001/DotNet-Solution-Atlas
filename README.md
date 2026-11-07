@@ -238,6 +238,23 @@ violation without any setup.
   sidebar shows whether it goes down over time. Together with "Compare with
   Git…" you can also see which violations a branch introduces.
 
+### Projects that MSBuild cannot load
+
+The analyzer opens the solution with the MSBuild of the .NET SDK, like
+`dotnet build`. Projects that only build with the MSBuild of Visual Studio (for
+example because of COM references, error MSB4803) or whose .NET Framework build
+host fails cannot be loaded that way. They are not dropped: if the solution cannot
+be opened as a whole, the analyzer tries the projects one by one, and every project
+that comes back without source files, or not at all, is read from its files on disk
+(all `.cs` or `.vb` files of an SDK-style project, the `Compile` items of an
+old-style one; not `bin`, `obj` or nested projects). The "DotNet Solution Atlas"
+output lists them as `[Fallback]` or `[Skipped]`.
+
+The limit: references to the framework, NuGet packages and COM libraries are not
+known for these projects. The relationships between the types of the solution are
+found, but calls into libraries are not resolved, and the exceptions for unused
+types that depend on framework base types (WPF and others) do not apply to them.
+
 ### Keeping the map up to date
 
 The map is a snapshot. While it is open, the extension watches the source files
@@ -603,6 +620,25 @@ eigene Regeln mit, sodass du einen Verstoß ohne jede Einrichtung siehst.
   der Seitenleiste zeigt, ob sie mit der Zeit sinkt. Zusammen mit „Compare with
   Git…“ siehst du außerdem, welche Verstöße ein Branch neu einführt.
 
+### Projekte, die MSBuild nicht laden kann
+
+Der Analyzer öffnet die Solution mit dem MSBuild des .NET SDK, wie
+`dotnet build`. Projekte, die sich nur mit dem MSBuild von Visual Studio bauen
+lassen (zum Beispiel wegen COM-Verweisen, Fehler MSB4803) oder deren
+.NET-Framework-Build-Host ausfällt, lassen sich so nicht laden. Sie fallen
+trotzdem nicht weg: Lässt sich die Solution nicht als Ganzes öffnen, probiert der
+Analyzer die Projekte einzeln, und jedes Projekt, das ohne Quelldateien oder gar
+nicht zurückkommt, wird aus seinen Dateien auf der Festplatte gelesen (alle
+`.cs`- oder `.vb`-Dateien bei einem SDK-Projekt, die `Compile`-Einträge bei einem
+alten Projektformat; nicht `bin`, `obj` oder verschachtelte Projekte). Die Ausgabe
+„DotNet Solution Atlas“ nennt sie als `[Fallback]` oder `[Skipped]`.
+
+Die Grenze: Verweise auf das Framework, NuGet-Pakete und COM-Bibliotheken sind für
+diese Projekte nicht bekannt. Die Beziehungen zwischen den Typen der Solution
+werden gefunden, Aufrufe in Bibliotheken aber nicht aufgelöst, und die Ausnahmen
+für ungenutzte Typen, die auf Framework-Basistypen beruhen (WPF und andere),
+greifen dort nicht.
+
 ### Die Karte aktuell halten
 
 Die Karte ist eine Momentaufnahme. Solange sie offen ist, beobachtet die
@@ -909,6 +945,18 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
   也算作关系。请为这部分代码设置一个没有规则的层，或者不把它纳入任何层。
 - 已有的违规不是放弃规则的理由：侧边栏中的数字会显示它是否随时间下降。
   结合“Compare with Git…”，还可以看出某个分支新引入了哪些违规。
+
+### MSBuild 无法加载的项目
+
+分析器使用 .NET SDK 的 MSBuild 打开解决方案，与 `dotnet build` 相同。只能用 Visual Studio 的
+MSBuild 构建的项目（例如因为 COM 引用，错误 MSB4803），或其 .NET Framework 构建宿主失败的项目，
+无法这样加载。它们不会被丢弃：如果解决方案无法整体打开，分析器会逐个尝试项目，对于返回时没有源文件
+或根本没有返回的项目，则直接从磁盘上的文件读取（SDK 风格项目读取所有 `.cs` 或 `.vb` 文件，
+旧格式项目读取 `Compile` 项；不含 `bin`、`obj` 和嵌套项目）。“DotNet Solution Atlas”输出会以
+`[Fallback]` 或 `[Skipped]` 列出它们。
+
+局限：这些项目的框架、NuGet 包和 COM 库引用未知。解决方案内类型之间的关系可以找到，但对库的调用无法解析，
+依赖框架基类的未使用类型例外（WPF 等）对它们不适用。
 
 ### 保持地图为最新
 
@@ -1248,6 +1296,21 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 - Уже существующие нарушения — не повод отказываться от правила: число в
   боковой панели показывает, уменьшается ли оно со временем. Вместе с «Compare
   with Git…» можно увидеть и то, какие нарушения вносит ветка.
+
+### Проекты, которые MSBuild не может загрузить
+
+Анализатор открывает решение с помощью MSBuild из .NET SDK, как `dotnet build`. Проекты,
+которые собираются только MSBuild из Visual Studio (например, из-за COM-ссылок, ошибка
+MSB4803) или у которых не работает узел сборки .NET Framework, так загрузить нельзя. Они не
+отбрасываются: если решение не открывается целиком, анализатор пробует проекты по одному, а
+каждый проект, который вернулся без исходных файлов или не вернулся совсем, читается из своих
+файлов на диске (все файлы `.cs` или `.vb` у проекта в стиле SDK, элементы `Compile` у проекта
+старого формата; без `bin`, `obj` и вложенных проектов). Вывод «DotNet Solution Atlas» указывает
+их как `[Fallback]` или `[Skipped]`.
+
+Ограничение: ссылки на фреймворк, пакеты NuGet и COM-библиотеки для этих проектов неизвестны.
+Связи между типами решения находятся, но вызовы в библиотеки не разрешаются, а исключения для
+неиспользуемых типов, основанные на базовых типах фреймворка (WPF и другие), к ним не применяются.
 
 ### Актуальность карты
 
@@ -1598,6 +1661,22 @@ Las *reglas* (`rules`) limitan lo que una capa puede usar:
 - Las infracciones existentes no son motivo para renunciar a una regla: el
   número del panel lateral muestra si baja con el tiempo. Junto con «Compare
   with Git…» también ves qué infracciones introduce una rama.
+
+### Proyectos que MSBuild no puede cargar
+
+El analizador abre la solución con el MSBuild del SDK de .NET, igual que `dotnet build`. Los
+proyectos que solo se compilan con el MSBuild de Visual Studio (por ejemplo por referencias COM,
+error MSB4803) o cuyo host de compilación de .NET Framework falla no se pueden cargar así. No se
+descartan: si la solución no se puede abrir completa, el analizador prueba los proyectos uno a
+uno, y cada proyecto que vuelve sin archivos fuente, o que no vuelve, se lee desde sus archivos en
+el disco (todos los `.cs` o `.vb` en un proyecto de estilo SDK, los elementos `Compile` en uno de
+formato antiguo; sin `bin`, `obj` ni proyectos anidados). La salida «DotNet Solution Atlas» los
+indica como `[Fallback]` o `[Skipped]`.
+
+El límite: las referencias al framework, a paquetes NuGet y a bibliotecas COM no se conocen para
+estos proyectos. Se encuentran las relaciones entre los tipos de la solución, pero las llamadas a
+bibliotecas no se resuelven y las excepciones para tipos sin usar que dependen de tipos base del
+framework (WPF y otros) no se aplican a ellos.
 
 ### Mantener el mapa al día
 

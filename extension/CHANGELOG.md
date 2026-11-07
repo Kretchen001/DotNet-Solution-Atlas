@@ -10,6 +10,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### Unreleased
+
+- Fixed: a solution with projects that MSBuild cannot load (COM references that only build with Visual Studio's MSBuild, a failing .NET Framework build host: `TypeLoadException ... ProjectCacheService`) no longer ends in "Analysis failed". The projects are tried one by one, and those that come back empty or not at all are read from their source files on disk (`[Fallback]` in the output).
+
 ### 1.1.1 – 2026-11-07
 
 - Added: `scripts/build-local.ps1` tests, builds and packages the extension on Windows and shows how to install the `.vsix`.
@@ -75,6 +79,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### Unveröffentlicht
+
+- Behoben: Eine Solution mit Projekten, die MSBuild nicht laden kann (COM-Verweise, die sich nur mit dem MSBuild von Visual Studio bauen lassen; ein ausfallender .NET-Framework-Build-Host: `TypeLoadException ... ProjectCacheService`), endet nicht mehr mit „Analysis failed“. Die Projekte werden einzeln versucht, und solche, die leer oder gar nicht zurückkommen, werden aus ihren Quelldateien auf der Festplatte gelesen (`[Fallback]` in der Ausgabe).
 
 ### 1.1.1 – 2026-11-07
 
@@ -142,6 +150,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 未发布
+
+- 修复：包含 MSBuild 无法加载的项目的解决方案（只能用 Visual Studio 的 MSBuild 构建的 COM 引用；失败的 .NET Framework 构建宿主：`TypeLoadException ... ProjectCacheService`）不再以“Analysis failed”结束。分析器会逐个尝试项目，对于返回为空或根本没有返回的项目，则从磁盘上的源文件读取（输出中为 `[Fallback]`）。
+
 ### 1.1.1 – 2026-11-07
 
 - 新增：`scripts/build-local.ps1` 在 Windows 上测试、构建并打包扩展，并显示如何安装 `.vsix`。
@@ -208,6 +220,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### Не выпущено
+
+- Исправлено: решение с проектами, которые MSBuild не может загрузить (COM-ссылки, собирающиеся только MSBuild из Visual Studio; сбой узла сборки .NET Framework: `TypeLoadException ... ProjectCacheService`), больше не заканчивается сообщением «Analysis failed». Проекты пробуются по одному, а те, что вернулись пустыми или не вернулись совсем, читаются из исходных файлов на диске (в выводе `[Fallback]`).
+
 ### 1.1.1 – 2026-11-07
 
 - Добавлено: `scripts/build-local.ps1` тестирует, собирает и упаковывает расширение в Windows и показывает, как установить `.vsix`.
@@ -273,6 +289,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### Sin publicar
+
+- Corregido: una solución con proyectos que MSBuild no puede cargar (referencias COM que solo se compilan con el MSBuild de Visual Studio; un host de compilación de .NET Framework que falla: `TypeLoadException ... ProjectCacheService`) ya no termina en «Analysis failed». Los proyectos se prueban uno a uno y los que vuelven vacíos o no vuelven se leen desde sus archivos fuente en el disco (`[Fallback]` en la salida).
 
 ### 1.1.1 – 2026-11-07
 
