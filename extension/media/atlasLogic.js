@@ -315,6 +315,204 @@
     return { groups, edges: [...merged.values()], representative };
   }
 
+  // ----------------------------------------------------------------- export
+
+  const EDGE_LABELS = {
+    inherits: 'inherits',
+    implements: 'implements',
+    uses: 'uses',
+    calls: 'calls',
+    accesses: 'accesses',
+    registers: 'registers',
+    events: 'events',
+    annotated: 'annotated',
+  };
+
+  /** Safe identifiers for the text formats: n0, n1, ... in the order of the nodes. */
+  function exportIds(nodes) {
+    return new Map(nodes.map((node, i) => [node.id, 'n' + i]));
+  }
+
+  /** Nodes grouped by namespace, in the order of first appearance. */
+  function byNamespace(nodes) {
+    const groups = new Map();
+    for (const node of nodes) {
+      const key = node.namespace || '';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(node);
+    }
+    return groups;
+  }
+
+  /**
+   * Mermaid flowchart. With `frames` every namespace becomes a subgraph.
+   * @param {{nodes: {id: string, label?: string, namespace?: string}[], edges: {source: string, target: string, kind: string}[], frames?: boolean}} model
+   */
+  function toMermaid(model) {
+    const ids = exportIds(model.nodes);
+    const text = (value) => String(value).replace(/["\r\n]/g, ' ');
+    const line = (node, indent) => `${indent}${ids.get(node.id)}["${text(node.label || node.id)}"]`;
+    const out = ['flowchart LR'];
+
+    if (model.frames) {
+      let g = 0;
+      for (const [namespace, members] of byNamespace(model.nodes)) {
+        if (namespace === '') {
+          for (const node of members) out.push(line(node, '  '));
+          continue;
+        }
+        out.push(`  subgraph g${g++}["${text(namespace)}"]`);
+        for (const node of members) out.push(line(node, '    '));
+        out.push('  end');
+      }
+    } else {
+      for (const node of model.nodes) out.push(line(node, '  '));
+    }
+
+    for (const edge of model.edges) {
+      const from = ids.get(edge.source);
+      const to = ids.get(edge.target);
+      if (!from || !to) continue;
+      const label = EDGE_LABELS[edge.kind] || edge.kind;
+      const arrow = edge.kind === 'inherits' ? '-->' : edge.kind === 'uses' ? '-->' : '-.->';
+      out.push(`  ${from} ${arrow}|${label}| ${to}`);
+    }
+    return out.join('\n') + '\n';
+  }
+
+  /** Graphviz DOT. With `frames` every namespace becomes a cluster. */
+  function toDot(model) {
+    const ids = exportIds(model.nodes);
+    const text = (value) => String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/[\r\n]/g, ' ');
+    const line = (node, indent) => `${indent}${ids.get(node.id)} [label="${text(node.label || node.id)}"];`;
+    const out = ['digraph Atlas {', '  rankdir=LR;', '  node [shape=box, style=rounded];'];
+
+    if (model.frames) {
+      let g = 0;
+      for (const [namespace, members] of byNamespace(model.nodes)) {
+        if (namespace === '') {
+          for (const node of members) out.push(line(node, '  '));
+          continue;
+        }
+        out.push(`  subgraph cluster_${g++} {`, `    label="${text(namespace)}";`);
+        for (const node of members) out.push(line(node, '    '));
+        out.push('  }');
+      }
+    } else {
+      for (const node of model.nodes) out.push(line(node, '  '));
+    }
+
+    for (const edge of model.edges) {
+      const from = ids.get(edge.source);
+      const to = ids.get(edge.target);
+      if (!from || !to) continue;
+      const style = edge.kind === 'implements' ? 'dashed' : edge.kind === 'calls' || edge.kind === 'accesses' || edge.kind === 'events' ? 'dotted' : 'solid';
+      const head = edge.kind === 'inherits' || edge.kind === 'implements' ? 'empty' : 'normal';
+      out.push(`  ${from} -> ${to} [label="${text(EDGE_LABELS[edge.kind] || edge.kind)}", style=${style}, arrowhead=${head}];`);
+    }
+    out.push('}');
+    return out.join('\n') + '\n';
+  }
+
+  /** JSON of exactly what the map shows, without positions. */
+  function toJson(model) {
+    return JSON.stringify(
+      {
+        nodes: model.nodes.map((n) => ({ id: n.id, label: n.label || n.id, kind: n.kind, namespace: n.namespace || '', project: n.project })),
+        edges: model.edges.map((e) => ({ source: e.source, target: e.target, kind: e.kind, weight: e.weight || 1 })),
+      },
+      null,
+      2,
+    ) + '\n';
+  }
+
+  function xml(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /**
+   * SVG of the map as it is laid out. Nodes and frames carry their position (centre x/y) and size (w/h),
+   * colours are passed in so that the file looks like the map and does not depend on the editor theme.
+   * @param {{nodes: object[], frames?: object[], edges: object[], colors: object}} model
+   */
+  function toSvg(model) {
+    const colors = Object.assign(
+      { background: '#ffffff', text: '#222222', frame: '#888888', edge: '#888888', edges: {} },
+      model.colors,
+    );
+    const items = [...(model.frames || []), ...model.nodes];
+    const pad = 24;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const item of items) {
+      minX = Math.min(minX, item.x - item.w / 2);
+      minY = Math.min(minY, item.y - item.h / 2);
+      maxX = Math.max(maxX, item.x + item.w / 2);
+      maxY = Math.max(maxY, item.y + item.h / 2);
+    }
+    if (items.length === 0) {
+      minX = minY = 0;
+      maxX = maxY = 100;
+    }
+    const width = Math.ceil(maxX - minX + pad * 2);
+    const height = Math.ceil(maxY - minY + pad * 2);
+    const tx = (x) => Math.round((x - minX + pad) * 10) / 10;
+    const ty = (y) => Math.round((y - minY + pad) * 10) / 10;
+
+    const kinds = [...new Set(model.edges.map((e) => e.kind))];
+    const colorOf = (kind) => colors.edges[kind] || colors.edge;
+    const out = [
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12">`,
+      '  <defs>',
+      ...kinds.map(
+        (kind) =>
+          `    <marker id="arrow-${xml(kind)}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${xml(colorOf(kind))}"/></marker>`,
+      ),
+      '  </defs>',
+      `  <rect width="${width}" height="${height}" fill="${xml(colors.background)}"/>`,
+    ];
+
+    for (const frame of model.frames || []) {
+      out.push(
+        `  <rect x="${tx(frame.x - frame.w / 2)}" y="${ty(frame.y - frame.h / 2)}" width="${frame.w}" height="${frame.h}" rx="8" fill="none" stroke="${xml(colors.frame)}" stroke-dasharray="5 4"/>`,
+        `  <text x="${tx(frame.x)}" y="${ty(frame.y - frame.h / 2) + 14}" text-anchor="middle" fill="${xml(colors.text)}" font-size="11">${xml(frame.label)}</text>`,
+      );
+    }
+
+    const byId = new Map(model.nodes.map((n) => [n.id, n]));
+    for (const edge of model.edges) {
+      const a = byId.get(edge.source);
+      const b = byId.get(edge.target);
+      if (!a || !b) continue;
+      const [x1, y1] = clip(a, b);
+      const [x2, y2] = clip(b, a);
+      const dash = edge.kind === 'implements' || edge.kind === 'registers' || edge.kind === 'annotated' ? ' stroke-dasharray="6 4"' : edge.kind === 'calls' || edge.kind === 'accesses' || edge.kind === 'events' ? ' stroke-dasharray="2 3"' : '';
+      out.push(
+        `  <line x1="${tx(x1)}" y1="${ty(y1)}" x2="${tx(x2)}" y2="${ty(y2)}" stroke="${xml(colorOf(edge.kind))}" stroke-width="${Math.min(4, 1 + Math.log2(edge.weight || 1) / 2)}"${dash} marker-end="url(#arrow-${xml(edge.kind)})" opacity="0.85"/>`,
+      );
+    }
+
+    for (const node of model.nodes) {
+      out.push(
+        `  <rect x="${tx(node.x - node.w / 2)}" y="${ty(node.y - node.h / 2)}" width="${node.w}" height="${node.h}" rx="5" fill="${xml(node.fill || '#dddddd')}" stroke="${xml(node.border || '#666666')}"/>`,
+        `  <text x="${tx(node.x)}" y="${ty(node.y) + 4}" text-anchor="middle" fill="${xml(node.textColor || '#222222')}">${xml(node.label)}</text>`,
+      );
+    }
+    out.push('</svg>');
+    return out.join('\n') + '\n';
+  }
+
+  /** Where the line from the centre of a towards b leaves the rectangle of a. */
+  function clip(a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    if (dx === 0 && dy === 0) return [a.x, a.y];
+    const scale = Math.min(dx === 0 ? Infinity : a.w / 2 / Math.abs(dx), dy === 0 ? Infinity : a.h / 2 / Math.abs(dy));
+    return [a.x + dx * scale, a.y + dy * scale];
+  }
+
   return {
     stronglyConnected,
     findCycles,
@@ -326,5 +524,9 @@
     assignLayers,
     findViolations,
     collapse,
+    toMermaid,
+    toDot,
+    toJson,
+    toSvg,
   };
 });

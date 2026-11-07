@@ -174,3 +174,68 @@ test('collapse keeps edges of different kinds apart', () => {
   const result = logic.collapse(nodes, [edge('a', 'c', 'uses'), edge('a', 'c', 'calls')], (n) => n.namespace);
   assert.equal(result.edges.length, 2);
 });
+
+const exportModel = {
+  frames: true,
+  nodes: [
+    { id: 'A.One', label: 'One "x"', namespace: 'A', kind: 'class', project: 'P' },
+    { id: 'A.Two', label: 'Two', namespace: 'A', kind: 'interface', project: 'P' },
+    { id: 'B.Three', label: 'Three', namespace: '', kind: 'class', project: 'P' },
+  ],
+  edges: [
+    { source: 'A.One', target: 'A.Two', kind: 'implements' },
+    { source: 'B.Three', target: 'A.One', kind: 'registers', weight: 2 },
+    { source: 'B.Three', target: 'missing', kind: 'uses' },
+  ],
+};
+
+test('toMermaid groups namespaces into subgraphs and skips unknown targets', () => {
+  const text = logic.toMermaid(exportModel);
+  assert.match(text, /^flowchart LR\n/);
+  assert.match(text, /subgraph g0\["A"\]\n    n0\["One  x "\]\n    n1\["Two"\]\n  end/);
+  assert.match(text, /n2\["Three"\]/);
+  assert.match(text, /n0 -\.->\|implements\| n1/);
+  assert.match(text, /n2 -\.->\|registers\| n0/);
+  assert.ok(!text.includes('missing'));
+});
+
+test('toMermaid without frames is a flat list', () => {
+  assert.ok(!logic.toMermaid({ ...exportModel, frames: false }).includes('subgraph'));
+});
+
+test('toDot escapes labels, clusters namespaces and styles kinds', () => {
+  const text = logic.toDot(exportModel);
+  assert.match(text, /^digraph Atlas \{/);
+  assert.match(text, /subgraph cluster_0 \{\n    label="A";/);
+  assert.match(text, /n0 \[label="One \\"x\\""\];/);
+  assert.match(text, /n0 -> n1 \[label="implements", style=dashed, arrowhead=empty\];/);
+  assert.match(text, /\}\n$/);
+});
+
+test('toJson contains nodes and edges without positions', () => {
+  const data = JSON.parse(logic.toJson(exportModel));
+  assert.equal(data.nodes.length, 3);
+  assert.deepEqual(data.edges[1], { source: 'B.Three', target: 'A.One', kind: 'registers', weight: 2 });
+});
+
+test('toSvg draws frames, edges and escaped labels inside the canvas', () => {
+  const svg = logic.toSvg({
+    frames: [{ x: 50, y: 25, w: 160, h: 90, label: 'A & B' }],
+    nodes: [
+      { id: 'a', label: '<One>', x: 0, y: 0, w: 60, h: 24, fill: '#fff', border: '#000' },
+      { id: 'b', label: 'Two', x: 100, y: 50, w: 60, h: 24 },
+    ],
+    edges: [{ source: 'a', target: 'b', kind: 'calls', weight: 1 }, { source: 'a', target: 'zz', kind: 'uses' }],
+    colors: { edges: { calls: '#ff8800' } },
+  });
+  assert.match(svg, /^<svg xmlns=/);
+  assert.match(svg, /&lt;One&gt;/);
+  assert.match(svg, /A &amp; B/);
+  assert.match(svg, /stroke="#ff8800"/);
+  assert.equal((svg.match(/<line /g) || []).length, 1);
+  assert.match(svg, /marker id="arrow-calls"/);
+});
+
+test('toSvg copes with an empty map', () => {
+  assert.match(logic.toSvg({ nodes: [], edges: [] }), /<svg [^>]*width="148"/);
+});
