@@ -10,7 +10,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
-### Unreleased
+### 1.1.0 – 2026-11-07
 
 - Added: XAML files (`.xaml`, `.axaml`) are read. Types that are only used there (windows, user controls, converters, view models) get a new "XAML references" relationship and no longer appear as unused. Setting `dotnetAtlas.analyzeXaml` switches it off.
 - Added: global exceptions for unused candidates with the settings `dotnetAtlas.ignoreUnused` and `dotnetAtlas.ignoreUnusedDefaults`.
@@ -71,7 +71,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Deutsch
 
-### Unveröffentlicht
+### 1.1.0 – 2026-11-07
 
 - Neu: XAML-Dateien (`.xaml`, `.axaml`) werden gelesen. Typen, die nur dort benutzt werden (Fenster, UserControls, Converter, ViewModels), erhalten die neue Beziehung „XAML references“ und erscheinen nicht mehr als ungenutzt. Die Einstellung `dotnetAtlas.analyzeXaml` schaltet das ab.
 - Neu: globale Ausnahmen für ungenutzte Kandidaten über die Einstellungen `dotnetAtlas.ignoreUnused` und `dotnetAtlas.ignoreUnusedDefaults`.
@@ -132,7 +132,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
-### 未发布
+### 1.1.0 – 2026-11-07
 
 - 新增：读取 XAML 文件（`.xaml`、`.axaml`）。只在其中使用的类型（窗口、用户控件、转换器、视图模型）获得新的“XAML references”关系，不再显示为未使用。设置项 `dotnetAtlas.analyzeXaml` 可将其关闭。
 - 新增：通过设置项 `dotnetAtlas.ignoreUnused` 与 `dotnetAtlas.ignoreUnusedDefaults` 为未使用候选设置全局例外。
@@ -193,7 +193,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
-### Не выпущено
+### 1.1.0 – 2026-11-07
 
 - Добавлено: читаются файлы XAML (`.xaml`, `.axaml`). Типы, которые используются только в них (окна, пользовательские элементы управления, конвертеры, модели представления), получают новую связь «XAML references» и больше не считаются неиспользуемыми. Параметр `dotnetAtlas.analyzeXaml` отключает это.
 - Добавлено: глобальные исключения для неиспользуемых кандидатов через параметры `dotnetAtlas.ignoreUnused` и `dotnetAtlas.ignoreUnusedDefaults`.
@@ -254,7 +254,7 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Español
 
-### Sin publicar
+### 1.1.0 – 2026-11-07
 
 - Añadido: se leen los archivos XAML (`.xaml`, `.axaml`). Los tipos que solo se usan allí (ventanas, controles de usuario, convertidores, modelos de vista) reciben la nueva relación «XAML references» y ya no aparecen como sin usar. El ajuste `dotnetAtlas.analyzeXaml` lo desactiva.
 - Añadido: excepciones globales para los candidatos sin usar con los ajustes `dotnetAtlas.ignoreUnused` y `dotnetAtlas.ignoreUnusedDefaults`.
