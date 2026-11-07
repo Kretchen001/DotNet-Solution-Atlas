@@ -346,14 +346,17 @@ export class AtlasPanel {
   <body>
     <div id="app">
       <aside id="filters" aria-label="Filters">
-        <h3>Relationships</h3>
+        <h3 id="relationshipsHeading">Relationships</h3>
         <div id="edgeKinds"></div>
-        <h3>Types</h3>
+        <h3 id="typesHeading">Types</h3>
         <div id="kinds"></div>
         <h3 id="languagesHeading" hidden>Languages</h3>
         <div id="languages"></div>
-        <h3>Projects</h3>
+        <h3 id="projectsHeading">Projects</h3>
         <div id="projects"></div>
+        <h3 id="namespacesHeading">Namespaces</h3>
+        <input id="namespaceSearch" type="search" placeholder="Filter the list" aria-label="Filter the list of namespaces">
+        <div id="namespaceList"></div>
         <h3>Groups</h3>
         <div id="groups"></div>
         <h3>Analysis</h3>

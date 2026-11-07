@@ -53,6 +53,7 @@
     languages: new Set(LANGUAGES.map((l) => l.id)),
     edgeKinds: new Set(EDGE_KINDS.map((k) => k.id)),
     projects: new Set(),
+    nsFilter: new Set(), // namespaces that are shown ('' is the global namespace)
     query: '',
     focus: false,
     namespaces: 'off', // off | grouped | nested
@@ -162,6 +163,8 @@
     state.namespaces = ['off', 'grouped', 'nested'].includes(grouping) ? grouping : 'off';
     $('namespaces').value = state.namespaces;
     state.projects = new Set(graph.nodes.map((n) => n.project));
+    state.nsFilter = new Set(graph.nodes.map((n) => n.namespace || ''));
+    $('namespaceSearch').value = '';
     lastVisibleKey = '';
 
     setRulesInfo(rules, false);
@@ -289,6 +292,62 @@
     }
   }
 
+  /**
+   * "all / none" in the heading of a filter group. `apply(on)` changes the set behind the checkboxes;
+   * the checkboxes of the box follow, and the map is updated once.
+   */
+  function addBulk(headingId, boxId, apply) {
+    const heading = $(headingId);
+    heading.querySelector('.bulk')?.remove();
+
+    const setAll = (on) => {
+      apply(on);
+      for (const input of $(boxId).querySelectorAll('input[type="checkbox"]')) {
+        if (!input.closest('label').hidden) input.checked = on;
+      }
+      applyView();
+    };
+
+    heading.append(el('span', { className: 'bulk' },
+      link('all', () => setAll(true), 'Show everything in this list'),
+      ' · ',
+      link('none', () => setAll(false), 'Hide everything in this list'),
+    ));
+  }
+
+  /** A set that follows "all / none" for a list of values. */
+  const bulkOf = (set, values) => (on) => {
+    for (const value of values) {
+      if (on) set.add(value);
+      else set.delete(value);
+    }
+  };
+
+  /** Namespaces with a count each; the search box narrows the list, and "all / none" apply to what is listed. */
+  function buildNamespaceList(graph) {
+    const box = $('namespaceList');
+    box.replaceChildren();
+
+    const counts = new Map();
+    for (const node of graph.nodes) counts.set(node.namespace || '', (counts.get(node.namespace || '') || 0) + 1);
+
+    const names = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+    $('namespacesHeading').hidden = names.length < 2;
+    $('namespaceSearch').hidden = names.length < 2;
+    box.hidden = names.length < 2;
+    if (names.length < 2) return;
+
+    for (const name of names) {
+      const row = checkbox(name || '(global)', state.nsFilter.has(name), counts.get(name), null, (on) => toggle(state.nsFilter, name, on));
+      row.title = name || '(global namespace)';
+      row.dataset.namespace = name;
+      box.append(row);
+    }
+
+    const visibleNames = () => [...box.children].filter((row) => !row.hidden).map((row) => row.dataset.namespace);
+    addBulk('namespacesHeading', 'namespaceList', (on) => bulkOf(state.nsFilter, visibleNames())(on));
+  }
+
   function buildFilters(graph) {
     const kindBox = $('kinds');
     kindBox.replaceChildren();
@@ -333,6 +392,16 @@
       const count = graph.nodes.filter((n) => n.project === project).length;
       projectBox.append(checkbox(project, true, count, null, (on) => toggle(state.projects, project, on)));
     }
+
+    // "all / none" where a list has more than one entry.
+    addBulk('relationshipsHeading', 'edgeKinds', bulkOf(state.edgeKinds, EDGE_KINDS.map((k) => k.id)));
+    addBulk('typesHeading', 'kinds', bulkOf(state.kinds, KINDS.map((k) => k.id)));
+    if (present.length > 1) addBulk('languagesHeading', 'languages', bulkOf(state.languages, present.map((l) => l.id)));
+    else $('languagesHeading').querySelector('.bulk')?.remove();
+    if (projects.length > 1) addBulk('projectsHeading', 'projects', bulkOf(state.projects, projects));
+    else $('projectsHeading').querySelector('.bulk')?.remove();
+
+    buildNamespaceList(graph);
   }
 
   function checkbox(text, checked, count, swatch, onChange) {
@@ -612,6 +681,7 @@
         const visible =
           state.kinds.has(node.data('kind')) &&
           state.projects.has(node.data('project')) &&
+          state.nsFilter.has(node.data('namespace') || '') &&
           state.languages.has(languageOf(node.data())) &&
           (!state.focus || !neighbourhood || neighbourhood.contains(node));
         node.toggleClass('hidden', !visible);
@@ -1296,6 +1366,13 @@
       vscode.postMessage({ type: 'save', format, content: L.toJson(textModel) });
     }
   }
+
+  $('namespaceSearch').addEventListener('input', (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    for (const row of $('namespaceList').children) {
+      row.hidden = query !== '' && !(row.dataset.namespace || '(global)').toLowerCase().includes(query);
+    }
+  });
 
   $('compare').addEventListener('click', () => vscode.postMessage({ type: 'compare' }));
   $('clearCompare').addEventListener('click', () => clearBaseline());
