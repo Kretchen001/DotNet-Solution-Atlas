@@ -327,12 +327,28 @@ Basic part can be looked at separately.
 - .NET SDK 8.0 or newer (needed by the analyzer to load your solution)
 - Node.js 20 or newer (only to build the extension)
 
+### Building from source
+
+You need the .NET SDK 8.0 or newer and Node.js 20 or newer. On Windows, one
+command tests, builds and packages everything and prints how to install the
+result:
+
+```powershell
+.\scripts\build-local.ps1            # add -Install to install into VS Code as well
+```
+
+By hand, in `extension/`: `npm ci`, `npm test`, then `npm run package`. That builds
+the analyzer and creates `dotnet-solution-atlas-<version>.vsix`, which you install
+with `code --install-extension <file>` or "Install from VSIX..." in the Extensions view.
+The analyzer tests run with `dotnet test analyzer/Atlas.Analyzer.Tests`.
+
 ### Repository layout
 
 | Path         | Content                                 |
 | ------------ | --------------------------------------- |
 | `analyzer/`  | .NET console tool (Roslyn) and its tests |
 | `extension/` | VS Code extension (TypeScript, webview) |
+| `scripts/`    | Build script for Windows PowerShell      |
 
 ### License
 
@@ -681,12 +697,29 @@ sich der C#- und der Visual-Basic-Teil getrennt betrachten lassen.
 - .NET SDK 8.0 oder neuer (der Analyzer braucht es, um deine Solution zu laden)
 - Node.js 20 oder neuer (nur zum Bauen der Erweiterung)
 
+### Aus dem Quellcode bauen
+
+Du brauchst das .NET SDK 8.0 oder neuer und Node.js 20 oder neuer. Unter Windows
+testet, baut und verpackt ein Befehl alles und zeigt, wie man das Ergebnis
+installiert:
+
+```powershell
+.\scripts\build-local.ps1            # mit -Install wird auch gleich in VS Code installiert
+```
+
+Von Hand in `extension/`: `npm ci`, `npm test`, dann `npm run package`. Das baut den
+Analyzer und erzeugt `dotnet-solution-atlas-<Version>.vsix`, die du mit
+`code --install-extension <Datei>` oder „Aus VSIX installieren...“ in der
+Erweiterungsansicht installierst. Die Analyzer-Tests laufen mit
+`dotnet test analyzer/Atlas.Analyzer.Tests`.
+
 ### Aufbau des Repositorys
 
 | Pfad         | Inhalt                                       |
 | ------------ | -------------------------------------------- |
 | `analyzer/`  | .NET-Konsolenprogramm (Roslyn) und seine Tests |
 | `extension/` | VS-Code-Erweiterung (TypeScript, Webview)    |
+| `scripts/`    | Build-Skript für Windows PowerShell      |
 
 ### Lizenz
 
@@ -951,12 +984,26 @@ Visual Basic 的模块（Module）会显示为静态类；编译器生成的 `My
 - .NET SDK 8.0 或更高版本（分析器需要它来加载你的解决方案）
 - Node.js 20 或更高版本（仅用于构建扩展）
 
+### 从源代码构建
+
+需要 .NET SDK 8.0 或更高版本以及 Node.js 20 或更高版本。在 Windows 上，一条命令即可
+测试、构建并打包，并显示安装方法：
+
+```powershell
+.\scripts\build-local.ps1            # 加上 -Install 还会直接安装到 VS Code
+```
+
+手动操作时，在 `extension/` 中依次执行 `npm ci`、`npm test`、`npm run package`。这会构建分析器并生成
+`dotnet-solution-atlas-<版本>.vsix`，可用 `code --install-extension <文件>` 或扩展视图中的
+“从 VSIX 安装...”安装。分析器测试用 `dotnet test analyzer/Atlas.Analyzer.Tests` 运行。
+
 ### 仓库结构
 
 | 路径         | 内容                                  |
 | ------------ | ------------------------------------- |
 | `analyzer/`  | .NET 命令行工具（Roslyn）及其测试     |
 | `extension/` | VS Code 扩展（TypeScript、Webview）   |
+| `scripts/`    | 适用于 Windows PowerShell 的构建脚本      |
 
 ### 许可证
 
@@ -1289,12 +1336,27 @@ C# и Visual Basic, при необходимости — в одном реше
 - .NET SDK 8.0 или новее (нужен анализатору для загрузки вашего решения)
 - Node.js 20 или новее (только для сборки расширения)
 
+### Сборка из исходного кода
+
+Нужны .NET SDK 8.0 или новее и Node.js 20 или новее. В Windows одна команда тестирует,
+собирает и упаковывает всё и показывает, как установить результат:
+
+```powershell
+.\scripts\build-local.ps1            # с -Install расширение сразу устанавливается в VS Code
+```
+
+Вручную, в `extension/`: `npm ci`, `npm test`, затем `npm run package`. Это собирает
+анализатор и создаёт `dotnet-solution-atlas-<версия>.vsix`; его устанавливают командой
+`code --install-extension <файл>` или через «Установить из VSIX...» в представлении
+расширений. Тесты анализатора запускаются командой `dotnet test analyzer/Atlas.Analyzer.Tests`.
+
 ### Структура репозитория
 
 | Путь         | Содержимое                                       |
 | ------------ | ------------------------------------------------ |
 | `analyzer/`  | консольная утилита .NET (Roslyn) и её тесты      |
 | `extension/` | расширение VS Code (TypeScript, веб-представление) |
+| `scripts/`    | Скрипт сборки для Windows PowerShell      |
 
 ### Лицензия
 
@@ -1641,12 +1703,27 @@ separado la parte en C# y la parte en Visual Basic.
 - SDK de .NET 8.0 o superior (lo necesita el analizador para cargar tu solución)
 - Node.js 20 o superior (solo para compilar la extensión)
 
+### Compilar desde el código fuente
+
+Necesitas el SDK de .NET 8.0 o posterior y Node.js 20 o posterior. En Windows, un solo
+comando prueba, compila y empaqueta todo y muestra cómo instalar el resultado:
+
+```powershell
+.\scripts\build-local.ps1            # con -Install también se instala en VS Code
+```
+
+A mano, en `extension/`: `npm ci`, `npm test` y luego `npm run package`. Eso compila el
+analizador y crea `dotnet-solution-atlas-<versión>.vsix`, que se instala con
+`code --install-extension <archivo>` o con «Instalar desde VSIX...» en la vista de
+extensiones. Las pruebas del analizador se ejecutan con `dotnet test analyzer/Atlas.Analyzer.Tests`.
+
 ### Estructura del repositorio
 
 | Ruta         | Contenido                                        |
 | ------------ | ------------------------------------------------ |
 | `analyzer/`  | herramienta de consola de .NET (Roslyn) y sus pruebas |
 | `extension/` | extensión de VS Code (TypeScript, webview)       |
+| `scripts/`    | Script de compilación para Windows PowerShell      |
 
 ### Licencia
 
