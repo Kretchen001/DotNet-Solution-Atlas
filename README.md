@@ -133,32 +133,104 @@ The interface of the extension is in English.
 
 ### Architecture rules
 
-Create a file `.atlas.json` next to the solution (or in the workspace folder),
-or press "Create rules file" under "Architecture rules" in the map. It defines
-layers and what they may use:
+Architecture rules describe how the solution is *meant* to be built; the map
+then shows where the code does something else. A typical example: the domain
+layer must not know the database layer. Nothing stops a `using
+Shop.Infrastructure` from slipping into a domain class, but with a rule that
+dependency is drawn in red and listed.
+
+**Getting started**
+
+1. Press "Create rules file" under "Architecture rules" in the sidebar of the
+   map. This creates `.atlas.json` next to the solution, with the most common
+   namespace prefix of your code as a starting point.
+2. Adjust the layers to your namespaces or projects and add rules.
+3. Press "Reload" in the map. The check runs at once, no new analysis is needed.
+
+The file is looked up next to the solution first, then in the workspace
+folders. The file name can be changed with the setting `dotnetAtlas.rulesFile`.
+The sample map ("Open sample map") has rules of its own, so you can see a
+violation without any setup.
+
+**The file**
 
 ```json
 {
   "layers": [
-    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
-    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
-    { "name": "Application", "projects": ["Shop.App"] }
+    { "name": "Domain",         "namespaces": ["Shop.Domain", "Shop.Domain.*"] },
+    { "name": "Application",    "namespaces": ["Shop.Application", "Shop.Application.*"] },
+    { "name": "Infrastructure", "projects": ["Shop.Infrastructure"] },
+    { "name": "Web",            "projects": ["Shop.Web"] }
   ],
   "rules": [
-    { "from": "Domain", "cannotUse": ["Infrastructure"] },
-    { "from": "Application", "canOnlyUse": ["Domain"] }
+    { "from": "Domain",         "canOnlyUse": [] },
+    { "from": "Application",    "canOnlyUse": ["Domain"] },
+    { "from": "Infrastructure", "cannotUse": ["Web"] }
   ]
 }
 ```
 
-- A layer collects types by namespace or project. `*` stands for any
-  characters, the first matching layer wins.
-- `cannotUse` lists layers that must not be used, `canOnlyUse` lists the only
-  layers that may be used. A dependency inside a layer, or on a type without a
-  layer, is always allowed.
-- Violating relationships are drawn in red and listed; click an entry to find
-  it. "Reload" reads the file again. The file name can be changed with the
-  setting `dotnetAtlas.rulesFile`.
+*Layers* group the types of the solution:
+
+- `name` is how rules refer to the layer.
+- `namespaces` and `projects` are lists of patterns. A type belongs to the
+  layer if its namespace or the name of its project (without `.csproj`)
+  matches one of them. Use either list or both.
+- In a pattern `*` stands for any characters, dots included; everything else is
+  literal and case-sensitive, and the pattern has to match the whole name.
+  `Shop.Domain*` therefore also matches `Shop.DomainTools`. To match the
+  namespace and everything below it, and nothing else, write both
+  `Shop.Domain` and `Shop.Domain.*`.
+- If several layers match, the first one in the file wins. Put the specific
+  layers before the general ones.
+
+*Rules* limit what a layer may use:
+
+- `from` is the layer the rule is about.
+- `cannotUse` lists layers that must not be used.
+- `canOnlyUse` lists the only layers that may be used. An empty list means
+  "none": the layer may not depend on any other layer.
+- A layer can have several rules, and a rule can have both lists.
+- A rule restricts the dependencies that *leave* a layer. To say "nobody but
+  Application may use Infrastructure", write rules for the other layers
+  (`cannotUse` or `canOnlyUse`), not for Infrastructure.
+
+**What counts as a violation**
+
+- A relationship from a type of layer A to a type of layer B that a rule of A
+  forbids. Every kind of relationship counts: inheritance, use of a type,
+  calls, accesses, registrations, events and attributes.
+- Always allowed: dependencies inside one layer, dependencies from or to types
+  that belong to no layer, and layers without a rule.
+- The check works on what the filters let through. If you hide "Uses types" or
+  a project, the violations that consist of those relationships or types are
+  gone as well. Switch all relationships on for a complete check.
+- Collapsing namespaces or projects changes only the drawing; the rules are
+  checked on the types.
+
+**In the map**
+
+- Violating relationships are drawn thick and red. "Mark rule violations"
+  under "Analysis" switches the marking off.
+- "Architecture rules" in the sidebar shows how many layers there are, how
+  many types were assigned to a layer (a low number usually means that the
+  patterns do not match your namespaces), and every violation with the rule
+  it breaks. Click an entry to find it in the map.
+- Mistakes in the file (an unknown layer name, a layer without patterns, a rule
+  without `cannotUse` and `canOnlyUse`) are listed there; the rest of the file
+  still applies.
+
+**Tips**
+
+- Start with the one or two rules that matter most, for example "Domain can
+  only use Domain", and add more when those are clean.
+- The place where the application is put together (`Program.cs`, a startup
+  class) legitimately knows all layers, and registrations with the dependency
+  injection container count as relationships. Give that code a layer without
+  rules, or leave it out.
+- Existing violations are not a reason to give up on a rule: the number in the
+  sidebar shows whether it goes down over time. Together with "Compare with
+  Git…" you can also see which violations a branch introduces.
 
 ### Supported languages
 
@@ -335,32 +407,111 @@ Die Oberfläche der Erweiterung ist englisch.
 
 ### Architekturregeln
 
-Lege neben der Solution (oder im Workspace-Ordner) eine Datei `.atlas.json`
-an, oder drücke in der Karte unter „Architecture rules“ auf „Create rules
-file“. Sie definiert Schichten und was sie verwenden dürfen:
+Architekturregeln beschreiben, wie die Solution aufgebaut sein *soll*; die
+Karte zeigt dann, wo der Code davon abweicht. Ein typisches Beispiel: Die
+Domain-Schicht darf die Datenbank-Schicht nicht kennen. Nichts hindert ein
+`using Shop.Infrastructure` daran, sich in eine Domain-Klasse einzuschleichen,
+aber mit einer Regel wird diese Abhängigkeit rot gezeichnet und aufgelistet.
+
+**Erste Schritte**
+
+1. Drücke in der Seitenleiste der Karte unter „Architecture rules“ auf „Create
+   rules file“. Das legt `.atlas.json` neben der Solution an, mit dem
+   häufigsten Namespace-Präfix deines Codes als Ausgangspunkt.
+2. Passe die Schichten an deine Namespaces oder Projekte an und füge Regeln hinzu.
+3. Drücke in der Karte auf „Reload“. Die Prüfung läuft sofort, eine neue
+   Analyse ist nicht nötig.
+
+Die Datei wird zuerst neben der Solution gesucht, dann in den
+Workspace-Ordnern. Der Dateiname lässt sich mit der Einstellung
+`dotnetAtlas.rulesFile` ändern. Die Beispielkarte („Open sample map“) bringt
+eigene Regeln mit, sodass du einen Verstoß ohne jede Einrichtung siehst.
+
+**Die Datei**
 
 ```json
 {
   "layers": [
-    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
-    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
-    { "name": "Application", "projects": ["Shop.App"] }
+    { "name": "Domain",         "namespaces": ["Shop.Domain", "Shop.Domain.*"] },
+    { "name": "Application",    "namespaces": ["Shop.Application", "Shop.Application.*"] },
+    { "name": "Infrastructure", "projects": ["Shop.Infrastructure"] },
+    { "name": "Web",            "projects": ["Shop.Web"] }
   ],
   "rules": [
-    { "from": "Domain", "cannotUse": ["Infrastructure"] },
-    { "from": "Application", "canOnlyUse": ["Domain"] }
+    { "from": "Domain",         "canOnlyUse": [] },
+    { "from": "Application",    "canOnlyUse": ["Domain"] },
+    { "from": "Infrastructure", "cannotUse": ["Web"] }
   ]
 }
 ```
 
-- Eine Schicht sammelt Typen nach Namespace oder Projekt. `*` steht für
-  beliebige Zeichen, die erste passende Schicht gilt.
-- `cannotUse` nennt Schichten, die nicht verwendet werden dürfen, `canOnlyUse`
-  die einzigen Schichten, die verwendet werden dürfen. Eine Abhängigkeit
-  innerhalb einer Schicht oder auf einen Typ ohne Schicht ist immer erlaubt.
-- Verletzende Beziehungen werden rot gezeichnet und aufgelistet; ein Klick auf
-  einen Eintrag zeigt sie. „Reload“ liest die Datei neu ein. Der Dateiname lässt
-  sich mit der Einstellung `dotnetAtlas.rulesFile` ändern.
+*Schichten* (`layers`) gruppieren die Typen der Solution:
+
+- `name` ist der Name, mit dem Regeln auf die Schicht verweisen.
+- `namespaces` und `projects` sind Listen von Mustern. Ein Typ gehört zur
+  Schicht, wenn sein Namespace oder der Name seines Projekts (ohne `.csproj`)
+  zu einem davon passt. Du kannst eine der Listen verwenden oder beide.
+- In einem Muster steht `*` für beliebige Zeichen, Punkte eingeschlossen; alles
+  andere ist wörtlich gemeint und unterscheidet Groß- und Kleinschreibung, und
+  das Muster muss auf den ganzen Namen passen. `Shop.Domain*` passt daher auch
+  auf `Shop.DomainTools`. Für den Namespace und alles darunter, aber sonst
+  nichts, schreibst du `Shop.Domain` und `Shop.Domain.*`.
+- Passen mehrere Schichten, gilt die erste in der Datei. Stelle die speziellen
+  Schichten vor die allgemeinen.
+
+*Regeln* (`rules`) begrenzen, was eine Schicht verwenden darf:
+
+- `from` ist die Schicht, um die es in der Regel geht.
+- `cannotUse` nennt Schichten, die nicht verwendet werden dürfen.
+- `canOnlyUse` nennt die einzigen Schichten, die verwendet werden dürfen. Eine
+  leere Liste bedeutet „keine“: Die Schicht darf von keiner anderen Schicht
+  abhängen.
+- Eine Schicht kann mehrere Regeln haben, und eine Regel kann beide Listen
+  enthalten.
+- Eine Regel beschränkt die Abhängigkeiten, die eine Schicht *verlassen*. Um
+  „nur Application darf Infrastructure verwenden“ auszudrücken, schreibst du
+  Regeln für die anderen Schichten (`cannotUse` oder `canOnlyUse`), nicht für
+  Infrastructure.
+
+**Was als Verstoß zählt**
+
+- Eine Beziehung von einem Typ der Schicht A zu einem Typ der Schicht B, die
+  eine Regel von A verbietet. Jede Art von Beziehung zählt: Vererbung,
+  Verwendung eines Typs, Aufrufe, Zugriffe, Registrierungen, Events und
+  Attribute.
+- Immer erlaubt sind Abhängigkeiten innerhalb einer Schicht, Abhängigkeiten von
+  und zu Typen ohne Schicht sowie Schichten ohne Regel.
+- Die Prüfung arbeitet mit dem, was die Filter durchlassen. Blendest du „Uses
+  types“ oder ein Projekt aus, verschwinden auch die Verstöße, die aus diesen
+  Beziehungen oder Typen bestehen. Schalte für eine vollständige Prüfung alle
+  Beziehungen ein.
+- Das Zusammenfassen von Namespaces oder Projekten ändert nur die Darstellung;
+  die Regeln werden an den Typen geprüft.
+
+**In der Karte**
+
+- Verletzende Beziehungen werden dick und rot gezeichnet. „Mark rule
+  violations“ unter „Analysis“ schaltet die Markierung aus.
+- „Architecture rules“ in der Seitenleiste zeigt, wie viele Schichten es gibt,
+  wie viele Typen einer Schicht zugeordnet wurden (eine niedrige Zahl
+  bedeutet meist, dass die Muster nicht zu deinen Namespaces passen) und jeden
+  Verstoß mit der Regel, die er verletzt. Ein Klick auf einen Eintrag zeigt ihn
+  in der Karte.
+- Fehler in der Datei (ein unbekannter Schichtname, eine Schicht ohne Muster,
+  eine Regel ohne `cannotUse` und `canOnlyUse`) werden dort aufgelistet; der
+  Rest der Datei gilt weiter.
+
+**Tipps**
+
+- Beginne mit der einen oder den zwei wichtigsten Regeln, zum Beispiel „Domain
+  darf nur Domain verwenden“, und ergänze weitere, wenn diese sauber sind.
+- Die Stelle, an der die Anwendung zusammengesetzt wird (`Program.cs`, eine
+  Startup-Klasse), kennt berechtigterweise alle Schichten, und Registrierungen
+  im Dependency-Injection-Container zählen als Beziehungen. Gib diesem Code
+  eine Schicht ohne Regeln oder lass ihn weg.
+- Bestehende Verstöße sind kein Grund, auf eine Regel zu verzichten: Die Zahl in
+  der Seitenleiste zeigt, ob sie mit der Zeit sinkt. Zusammen mit „Compare with
+  Git…“ siehst du außerdem, welche Verstöße ein Branch neu einführt.
 
 ### Unterstützte Sprachen
 
@@ -507,28 +658,83 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 
 ### 架构规则
 
-在解决方案旁边（或工作区文件夹中）创建文件 `.atlas.json`，或在地图的
-“Architecture rules”下点击“Create rules file”。它定义各层及其可使用的内容：
+架构规则描述解决方案“应该”如何构建；地图则显示代码在哪些地方偏离了这一设计。典型例子：
+领域层不应该知道数据库层。没有什么能阻止 `using Shop.Infrastructure` 悄悄混进某个领域类，
+但有了规则，这个依赖就会以红色绘制并列出。
+
+**快速开始**
+
+1. 在地图侧边栏的“Architecture rules”下点击“Create rules file”。这会在解决方案旁创建
+   `.atlas.json`，并以代码中最常见的命名空间前缀作为起点。
+2. 按你的命名空间或项目调整各层，并添加规则。
+3. 在地图中点击“Reload”。检查会立即运行，无需重新分析。
+
+文件先在解决方案旁查找，然后在工作区文件夹中查找。文件名可通过设置
+`dotnetAtlas.rulesFile` 修改。示例地图（“Open sample map”）自带规则，
+无需任何配置就能看到违规。
+
+**文件格式**
 
 ```json
 {
   "layers": [
-    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
-    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
-    { "name": "Application", "projects": ["Shop.App"] }
+    { "name": "Domain",         "namespaces": ["Shop.Domain", "Shop.Domain.*"] },
+    { "name": "Application",    "namespaces": ["Shop.Application", "Shop.Application.*"] },
+    { "name": "Infrastructure", "projects": ["Shop.Infrastructure"] },
+    { "name": "Web",            "projects": ["Shop.Web"] }
   ],
   "rules": [
-    { "from": "Domain", "cannotUse": ["Infrastructure"] },
-    { "from": "Application", "canOnlyUse": ["Domain"] }
+    { "from": "Domain",         "canOnlyUse": [] },
+    { "from": "Application",    "canOnlyUse": ["Domain"] },
+    { "from": "Infrastructure", "cannotUse": ["Web"] }
   ]
 }
 ```
 
-- 一个层按命名空间或项目收集类型。`*` 代表任意字符，先匹配到的层生效。
-- `cannotUse` 列出不得使用的层，`canOnlyUse` 列出唯一可使用的层。层内部的依赖，
-  以及对没有层的类型的依赖，始终允许。
-- 违规的关系以红色绘制并列出，点击条目即可定位。“Reload”重新读取该文件。文件名
-  可通过设置 `dotnetAtlas.rulesFile` 修改。
+*层*（`layers`）用于把解决方案中的类型分组：
+
+- `name` 是规则引用该层时使用的名称。
+- `namespaces` 和 `projects` 是模式列表。如果类型的命名空间或其项目名称（不含 `.csproj`）
+  匹配其中之一，它就属于该层。可以只用其中一个列表，也可以两个都用。
+- 模式中的 `*` 代表任意字符（包括点）；其余部分按字面匹配并区分大小写，
+  且模式必须匹配整个名称。因此 `Shop.Domain*` 也会匹配 `Shop.DomainTools`。
+  若要只匹配该命名空间及其下级，请同时写 `Shop.Domain` 和 `Shop.Domain.*`。
+- 如果多个层都匹配，以文件中靠前的为准。请把具体的层放在笼统的层之前。
+
+*规则*（`rules`）限制某一层可以使用什么：
+
+- `from` 是规则所针对的层。
+- `cannotUse` 列出不得使用的层。
+- `canOnlyUse` 列出唯一可以使用的层。空列表表示“一个也没有”：该层不得依赖任何其他层。
+- 一个层可以有多条规则，一条规则也可以同时包含两个列表。
+- 规则限制的是*离开*某一层的依赖。要表达“只有 Application 可以使用 Infrastructure”，
+  请为其他层编写规则（`cannotUse` 或 `canOnlyUse`），而不是为 Infrastructure 编写。
+
+**什么算违规**
+
+- 从 A 层的类型指向 B 层的类型、且被 A 的某条规则禁止的关系。所有种类的关系都计入：
+  继承、类型使用、调用、访问、注册、事件和特性。
+- 始终允许的有：同一层内部的依赖、来自或指向不属于任何层的类型的依赖，以及没有规则的层。
+- 检查基于过滤器放行的内容。如果隐藏了“Uses types”或某个项目，由这些关系或类型构成的违规
+  也会随之消失。要进行完整检查，请打开所有关系。
+- 折叠命名空间或项目只改变显示；规则是在类型上检查的。
+
+**在地图中**
+
+- 违规的关系以粗红线绘制。“Analysis”下的“Mark rule violations”可关闭该标记。
+- 侧边栏的“Architecture rules”显示有多少个层、多少个类型被分配到某个层
+  （数字很低通常说明模式与你的命名空间不匹配），以及每个违规和它违反的规则。
+  点击条目即可在地图中定位。
+- 文件中的错误（未知的层名、没有模式的层、既没有 `cannotUse` 也没有 `canOnlyUse` 的规则）
+  会在那里列出；文件的其余部分仍然有效。
+
+**提示**
+
+- 先从最重要的一两条规则开始，例如“Domain 只能使用 Domain”，等它们干净之后再添加更多。
+- 组装应用程序的地方（`Program.cs`、启动类）理所当然地了解所有层，而且向依赖注入容器的注册
+  也算作关系。请为这部分代码设置一个没有规则的层，或者不把它纳入任何层。
+- 已有的违规不是放弃规则的理由：侧边栏中的数字会显示它是否随时间下降。
+  结合“Compare with Git…”，还可以看出某个分支新引入了哪些违规。
 
 ### 支持的语言
 
@@ -699,32 +905,107 @@ dotnet run --project analyzer/Atlas.Analyzer -- path/to/Your.sln --out graph.jso
 
 ### Архитектурные правила
 
-Создайте рядом с решением (или в папке рабочей области) файл `.atlas.json` либо
-нажмите «Create rules file» в разделе «Architecture rules» на карте. В нём
-задаются слои и то, что им разрешено использовать:
+Архитектурные правила описывают, как решение *должно* быть устроено; карта
+затем показывает, где код отступает от этого. Типичный пример: слой домена не
+должен знать о слое базы данных. Ничто не мешает `using Shop.Infrastructure`
+проникнуть в класс домена, но с правилом такая зависимость рисуется красным и
+попадает в список.
+
+**Начало работы**
+
+1. Нажмите «Create rules file» в разделе «Architecture rules» боковой панели
+   карты. Будет создан `.atlas.json` рядом с решением, за отправную точку
+   берётся самый частый префикс пространства имён в вашем коде.
+2. Приведите слои в соответствие с вашими пространствами имён или проектами и
+   добавьте правила.
+3. Нажмите «Reload» на карте. Проверка выполняется сразу, новый анализ не нужен.
+
+Файл ищется сначала рядом с решением, затем в папках рабочей области. Имя файла
+можно изменить параметром `dotnetAtlas.rulesFile`. У демонстрационной карты
+(«Open sample map») есть собственные правила, так что нарушение видно без
+какой-либо настройки.
+
+**Файл**
 
 ```json
 {
   "layers": [
-    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
-    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
-    { "name": "Application", "projects": ["Shop.App"] }
+    { "name": "Domain",         "namespaces": ["Shop.Domain", "Shop.Domain.*"] },
+    { "name": "Application",    "namespaces": ["Shop.Application", "Shop.Application.*"] },
+    { "name": "Infrastructure", "projects": ["Shop.Infrastructure"] },
+    { "name": "Web",            "projects": ["Shop.Web"] }
   ],
   "rules": [
-    { "from": "Domain", "cannotUse": ["Infrastructure"] },
-    { "from": "Application", "canOnlyUse": ["Domain"] }
+    { "from": "Domain",         "canOnlyUse": [] },
+    { "from": "Application",    "canOnlyUse": ["Domain"] },
+    { "from": "Infrastructure", "cannotUse": ["Web"] }
   ]
 }
 ```
 
-- Слой собирает типы по пространству имён или проекту. `*` означает любые
-  символы, действует первый подходящий слой.
-- `cannotUse` перечисляет слои, которые использовать нельзя, `canOnlyUse` — единственные
-  слои, которые можно использовать. Зависимость внутри слоя или от типа без слоя
-  разрешена всегда.
-- Нарушающие связи рисуются красным и перечисляются; щелчок по записи показывает
-  связь. «Reload» перечитывает файл. Имя файла можно изменить параметром
-  `dotnetAtlas.rulesFile`.
+*Слои* (`layers`) группируют типы решения:
+
+- `name` — имя, по которому правила ссылаются на слой.
+- `namespaces` и `projects` — списки шаблонов. Тип принадлежит слою, если его
+  пространство имён или имя его проекта (без `.csproj`) подходит под один из
+  шаблонов. Можно использовать любой из списков или оба.
+- В шаблоне `*` означает любые символы, включая точки; всё остальное
+  понимается буквально, с учётом регистра, а шаблон должен подходить ко всему
+  имени целиком. Поэтому `Shop.Domain*` подходит и к `Shop.DomainTools`. Чтобы
+  охватить пространство имён и всё, что под ним, и ничего больше, пишите
+  `Shop.Domain` и `Shop.Domain.*`.
+- Если подходит несколько слоёв, действует первый в файле. Ставьте конкретные
+  слои перед общими.
+
+*Правила* (`rules`) ограничивают то, что слой может использовать:
+
+- `from` — слой, к которому относится правило.
+- `cannotUse` перечисляет слои, которые использовать нельзя.
+- `canOnlyUse` перечисляет единственные слои, которые можно использовать.
+  Пустой список означает «никаких»: слой не может зависеть ни от одного
+  другого слоя.
+- У слоя может быть несколько правил, а правило может содержать оба списка.
+- Правило ограничивает зависимости, которые *выходят* из слоя. Чтобы
+  выразить «только Application может использовать Infrastructure», пишите
+  правила для остальных слоёв (`cannotUse` или `canOnlyUse`), а не для
+  Infrastructure.
+
+**Что считается нарушением**
+
+- Связь от типа слоя A к типу слоя B, которую запрещает правило A. Учитывается
+  любой вид связи: наследование, использование типа, вызовы, обращения,
+  регистрации, события и атрибуты.
+- Всегда разрешены зависимости внутри одного слоя, зависимости от типов и к
+  типам, не входящим ни в один слой, и слои без правил.
+- Проверка работает с тем, что пропускают фильтры. Если скрыть «Uses types»
+  или проект, исчезнут и нарушения, состоящие из этих связей или типов. Для
+  полной проверки включите все связи.
+- Свёртка пространств имён или проектов меняет только отображение; правила
+  проверяются по типам.
+
+**На карте**
+
+- Нарушающие связи рисуются толстой красной линией. «Mark rule violations» в
+  разделе «Analysis» отключает отметку.
+- «Architecture rules» в боковой панели показывает число слоёв, сколько типов
+  отнесено к слою (малое число обычно означает, что шаблоны не подходят к вашим
+  пространствам имён) и каждое нарушение с правилом, которое оно нарушает.
+  Щелчок по записи показывает его на карте.
+- Ошибки в файле (неизвестное имя слоя, слой без шаблонов, правило без
+  `cannotUse` и `canOnlyUse`) перечисляются там же; остальная часть файла
+  продолжает действовать.
+
+**Советы**
+
+- Начните с одного-двух самых важных правил, например «Domain может
+  использовать только Domain», и добавляйте остальные, когда эти будут чистыми.
+- Место, где приложение собирается воедино (`Program.cs`, класс запуска),
+  по праву знает все слои, а регистрации в контейнере внедрения зависимостей
+  считаются связями. Отнесите этот код к слою без правил или оставьте его вне
+  слоёв.
+- Уже существующие нарушения — не повод отказываться от правила: число в
+  боковой панели показывает, уменьшается ли оно со временем. Вместе с «Compare
+  with Git…» можно увидеть и то, какие нарушения вносит ветка.
 
 ### Поддерживаемые языки
 
@@ -896,32 +1177,106 @@ La interfaz de la extensión está en inglés.
 
 ### Reglas de arquitectura
 
-Crea un archivo `.atlas.json` junto a la solución (o en la carpeta del espacio
-de trabajo), o pulsa «Create rules file» en «Architecture rules» dentro del
-mapa. Define capas y lo que pueden usar:
+Las reglas de arquitectura describen cómo *debe* estar construida la solución;
+el mapa muestra después dónde el código hace otra cosa. Un ejemplo típico: la
+capa de dominio no debe conocer la capa de base de datos. Nada impide que un
+`using Shop.Infrastructure` se cuele en una clase de dominio, pero con una
+regla esa dependencia se dibuja en rojo y se enumera.
+
+**Primeros pasos**
+
+1. Pulsa «Create rules file» en «Architecture rules», en el panel lateral del
+   mapa. Esto crea `.atlas.json` junto a la solución, con el prefijo de espacio
+   de nombres más frecuente de tu código como punto de partida.
+2. Adapta las capas a tus espacios de nombres o proyectos y añade reglas.
+3. Pulsa «Reload» en el mapa. La comprobación se ejecuta de inmediato; no hace
+   falta un nuevo análisis.
+
+El archivo se busca primero junto a la solución y después en las carpetas del
+espacio de trabajo. El nombre se cambia con el ajuste `dotnetAtlas.rulesFile`.
+El mapa de ejemplo («Open sample map») trae reglas propias, así que puedes ver
+una infracción sin configurar nada.
+
+**El archivo**
 
 ```json
 {
   "layers": [
-    { "name": "Domain", "namespaces": ["Shop.Domain*"] },
-    { "name": "Infrastructure", "namespaces": ["Shop.Infrastructure*"] },
-    { "name": "Application", "projects": ["Shop.App"] }
+    { "name": "Domain",         "namespaces": ["Shop.Domain", "Shop.Domain.*"] },
+    { "name": "Application",    "namespaces": ["Shop.Application", "Shop.Application.*"] },
+    { "name": "Infrastructure", "projects": ["Shop.Infrastructure"] },
+    { "name": "Web",            "projects": ["Shop.Web"] }
   ],
   "rules": [
-    { "from": "Domain", "cannotUse": ["Infrastructure"] },
-    { "from": "Application", "canOnlyUse": ["Domain"] }
+    { "from": "Domain",         "canOnlyUse": [] },
+    { "from": "Application",    "canOnlyUse": ["Domain"] },
+    { "from": "Infrastructure", "cannotUse": ["Web"] }
   ]
 }
 ```
 
-- Una capa reúne tipos por espacio de nombres o proyecto. `*` representa
-  cualquier carácter y vale la primera capa que coincide.
-- `cannotUse` enumera las capas que no se pueden usar, `canOnlyUse` las únicas
-  capas que se pueden usar. Una dependencia dentro de una capa, o de un tipo sin
-  capa, siempre está permitida.
-- Las relaciones que infringen una regla se dibujan en rojo y se enumeran; un
-  clic en una entrada la localiza. «Reload» vuelve a leer el archivo. El nombre
-  del archivo se cambia con el ajuste `dotnetAtlas.rulesFile`.
+Las *capas* (`layers`) agrupan los tipos de la solución:
+
+- `name` es el nombre con el que las reglas se refieren a la capa.
+- `namespaces` y `projects` son listas de patrones. Un tipo pertenece a la capa
+  si su espacio de nombres o el nombre de su proyecto (sin `.csproj`) coincide
+  con alguno. Puedes usar una de las listas o ambas.
+- En un patrón, `*` representa cualquier carácter, puntos incluidos; el resto
+  se toma literalmente, distingue mayúsculas de minúsculas, y el patrón debe
+  coincidir con el nombre completo. Por eso `Shop.Domain*` también coincide con
+  `Shop.DomainTools`. Para el espacio de nombres y todo lo que hay debajo, y
+  nada más, escribe `Shop.Domain` y `Shop.Domain.*`.
+- Si coinciden varias capas, vale la primera del archivo. Pon las capas
+  específicas antes que las generales.
+
+Las *reglas* (`rules`) limitan lo que una capa puede usar:
+
+- `from` es la capa a la que se refiere la regla.
+- `cannotUse` enumera las capas que no se pueden usar.
+- `canOnlyUse` enumera las únicas capas que se pueden usar. Una lista vacía
+  significa «ninguna»: la capa no puede depender de ninguna otra.
+- Una capa puede tener varias reglas, y una regla puede llevar ambas listas.
+- Una regla limita las dependencias que *salen* de una capa. Para expresar
+  «solo Application puede usar Infrastructure», escribe reglas para las demás
+  capas (`cannotUse` o `canOnlyUse`), no para Infrastructure.
+
+**Qué cuenta como infracción**
+
+- Una relación de un tipo de la capa A a un tipo de la capa B que una regla de
+  A prohíbe. Cuenta cualquier clase de relación: herencia, uso de un tipo,
+  llamadas, accesos, registros, eventos y atributos.
+- Siempre se permiten las dependencias dentro de una capa, las dependencias de
+  y hacia tipos sin capa, y las capas sin regla.
+- La comprobación trabaja con lo que dejan pasar los filtros. Si ocultas «Uses
+  types» o un proyecto, desaparecen también las infracciones formadas por esas
+  relaciones o tipos. Para una comprobación completa, activa todas las
+  relaciones.
+- Contraer espacios de nombres o proyectos solo cambia el dibujo; las reglas se
+  comprueban sobre los tipos.
+
+**En el mapa**
+
+- Las relaciones que infringen una regla se dibujan gruesas y en rojo. «Mark
+  rule violations», en «Analysis», desactiva la marca.
+- «Architecture rules», en el panel lateral, muestra cuántas capas hay, a
+  cuántos tipos se les asignó una capa (un número bajo suele indicar que los
+  patrones no coinciden con tus espacios de nombres) y cada infracción con la
+  regla que incumple. Un clic en una entrada la localiza en el mapa.
+- Los errores del archivo (un nombre de capa desconocido, una capa sin
+  patrones, una regla sin `cannotUse` ni `canOnlyUse`) se enumeran allí; el
+  resto del archivo sigue vigente.
+
+**Consejos**
+
+- Empieza con la una o dos reglas más importantes, por ejemplo «Domain solo
+  puede usar Domain», y añade más cuando estén limpias.
+- El lugar donde se ensambla la aplicación (`Program.cs`, una clase de inicio)
+  conoce legítimamente todas las capas, y los registros en el contenedor de
+  inyección de dependencias cuentan como relaciones. Dale a ese código una capa
+  sin reglas o déjalo fuera.
+- Las infracciones existentes no son motivo para renunciar a una regla: el
+  número del panel lateral muestra si baja con el tiempo. Junto con «Compare
+  with Git…» también ves qué infracciones introduce una rama.
 
 ### Lenguajes compatibles
 
