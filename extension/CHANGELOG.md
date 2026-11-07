@@ -10,8 +10,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
-### Unreleased
+### 0.3.0 – 2026-11-07
 
+- Added: project icon (a folded map with a coastline) for the extension and, in a single-colour version, for the Activity Bar.
 - Added: an entry in the Activity Bar (left side bar) with a view that opens the map of the solution or the sample map.
 - Changed: the bundled analyzer is smaller (English resources only, no debug symbols).
 - Added: this changelog, in five languages.
@@ -34,8 +35,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Deutsch
 
-### Unveröffentlicht
+### 0.3.0 – 2026-11-07
 
+- Neu: Projekt-Icon (gefaltete Landkarte mit Küstenlinie) für die Extension und, einfarbig, für die Activity Bar.
 - Neu: Eintrag in der Activity Bar (linke Seitenleiste) mit einer Ansicht, die die Karte der Solution oder die Beispielkarte öffnet.
 - Geändert: Der mitgelieferte Analyzer ist kleiner (nur englische Ressourcen, keine Debug-Symbole).
 - Neu: dieses Änderungsprotokoll in fünf Sprachen.
@@ -58,8 +60,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
-### 未发布
+### 0.3.0 – 2026-11-07
 
+- 新增：项目图标（带海岸线的折叠地图），用于扩展本身，并提供单色版本用于活动栏。
 - 新增：在活动栏（左侧边栏）中加入入口，其视图可打开解决方案地图或示例地图。
 - 变更：随扩展提供的分析器体积更小（仅英文资源，不含调试符号）。
 - 新增：五种语言的更新日志（本文件）。
@@ -82,8 +85,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
-### Не выпущено
+### 0.3.0 – 2026-11-07
 
+- Добавлено: значок проекта (сложенная карта с береговой линией) для расширения и, в одноцветном варианте, для панели действий.
 - Добавлено: пункт в панели действий (левая боковая панель) с представлением, которое открывает карту решения или демонстрационную карту.
 - Изменено: поставляемый анализатор стал меньше (только английские ресурсы, без отладочных символов).
 - Добавлено: этот журнал изменений на пяти языках.
@@ -106,8 +110,9 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Español
 
-### Sin publicar
+### 0.3.0 – 2026-11-07
 
+- Añadido: icono del proyecto (un mapa plegado con costa) para la extensión y, en versión monocroma, para la barra de actividad.
 - Añadido: una entrada en la barra de actividad (barra lateral izquierda) con una vista que abre el mapa de la solución o el mapa de ejemplo.
 - Cambiado: el analizador incluido es más pequeño (solo recursos en inglés, sin símbolos de depuración).
 - Añadido: este registro de cambios en cinco idiomas.
