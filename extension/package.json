@@ -2,7 +2,7 @@
   "name": "dotnet-solution-atlas",
   "displayName": "DotNet Solution Atlas",
   "description": "Shows the classes, interfaces and their relationships of a C# or Visual Basic solution as an interactive map.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "license": "MIT",
   "engines": {
