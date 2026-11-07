@@ -37,12 +37,25 @@ public enum EdgeKind
     /// Enum members count as well.
     /// </summary>
     Accesses,
+
+    /// <summary>
+    /// The source registers the target with the dependency injection container
+    /// (<c>services.AddScoped&lt;IOrders, Orders&gt;()</c>, <c>AddHostedService&lt;Worker&gt;()</c>, ...).
+    /// The code that uses the container never names the implementation; this is where it is chosen.
+    /// </summary>
+    Registers,
+
+    /// <summary>The source subscribes to, unsubscribes from or raises an event of the target.</summary>
+    Events,
+
+    /// <summary>The source is marked with the target, an attribute class of the solution.</summary>
+    Annotated,
 }
 
 /// <summary>What a member refers to: a member of another type (calls, accesses) or a type as a whole (uses).</summary>
 /// <param name="Target">Id of the type that is referred to.</param>
 /// <param name="Member">Name of the called or accessed member, empty if only the type is used.</param>
-/// <param name="Kind">Only <see cref="EdgeKind.Calls"/>, <see cref="EdgeKind.Accesses"/> and <see cref="EdgeKind.Uses"/> occur.</param>
+/// <param name="Kind">Never <see cref="EdgeKind.Inherits"/> or <see cref="EdgeKind.Implements"/>: those belong to the type.</param>
 public sealed record AtlasMemberRef(string Target, string? Member, EdgeKind Kind);
 
 /// <summary>A member of a type with the places in the solution it refers to.</summary>

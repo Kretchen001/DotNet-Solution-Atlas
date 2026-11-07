@@ -95,7 +95,8 @@ internal static class BodyDependencyCollector
         {
             if (syntax.ReferencedType(node, model, ct) is { } named)
             {
-                result.Add(new Reference(SymbolIds.For(named), EdgeKind.Uses));
+                // [Authorize] marks the type, which is more than just naming a class.
+                result.Add(new Reference(SymbolIds.For(named), syntax.IsAttribute(node) ? EdgeKind.Annotated : EdgeKind.Uses));
             }
 
             if (syntax.OperationRoot(node) is { } operationRoot && model.GetOperation(operationRoot, ct) is { } operation)
@@ -131,6 +132,7 @@ internal static class BodyDependencyCollector
         {
             case IInvocationOperation invocation:
                 AddMethod(invocation.TargetMethod, result);
+                AddRegistrations(invocation, result);
                 break;
 
             case IObjectCreationOperation creation:
@@ -157,7 +159,7 @@ internal static class BodyDependencyCollector
                 break;
 
             case IEventReferenceOperation @event:
-                AddMember(@event.Event, result);
+                AddMember(@event.Event, result, EdgeKind.Events);
                 break;
 
             // foreach calls GetEnumerator, MoveNext, Current and Dispose without naming them.
@@ -196,11 +198,66 @@ internal static class BodyDependencyCollector
     private static string MemberName(IMethodSymbol method) =>
         method.MethodKind is MethodKind.Constructor or MethodKind.StaticConstructor ? method.ContainingType.Name : method.Name;
 
-    private static void AddMember(ISymbol? member, List<Reference> result)
+    private static void AddMember(ISymbol? member, List<Reference> result, EdgeKind kind = EdgeKind.Accesses)
     {
         if (member?.ContainingType is { } owner)
         {
-            result.Add(new Reference(SymbolIds.For(owner), EdgeKind.Accesses, member.Name));
+            result.Add(new Reference(SymbolIds.For(owner), kind, member.Name));
+        }
+    }
+
+    /// <summary>
+    /// The methods of the dependency injection container that register a service.
+    /// Found by name, so the analyzed solution does not need a reference to Microsoft.Extensions.DependencyInjection
+    /// to be understood, and other containers with the same extension methods work as well.
+    /// </summary>
+    private static bool IsRegistration(string name)
+    {
+        var rest = name.StartsWith("TryAdd", StringComparison.Ordinal) ? name["TryAdd".Length..]
+            : name.StartsWith("Add", StringComparison.Ordinal) ? name["Add".Length..]
+            : null;
+
+        if (rest is null)
+        {
+            return false;
+        }
+
+        if (rest.StartsWith("Keyed", StringComparison.Ordinal))
+        {
+            rest = rest["Keyed".Length..];
+        }
+
+        return rest is "Singleton" or "Scoped" or "Transient" or "HostedService" or "DbContext" or "DbContextPool" or "HttpClient";
+    }
+
+    /// <summary>
+    /// <c>services.AddScoped&lt;IOrders, Orders&gt;()</c> and <c>AddScoped(typeof(IOrders), typeof(Orders))</c>:
+    /// the registering code depends on the service and on the implementation it chooses.
+    /// </summary>
+    private static void AddRegistrations(IInvocationOperation invocation, List<Reference> result)
+    {
+        var method = invocation.TargetMethod;
+        var definition = method.ReducedFrom ?? method;
+
+        if (!IsRegistration(method.Name) || definition.Parameters.FirstOrDefault()?.Type.Name != "IServiceCollection")
+        {
+            return;
+        }
+
+        foreach (var argument in method.TypeArguments)
+        {
+            if (argument is INamedTypeSymbol named)
+            {
+                result.Add(new Reference(SymbolIds.For(named), EdgeKind.Registers));
+            }
+        }
+
+        foreach (var argument in invocation.Arguments)
+        {
+            if (argument.Value is ITypeOfOperation { TypeOperand: INamedTypeSymbol named })
+            {
+                result.Add(new Reference(SymbolIds.For(named), EdgeKind.Registers));
+            }
         }
     }
 

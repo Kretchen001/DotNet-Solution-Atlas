@@ -17,6 +17,8 @@ internal sealed class CSharpSyntaxSupport : ISyntaxSupport
 
     public SyntaxNode MemberRoot(SyntaxNode declaration) => declaration;
 
+    public bool IsAttribute(SyntaxNode node) => node is AttributeSyntax;
+
     // Nested types and delegates are nodes of their own and are analyzed separately. The
     // base list is already covered by "inherits" and "implements".
     public IEnumerable<SyntaxNode> Nodes(SyntaxNode root) =>

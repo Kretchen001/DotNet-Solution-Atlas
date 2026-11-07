@@ -29,6 +29,8 @@ internal sealed class VisualBasicSyntaxSupport : ISyntaxSupport
         _ => declaration,
     };
 
+    public bool IsAttribute(SyntaxNode node) => node is AttributeSyntax;
+
     // Nested types are nodes of their own. Inherits and Implements are already covered by the
     // "inherits" and "implements" edges.
     public IEnumerable<SyntaxNode> Nodes(SyntaxNode root) =>

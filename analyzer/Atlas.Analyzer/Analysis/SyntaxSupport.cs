@@ -28,6 +28,9 @@ internal interface ISyntaxSupport
     /// <summary>The type a name in code refers to, or the class of an attribute. Null for every other node.</summary>
     INamedTypeSymbol? ReferencedType(SyntaxNode node, SemanticModel model, CancellationToken ct);
 
+    /// <summary>True if the node names an attribute, <c>[Authorize]</c> or <c>&lt;Authorize&gt;</c>.</summary>
+    bool IsAttribute(SyntaxNode node);
+
     /// <summary>The node from which an operation tree is taken, or null if the node is not the start of one.</summary>
     SyntaxNode? OperationRoot(SyntaxNode node);
 
