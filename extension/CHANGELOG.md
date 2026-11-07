@@ -10,6 +10,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### Unreleased
+
+- Changed: maps with thousands of relationships react faster (1000 types, 10 000 relationships: filters, namespace changes and layout take about a third of the time). Fitting the view looks at the types only, the connected groups are found without Cytoscape, and above 2500 drawn relationships the arrowheads are left out, except around the selected type.
+
 ### 1.1.2 – 2026-11-07
 
 - Fixed: types that cannot be resolved (missing references in projects that were read from their files) no longer end the analysis with "Object reference not set to an instance of an object". The analyzer prints the stack trace of a failure.
@@ -80,6 +84,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### Unveröffentlicht
+
+- Geändert: Karten mit Tausenden von Beziehungen reagieren schneller (1000 Typen, 10 000 Beziehungen: Filter, Namespace-Wechsel und Layout brauchen etwa ein Drittel der Zeit). Das Einpassen der Ansicht betrachtet nur die Typen, die verbundenen Gruppen werden ohne Cytoscape gefunden, und ab 2500 gezeichneten Beziehungen entfallen die Pfeilspitzen, außer um den ausgewählten Typ.
 
 ### 1.1.2 – 2026-11-07
 
@@ -152,6 +160,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 未发布
+
+- 变更：包含数千条关系的地图响应更快（1000 个类型、10 000 条关系：过滤、命名空间切换和布局大约只需原来三分之一的时间）。适应视图时只考虑类型，连通组不再依赖 Cytoscape 计算，绘制的关系超过 2500 条时省略箭头（所选类型周围除外）。
+
 ### 1.1.2 – 2026-11-07
 
 - 修复：无法解析的类型（从文件读取的项目中缺少引用）不再使分析以“Object reference not set to an instance of an object”结束。分析器在失败时会输出堆栈跟踪。
@@ -223,6 +235,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### Не выпущено
+
+- Изменено: карты с тысячами связей реагируют быстрее (1000 типов, 10 000 связей: фильтры, смена пространств имён и раскладка занимают около трети прежнего времени). При подгонке вида учитываются только типы, связные группы находятся без Cytoscape, а при более чем 2500 отображаемых связях стрелки не рисуются (кроме связей выбранного типа).
+
 ### 1.1.2 – 2026-11-07
 
 - Исправлено: типы, которые не удаётся разрешить (отсутствующие ссылки в проектах, прочитанных из файлов), больше не приводят к завершению анализа с «Object reference not set to an instance of an object». При сбое анализатор выводит трассировку стека.
@@ -293,6 +309,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### Sin publicar
+
+- Cambiado: los mapas con miles de relaciones reaccionan más rápido (1000 tipos, 10 000 relaciones: los filtros, el cambio de espacios de nombres y el diseño tardan aproximadamente un tercio). El ajuste de la vista solo considera los tipos, los grupos conectados se encuentran sin Cytoscape y, a partir de 2500 relaciones dibujadas, se omiten las puntas de flecha (salvo alrededor del tipo seleccionado).
 
 ### 1.1.2 – 2026-11-07
 
