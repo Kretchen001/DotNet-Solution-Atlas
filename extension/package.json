@@ -21,6 +21,7 @@
     "graph",
     "roslyn"
   ],
+  "icon": "icon.png",
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
