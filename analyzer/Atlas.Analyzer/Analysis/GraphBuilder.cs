@@ -17,7 +17,7 @@ internal static class GraphBuilder
 
         // A project that targets several frameworks is loaded once per target.
         // One of them is enough to describe its types.
-        foreach (var project in projects.DistinctBy(p => p.FilePath))
+        foreach (var project in projects.DistinctBy(p => p.FilePath ?? p.Id.ToString()))
         {
             var compilation = await project.GetCompilationAsync(ct);
             if (compilation is null)
@@ -53,6 +53,14 @@ internal static class GraphBuilder
             .Select(entry => CreateNode(entry.Key, entry.Value.Symbol, entry.Value.Project, entry.Value.Compilation, ct))
             .Concat(topLevel.Values.Select(entry => entry.Node))
             .OrderBy(node => node.Id, StringComparer.Ordinal)
+            .ToList();
+
+        // Needs all ids: references to types outside the solution are left out of the member lists.
+        var known = nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+        nodes = nodes
+            .Select(node => symbols.TryGetValue(node.Id, out var entry)
+                ? node with { MemberDetails = MemberAnalyzer.Collect(entry.Symbol, entry.Compilation, known, ct) }
+                : node)
             .ToList();
 
         var edges = CreateEdges(symbols, topLevel, nodes, ct);

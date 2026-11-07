@@ -39,6 +39,19 @@ public enum EdgeKind
     Accesses,
 }
 
+/// <summary>What a member refers to: a member of another type (calls, accesses) or a type as a whole (uses).</summary>
+/// <param name="Target">Id of the type that is referred to.</param>
+/// <param name="Member">Name of the called or accessed member, empty if only the type is used.</param>
+/// <param name="Kind">Only <see cref="EdgeKind.Calls"/>, <see cref="EdgeKind.Accesses"/> and <see cref="EdgeKind.Uses"/> occur.</param>
+public sealed record AtlasMemberRef(string Target, string? Member, EdgeKind Kind);
+
+/// <summary>A member of a type with the places in the solution it refers to.</summary>
+/// <param name="Name">Display name without the containing type, e.g. <c>Confirm(Order)</c>.</param>
+/// <param name="Kind"><c>method</c>, <c>constructor</c>, <c>property</c>, <c>field</c>, <c>event</c>, <c>operator</c>, ...</param>
+/// <param name="File">Absolute path of the declaring file.</param>
+/// <param name="Line">1-based line of the declaration.</param>
+public sealed record AtlasMember(string Name, string Kind, string? File, int? Line, IReadOnlyList<AtlasMemberRef> Refs);
+
 /// <summary>A type that is declared in source code of the analyzed solution.</summary>
 /// <param name="Id">Fully qualified, unique name, e.g. <c>Shop.Domain.Order</c>.</param>
 /// <param name="Name">Short display name including generic parameters.</param>
@@ -51,6 +64,7 @@ public enum EdgeKind
 /// <param name="Lines">Total number of lines of all declarations.</param>
 /// <param name="IsStatic">True for static classes and Visual Basic modules.</param>
 /// <param name="Language">Language of the declaring project: <c>csharp</c> or <c>visualbasic</c>.</param>
+/// <param name="MemberDetails">The members with what each of them refers to; null for a type without members to show.</param>
 public sealed record AtlasNode(
     string Id,
     string Name,
@@ -63,7 +77,8 @@ public sealed record AtlasNode(
     int Methods,
     int Lines,
     bool IsStatic,
-    string Language);
+    string Language,
+    IReadOnlyList<AtlasMember>? MemberDetails = null);
 
 /// <param name="Source">Id of the dependent type.</param>
 /// <param name="Target">Id of the type it depends on.</param>
