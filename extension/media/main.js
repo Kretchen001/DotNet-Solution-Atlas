@@ -538,6 +538,41 @@
       animate: false,
       fit: true,
     }).run();
+
+    if (state.namespaces !== 'off') separateRows();
+  }
+
+  /**
+   * dagre sometimes places two types of one frame on top of each other when frames are drawn (it does not
+   * keep them apart inside a compound node). Types on the same row are moved apart from left to right;
+   * frames grow with their content, so nothing else has to change.
+   */
+  function separateRows() {
+    const gap = 24;
+    const nodes = shown().nodes('[!isNamespace]').toArray();
+    const rows = new Map();
+    for (const node of nodes) {
+      const key = Math.round(node.position('y'));
+      if (!rows.has(key)) rows.set(key, []);
+      rows.get(key).push(node);
+    }
+
+    cy.batch(() => {
+      for (const row of rows.values()) {
+        row.sort((a, b) => a.position('x') - b.position('x'));
+        for (let i = 1; i < row.length; i++) {
+          const left = row[i - 1];
+          const right = row[i];
+          const needed = left.position('x') + left.outerWidth() / 2 + gap + right.outerWidth() / 2;
+          if (right.position('x') < needed) {
+            // Everything to the right moves with it, otherwise the shift would only move the overlap.
+            const shift = needed - right.position('x');
+            for (let j = i; j < row.length; j++) row[j].position({ x: row[j].position('x') + shift, y: row[j].position('y') });
+          }
+        }
+      }
+    });
+    cy.fit(shown(), 30);
   }
 
   function openNode(node) {
@@ -1001,6 +1036,81 @@
     select(null);
     lastVisibleKey = '';
     applyView();
+  });
+
+  // ----------------------------------------------------------------- export
+
+  /** The map as it is shown at the moment: filters, collapsed groups and frames included. */
+  function exportModel() {
+    const visible = shown();
+    const kindStyle = new Map(KINDS.map((k) => [k.id, k]));
+    const edgeColors = {};
+    for (const kind of EDGE_KINDS) edgeColors[kind.id] = css(kind.color[0], kind.color[1]);
+
+    const nodes = visible.nodes('[!isNamespace]').map((n) => {
+      const box = n.boundingBox({ includeLabels: false, includeOverlays: false });
+      const style = kindStyle.get(n.data('kind')) || { fill: '#dddddd', border: '#666666' };
+      return {
+        id: n.id(),
+        label: n.data('label'),
+        kind: n.data('isGroup') ? 'group' : n.data('kind'),
+        namespace: n.data('isGroup') ? '' : n.data('namespace') || '',
+        project: n.data('project') || '',
+        x: (box.x1 + box.x2) / 2,
+        y: (box.y1 + box.y2) / 2,
+        w: box.w,
+        h: box.h,
+        fill: style.fill,
+        border: style.border,
+        textColor: '#222222',
+      };
+    });
+
+    const frames = visible.nodes('.namespace').map((f) => {
+      const box = f.boundingBox({ includeLabels: false, includeOverlays: false });
+      return { x: (box.x1 + box.x2) / 2, y: (box.y1 + box.y2) / 2, w: box.w, h: box.h, label: f.data('label') };
+    });
+
+    const edges = visible.edges().map((e) => ({
+      source: e.data('source'),
+      target: e.data('target'),
+      kind: e.data('kind'),
+      weight: e.data('weight') || 1,
+    }));
+
+    return {
+      nodes,
+      edges,
+      frames,
+      pageFrames: state.namespaces !== 'off',
+      colors: { background: '#ffffff', text: '#222222', frame: '#888888', edge: '#888888', edges: edgeColors },
+    };
+  }
+
+  function exportMap(format) {
+    if (!cy || cy.nodes().empty()) return;
+    const model = exportModel();
+    // The text formats name the frames after the namespace of the nodes.
+    const textModel = { nodes: model.nodes, edges: model.edges, frames: model.pageFrames };
+
+    if (format === 'png') {
+      const uri = cy.png({ full: true, scale: 2, bg: css('--vscode-editor-background', '#1e1e1e'), output: 'base64uri' });
+      vscode.postMessage({ type: 'save', format, content: uri.slice(uri.indexOf(',') + 1) });
+    } else if (format === 'svg') {
+      vscode.postMessage({ type: 'save', format, content: L.toSvg({ ...model, frames: model.pageFrames ? model.frames : [] }) });
+    } else if (format === 'mermaid') {
+      vscode.postMessage({ type: 'save', format, content: L.toMermaid(textModel) });
+    } else if (format === 'dot') {
+      vscode.postMessage({ type: 'save', format, content: L.toDot(textModel) });
+    } else if (format === 'json') {
+      vscode.postMessage({ type: 'save', format, content: L.toJson(textModel) });
+    }
+  }
+
+  $('export').addEventListener('change', (e) => {
+    const format = e.target.value;
+    e.target.value = '';
+    if (format) exportMap(format);
   });
 
   $('sizeBy').addEventListener('change', (e) => {

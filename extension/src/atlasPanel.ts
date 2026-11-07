@@ -9,7 +9,21 @@ interface WebviewMessage {
   type?: string;
   file?: unknown;
   line?: unknown;
+  format?: unknown;
+  /** Text of a text format, or the base64 data of an image. */
+  content?: unknown;
 }
+
+/** What the map can be saved as. The webview is untrusted, so only these formats and file types are written. */
+const EXPORT_FORMATS: Record<string, { label: string; extension: string; binary: boolean }> = {
+  png: { label: 'PNG image', extension: 'png', binary: true },
+  svg: { label: 'SVG image', extension: 'svg', binary: false },
+  mermaid: { label: 'Mermaid diagram', extension: 'mmd', binary: false },
+  dot: { label: 'Graphviz DOT', extension: 'dot', binary: false },
+  json: { label: 'JSON', extension: 'json', binary: false },
+};
+
+const MAX_EXPORT_BYTES = 64 * 1024 * 1024;
 
 /** The architecture rules file as the webview gets it: its content, or what went wrong. */
 interface RulesPayload {
@@ -203,6 +217,52 @@ export class AtlasPanel {
       case 'open':
         void this.openFile(message.file, message.line);
         break;
+
+      case 'save':
+        void this.saveExport(message.format, message.content);
+        break;
+    }
+  }
+
+  /** Asks where to save and writes what the webview exported. */
+  private async saveExport(format: unknown, content: unknown): Promise<void> {
+    const spec = typeof format === 'string' && Object.hasOwn(EXPORT_FORMATS, format) ? EXPORT_FORMATS[format] : undefined;
+    if (!spec || typeof content !== 'string') {
+      return;
+    }
+
+    const bytes = spec.binary ? Buffer.from(content, 'base64') : Buffer.from(content, 'utf8');
+    if (bytes.length === 0 || bytes.length > MAX_EXPORT_BYTES) {
+      void vscode.window.showErrorMessage(`The ${spec.label} is empty or too large to save.`);
+      return;
+    }
+
+    const solution = path.isAbsolute(this.graph.root) ? path.basename(this.graph.root, path.extname(this.graph.root)) : 'solution';
+    const folder = path.isAbsolute(this.graph.root)
+      ? path.dirname(this.graph.root)
+      : vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const name = `${solution}-map.${spec.extension}`;
+
+    const target = await vscode.window.showSaveDialog({
+      defaultUri: folder ? vscode.Uri.file(path.join(folder, name)) : undefined,
+      filters: { [spec.label]: [spec.extension] },
+      saveLabel: 'Export',
+    });
+    if (!target) {
+      return;
+    }
+
+    try {
+      await vscode.workspace.fs.writeFile(target, bytes);
+    } catch (error) {
+      void vscode.window.showErrorMessage(`The map could not be saved: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
+
+    const open = 'Open';
+    const choice = await vscode.window.showInformationMessage(`Saved ${path.basename(target.fsPath)}.`, open);
+    if (choice === open) {
+      await vscode.commands.executeCommand('vscode.open', target);
     }
   }
 
@@ -315,6 +375,16 @@ export class AtlasPanel {
               <option value="none">Off</option>
               <option value="namespace">Namespaces</option>
               <option value="project">Projects</option>
+            </select>
+          </label>
+          <label class="check">
+            <select id="export" aria-label="Export the map shown">
+              <option value="">Export…</option>
+              <option value="png">PNG image</option>
+              <option value="svg">SVG image</option>
+              <option value="mermaid">Mermaid diagram</option>
+              <option value="dot">Graphviz DOT</option>
+              <option value="json">JSON</option>
             </select>
           </label>
           <button id="fit" type="button">Fit</button>
