@@ -2,6 +2,8 @@
 
 # DotNet Solution Atlas
 
+<img src="extension/icon.png" alt="DotNet Solution Atlas logo" width="96" align="right">
+
 - [English](#english)
 - [Deutsch](#deutsch)
 - [中文](#中文)
