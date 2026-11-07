@@ -43,7 +43,57 @@
       "members": 9,
       "methods": 3,
       "lines": 120,
-      "language": "csharp"
+      "language": "csharp",
+      "memberDetails": [
+        {
+          "name": "Order()",
+          "kind": "constructor",
+          "file": null,
+          "line": 3,
+          "refs": [
+            {
+              "target": "Shop.Domain.OrderStatus",
+              "member": "New",
+              "kind": "accesses"
+            }
+          ]
+        },
+        {
+          "name": "Total",
+          "kind": "property",
+          "file": null,
+          "line": 7,
+          "refs": [
+            {
+              "target": "Shop.Domain.PriceCalculator",
+              "member": "Sum",
+              "kind": "calls"
+            },
+            {
+              "target": "Shop.Domain.Customer",
+              "member": "Discount",
+              "kind": "accesses"
+            }
+          ]
+        },
+        {
+          "name": "Confirm()",
+          "kind": "method",
+          "file": null,
+          "line": 13,
+          "refs": [
+            {
+              "target": "Shop.Domain.OrderStatus",
+              "member": "Confirmed",
+              "kind": "accesses"
+            },
+            {
+              "target": "Shop.Domain.OrderChangedHandler",
+              "kind": "uses"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "Shop.Domain.Customer",
@@ -250,228 +300,6 @@
   ],
   "edges": [
     {
-      "source": "Shop.Api.OrdersController",
-      "target": "Shop.Domain.IOrderService",
-      "kind": "uses",
-      "weight": 3
-    },
-    {
-      "source": "Shop.Api.OrdersController",
-      "target": "Shop.Domain.Order",
-      "kind": "uses",
-      "weight": 2
-    },
-    {
-      "source": "Shop.Api.CustomersController",
-      "target": "Shop.Domain.IOrderService",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Api.CustomersController",
-      "target": "Shop.Domain.Customer",
-      "kind": "uses",
-      "weight": 2
-    },
-    {
-      "source": "Shop.Domain.Order",
-      "target": "Shop.Domain.Entity",
-      "kind": "inherits",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.Customer",
-      "target": "Shop.Domain.Entity",
-      "kind": "inherits",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.Order",
-      "target": "Shop.Domain.OrderStatus",
-      "kind": "uses",
-      "weight": 2
-    },
-    {
-      "source": "Shop.Domain.Order",
-      "target": "Shop.Domain.Customer",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.IOrderService",
-      "target": "Shop.Domain.Order",
-      "kind": "uses",
-      "weight": 3
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.IOrderService",
-      "kind": "implements",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.IOrderRepository",
-      "kind": "uses",
-      "weight": 2
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.IPaymentGateway",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.IAppLogger",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.Order",
-      "kind": "uses",
-      "weight": 5
-    },
-    {
-      "source": "Shop.Domain.IOrderRepository",
-      "target": "Shop.Domain.Order",
-      "kind": "uses",
-      "weight": 4
-    },
-    {
-      "source": "Shop.Domain.IPaymentGateway",
-      "target": "Shop.Domain.Order",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Infrastructure.SqlOrderRepository",
-      "target": "Shop.Domain.IOrderRepository",
-      "kind": "implements",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Infrastructure.SqlOrderRepository",
-      "target": "Shop.Domain.Order",
-      "kind": "uses",
-      "weight": 4
-    },
-    {
-      "source": "Shop.Infrastructure.StripeGateway",
-      "target": "Shop.Domain.IPaymentGateway",
-      "kind": "implements",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Infrastructure.StripeGateway",
-      "target": "Shop.Domain.Order",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Infrastructure.SerilogLogger",
-      "target": "Shop.Domain.IAppLogger",
-      "kind": "implements",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Api.OrdersController",
-      "target": "Shop.Domain.IOrderService",
-      "kind": "calls",
-      "weight": 3
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.PriceCalculator",
-      "kind": "calls",
-      "weight": 2
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.PriceCalculator",
-      "kind": "uses",
-      "weight": 2
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.IOrderRepository",
-      "kind": "calls",
-      "weight": 4
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.IPaymentGateway",
-      "kind": "calls",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.IAppLogger",
-      "kind": "calls",
-      "weight": 3
-    },
-    {
-      "source": "Shop.Domain.Order",
-      "target": "Shop.Domain.PriceCalculator",
-      "kind": "calls",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.Order",
-      "target": "Shop.Domain.OrderChangedHandler",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.OrderChangedHandler",
-      "kind": "calls",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.Order",
-      "kind": "accesses",
-      "weight": 6
-    },
-    {
-      "source": "Shop.Api.OrdersController",
-      "target": "Shop.Domain.Order",
-      "kind": "accesses",
-      "weight": 2
-    },
-    {
-      "source": "Shop.Domain.OrderService",
-      "target": "Shop.Domain.OrderStatus",
-      "kind": "accesses",
-      "weight": 3
-    },
-    {
-      "source": "Shop.Domain.Order",
-      "target": "Shop.Domain.Customer",
-      "kind": "accesses",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Reporting.ReportBuilder",
-      "target": "Shop.Reporting.ReportFormatter",
-      "kind": "calls",
-      "weight": 3
-    },
-    {
-      "source": "Shop.Reporting.ReportBuilder",
-      "target": "Shop.Reporting.CsvWriter",
-      "kind": "calls",
-      "weight": 1
-    },
-    {
-      "source": "Shop.Reporting.ReportFormatter",
-      "target": "Shop.Reporting.CsvWriter",
-      "kind": "uses",
-      "weight": 1
-    },
-    {
       "source": "Shop.Api.<top-level statements>",
       "target": "Shop.Api.OrdersController",
       "kind": "uses",
@@ -484,6 +312,228 @@
       "weight": 1
     },
     {
+      "source": "Shop.Api.CustomersController",
+      "target": "Shop.Domain.Customer",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Api.CustomersController",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "calls",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "uses",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.Order",
+      "kind": "accesses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Api.OrdersController",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.Customer",
+      "target": "Shop.Domain.Entity",
+      "kind": "inherits",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Customer",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.IOrderRepository",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 4
+    },
+    {
+      "source": "Shop.Domain.IOrderService",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Domain.IPaymentGateway",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.LegacyHelper",
+      "target": "Shop.Infrastructure.SqlOrderRepository",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.Customer",
+      "kind": "accesses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.Customer",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.Entity",
+      "kind": "inherits",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.OrderChangedHandler",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.OrderStatus",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.Order",
+      "target": "Shop.Domain.PriceCalculator",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IAppLogger",
+      "kind": "calls",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IAppLogger",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IOrderRepository",
+      "kind": "calls",
+      "weight": 4
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IOrderRepository",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IOrderService",
+      "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IPaymentGateway",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.IPaymentGateway",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.Order",
+      "kind": "accesses",
+      "weight": 6
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 5
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.OrderChangedHandler",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.OrderStatus",
+      "kind": "accesses",
+      "weight": 3
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.PriceCalculator",
+      "kind": "calls",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Domain.OrderService",
+      "target": "Shop.Domain.PriceCalculator",
+      "kind": "uses",
+      "weight": 2
+    },
+    {
+      "source": "Shop.Infrastructure.SerilogLogger",
+      "target": "Shop.Domain.IAppLogger",
+      "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Infrastructure.SqlOrderRepository",
+      "target": "Shop.Domain.IOrderRepository",
+      "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Infrastructure.SqlOrderRepository",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 4
+    },
+    {
+      "source": "Shop.Infrastructure.StripeGateway",
+      "target": "Shop.Domain.IPaymentGateway",
+      "kind": "implements",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Infrastructure.StripeGateway",
+      "target": "Shop.Domain.Order",
+      "kind": "uses",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Legacy.OrderImport",
+      "target": "Shop.Domain.Order",
+      "kind": "accesses",
+      "weight": 3
+    },
+    {
       "source": "Shop.Legacy.OrderImport",
       "target": "Shop.Domain.OrderService",
       "kind": "calls",
@@ -496,10 +546,22 @@
       "weight": 1
     },
     {
-      "source": "Shop.Legacy.OrderImport",
-      "target": "Shop.Domain.Order",
-      "kind": "accesses",
+      "source": "Shop.Reporting.ReportBuilder",
+      "target": "Shop.Reporting.CsvWriter",
+      "kind": "calls",
+      "weight": 1
+    },
+    {
+      "source": "Shop.Reporting.ReportBuilder",
+      "target": "Shop.Reporting.ReportFormatter",
+      "kind": "calls",
       "weight": 3
+    },
+    {
+      "source": "Shop.Reporting.ReportFormatter",
+      "target": "Shop.Reporting.CsvWriter",
+      "kind": "uses",
+      "weight": 1
     }
   ]
 }

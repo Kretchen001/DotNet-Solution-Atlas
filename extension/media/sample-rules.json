@@ -1,0 +1,43 @@
+{
+  "layers": [
+    {
+      "name": "Domain",
+      "namespaces": [
+        "Shop.Domain*"
+      ]
+    },
+    {
+      "name": "Infrastructure",
+      "namespaces": [
+        "Shop.Infrastructure*"
+      ]
+    },
+    {
+      "name": "Api",
+      "namespaces": [
+        "Shop.Api*"
+      ]
+    },
+    {
+      "name": "Reporting",
+      "namespaces": [
+        "Shop.Reporting*"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "from": "Domain",
+      "cannotUse": [
+        "Infrastructure",
+        "Api"
+      ]
+    },
+    {
+      "from": "Reporting",
+      "canOnlyUse": [
+        "Domain"
+      ]
+    }
+  ]
+}
