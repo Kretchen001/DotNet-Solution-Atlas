@@ -4,6 +4,7 @@
   "description": "Shows the classes, interfaces and their relationships of a C# or Visual Basic solution as an interactive map.",
   "version": "1.0.0",
   "private": true,
+  "publisher": "local",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -106,6 +107,7 @@
     "watch": "tsc -watch -p ./",
     "test": "node --test",
     "build:analyzer": "dotnet publish ../analyzer/Atlas.Analyzer -c Release -o analyzer",
+    "package": "npm run build:analyzer && npx --yes @vscode/vsce package --allow-missing-repository",
     "vscode:prepublish": "npm run compile"
   },
   "dependencies": {
