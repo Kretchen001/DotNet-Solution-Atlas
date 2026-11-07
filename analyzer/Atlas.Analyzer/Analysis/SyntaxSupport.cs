@@ -31,9 +31,19 @@ internal interface ISyntaxSupport
     /// <summary>True for an object creation that does not name its type (C# <c>new()</c>).</summary>
     bool IsImplicitCreation(IObjectCreationOperation creation);
 
-    /// <summary>The methods and properties a foreach loop uses implicitly.</summary>
-    ForEachStatementInfo? ForEachInfo(IForEachLoopOperation loop, SemanticModel model);
+    /// <summary>The methods and properties a foreach loop uses implicitly, or null if they cannot be determined.</summary>
+    ForEachMembers? ForEachInfo(IForEachLoopOperation loop, SemanticModel model);
 }
+
+/// <summary>
+/// What a foreach loop calls without naming it. The C# and Visual Basic compilers each have their own
+/// <c>ForEachStatementInfo</c> type, so the language-specific code copies the parts into this one.
+/// </summary>
+internal readonly record struct ForEachMembers(
+    IMethodSymbol? GetEnumeratorMethod,
+    IMethodSymbol? MoveNextMethod,
+    IMethodSymbol? DisposeMethod,
+    IPropertySymbol? CurrentProperty);
 
 internal static class SyntaxSupport
 {

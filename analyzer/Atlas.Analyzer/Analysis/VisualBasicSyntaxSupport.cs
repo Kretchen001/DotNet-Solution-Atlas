@@ -67,10 +67,16 @@ internal sealed class VisualBasicSyntaxSupport : ISyntaxSupport
     // Visual Basic always names the type in "New Order()".
     public bool IsImplicitCreation(IObjectCreationOperation creation) => false;
 
-    public ForEachStatementInfo? ForEachInfo(IForEachLoopOperation loop, SemanticModel model) =>
-        loop.Syntax is ForEachBlockSyntax block
-            ? model.GetForEachStatementInfo(block)
-            : (ForEachStatementInfo?)null;
+    public ForEachMembers? ForEachInfo(IForEachLoopOperation loop, SemanticModel model)
+    {
+        if (loop.Syntax is not ForEachBlockSyntax block)
+        {
+            return null;
+        }
+
+        var info = model.GetForEachStatementInfo(block);
+        return new ForEachMembers(info.GetEnumeratorMethod, info.MoveNextMethod, info.DisposeMethod, info.CurrentProperty);
+    }
 
     /// <summary>
     /// True for names inside executable statements, initializers ("= value") and attributes.

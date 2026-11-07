@@ -69,10 +69,16 @@ internal sealed class CSharpSyntaxSupport : ISyntaxSupport
     public bool IsImplicitCreation(IObjectCreationOperation creation) =>
         creation.Syntax is ImplicitObjectCreationExpressionSyntax;
 
-    public ForEachStatementInfo? ForEachInfo(IForEachLoopOperation loop, SemanticModel model) =>
-        loop.Syntax is CommonForEachStatementSyntax statement
-            ? model.GetForEachStatementInfo(statement)
-            : (ForEachStatementInfo?)null;
+    public ForEachMembers? ForEachInfo(IForEachLoopOperation loop, SemanticModel model)
+    {
+        if (loop.Syntax is not CommonForEachStatementSyntax statement)
+        {
+            return null;
+        }
+
+        var info = model.GetForEachStatementInfo(statement);
+        return new ForEachMembers(info.GetEnumeratorMethod, info.MoveNextMethod, info.DisposeMethod, info.CurrentProperty);
+    }
 
     /// <summary>
     /// True for names inside executable code, initializers and attributes, and for the parameters
