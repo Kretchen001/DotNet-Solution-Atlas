@@ -13,10 +13,11 @@ internal static class Cli
         Atlas.Analyzer - writes the type dependency graph of a .NET solution as JSON.
 
         Usage:
-          Atlas.Analyzer <path to .sln, .slnx, .slnf, .csproj or .vbproj> [--out <file>]
+          Atlas.Analyzer <path to .sln, .slnx, .slnf, .csproj or .vbproj> [--out <file>] [--no-xaml]
 
         Options:
           --out <file>   Write the JSON to a file instead of standard output.
+          --no-xaml      Do not read .xaml / .axaml files for the types they use.
           -h, --help     Show this help.
 
         Diagnostics and progress are written to standard error, so standard
@@ -41,12 +42,17 @@ internal static class Cli
 
         var input = Path.GetFullPath(args[0]);
         string? outPath = null;
+        var readXaml = true;
 
         for (var i = 1; i < args.Length; i++)
         {
             if (args[i] == "--out" && i + 1 < args.Length)
             {
                 outPath = Path.GetFullPath(args[++i]);
+            }
+            else if (args[i] == "--no-xaml")
+            {
+                readXaml = false;
             }
             else
             {
@@ -78,7 +84,7 @@ internal static class Cli
 
         try
         {
-            return await AnalyzeAsync(input, outPath);
+            return await AnalyzeAsync(input, outPath, readXaml);
         }
         catch (Exception ex)
         {
@@ -88,13 +94,13 @@ internal static class Cli
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static async Task<int> AnalyzeAsync(string input, string? outPath)
+    private static async Task<int> AnalyzeAsync(string input, string? outPath, bool readXaml)
     {
         Console.Error.WriteLine($"Loading {input} ...");
         using var workspace = await LoadedWorkspace.OpenAsync(input);
         Console.Error.WriteLine($"Loaded {workspace.Projects.Count} project(s).");
 
-        var graph = await GraphBuilder.BuildAsync(input, workspace.Projects);
+        var graph = await GraphBuilder.BuildAsync(input, workspace.Projects, readXaml);
         await WriteAsync(graph, outPath);
         return 0;
     }

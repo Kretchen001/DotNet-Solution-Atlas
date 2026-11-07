@@ -50,6 +50,13 @@ public enum EdgeKind
 
     /// <summary>The source is marked with the target, an attribute class of the solution.</summary>
     Annotated,
+
+    /// <summary>
+    /// The source is a type with a XAML file (<c>x:Class</c>) that names the target: as an element,
+    /// <c>{x:Type}</c>, <c>{x:Static}</c>, an attached property, or by loading its XAML file
+    /// (<c>StartupUri</c>, <c>ResourceDictionary Source</c>). Resource dictionaries count for the application class.
+    /// </summary>
+    Xaml,
 }
 
 /// <summary>What a member refers to: a member of another type (calls, accesses) or a type as a whole (uses).</summary>

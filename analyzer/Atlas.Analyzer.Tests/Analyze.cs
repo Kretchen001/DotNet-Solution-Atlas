@@ -20,6 +20,9 @@ internal sealed class TestProject
 
     /// <summary>Needed for top-level statements.</summary>
     public bool Executable { get; init; }
+
+    /// <summary>Directory of the project on disk, needed to find XAML files; null for a project without files.</summary>
+    public string? Directory { get; init; }
 }
 
 /// <summary>Builds the graph for sources given as text, without MSBuild and without files on disk.</summary>
@@ -45,7 +48,9 @@ internal static class Analyze
     public static TestProject VisualBasic(string name, string source, params string[] references) =>
         new() { Name = name, Language = LanguageNames.VisualBasic, Source = source, References = references };
 
-    public static async Task<AtlasGraph> BuildAsync(params TestProject[] projects)
+    public static Task<AtlasGraph> BuildAsync(params TestProject[] projects) => BuildAsync(true, projects);
+
+    public static async Task<AtlasGraph> BuildAsync(bool readXaml, params TestProject[] projects)
     {
         using var workspace = new AdhocWorkspace();
         var ids = new Dictionary<string, ProjectId>();
@@ -66,6 +71,7 @@ internal static class Analyze
                 project.Name,
                 project.Name,
                 project.Language,
+                filePath: project.Directory is null ? null : Path.Combine(project.Directory, project.Name + ".csproj"),
                 compilationOptions: options,
                 metadataReferences: Framework.Value,
                 projectReferences: project.References.Select(name => new ProjectReference(ids[name])));
@@ -75,7 +81,7 @@ internal static class Analyze
             workspace.AddDocument(added.Id, $"{project.Name}.{extension}", SourceText.From(project.Source));
         }
 
-        return await GraphBuilder.BuildAsync("test.sln", workspace.CurrentSolution.Projects.ToList());
+        return await GraphBuilder.BuildAsync("test.sln", workspace.CurrentSolution.Projects.ToList(), readXaml);
     }
 
     public static AtlasEdge? Edge(this AtlasGraph graph, string source, string target, EdgeKind kind) =>

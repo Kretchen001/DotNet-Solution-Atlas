@@ -10,6 +10,7 @@ internal static class GraphBuilder
     public static async Task<AtlasGraph> BuildAsync(
         string root,
         IReadOnlyList<Project> projects,
+        bool readXaml = true,
         CancellationToken ct = default)
     {
         var symbols = new Dictionary<string, (INamedTypeSymbol Symbol, string Project, Compilation Compilation)>(StringComparer.Ordinal);
@@ -63,7 +64,8 @@ internal static class GraphBuilder
                 : node)
             .ToList();
 
-        var edges = CreateEdges(symbols, topLevel, nodes, ct);
+        var xaml = readXaml ? CollectXaml(projects, known) : new List<(string Source, string Target)>();
+        var edges = CreateEdges(symbols, topLevel, nodes, xaml, ct);
 
         Console.Error.WriteLine($"Found {nodes.Count} type(s) and {edges.Count} relationship(s).");
 
@@ -79,6 +81,7 @@ internal static class GraphBuilder
         Dictionary<string, (INamedTypeSymbol Symbol, string Project, Compilation Compilation)> symbols,
         Dictionary<string, (AtlasNode Node, Compilation Compilation, IReadOnlyList<GlobalStatementSyntax> Statements)> topLevel,
         List<AtlasNode> nodes,
+        IReadOnlyList<(string Source, string Target)> xaml,
         CancellationToken ct)
     {
         var known = nodes.Select(n => n.Id).ToHashSet(StringComparer.Ordinal);
@@ -109,12 +112,50 @@ internal static class GraphBuilder
             Add(id, BodyDependencyCollector.CollectTopLevel(entry.Statements, entry.Compilation, ct));
         }
 
+        foreach (var (source, target) in xaml)
+        {
+            Add(source, [(target, EdgeKind.Xaml)]);
+        }
+
         return weights
             .Select(w => new AtlasEdge(w.Key.Source, w.Key.Target, w.Key.Kind, w.Value))
             .OrderBy(e => e.Source, StringComparer.Ordinal)
             .ThenBy(e => e.Target, StringComparer.Ordinal)
             .ThenBy(e => e.Kind)
             .ToList();
+    }
+
+    /// <summary>
+    /// The references that XAML files make to types, found by reading the .xaml / .axaml files below the
+    /// directory of every project. Roslyn does not see them: the files are no part of the compilation.
+    /// </summary>
+    private static List<(string Source, string Target)> CollectXaml(IReadOnlyList<Project> projects, ISet<string> known)
+    {
+        var directories = projects
+            .Select(p => p.FilePath)
+            .OfType<string>()
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(path => XamlReferences.Normalize(Path.GetDirectoryName(path)!))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var result = new List<(string, string)>();
+        var count = 0;
+
+        foreach (var directory in directories.Where(Directory.Exists))
+        {
+            var others = directories.Where(d => !string.Equals(d, directory, StringComparison.OrdinalIgnoreCase)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var files = XamlReferences.Load(directory, others);
+            count += files.Count;
+            result.AddRange(XamlReferences.Resolve(files, directory, known));
+        }
+
+        if (count > 0)
+        {
+            Console.Error.WriteLine($"Read {count} XAML file(s).");
+        }
+
+        return result;
     }
 
     /// <summary>Project name without the target framework suffix, e.g. <c>Shop.Api</c> instead of <c>Shop.Api(net8.0)</c>.</summary>
