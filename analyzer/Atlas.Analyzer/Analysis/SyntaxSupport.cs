@@ -16,6 +16,12 @@ internal interface ISyntaxSupport
     /// </summary>
     SyntaxNode BodyRoot(SyntaxNode declaration);
 
+    /// <summary>
+    /// The node that contains a whole member including its body. A symbol points at the declaration;
+    /// in some languages that is only the header, or only the name.
+    /// </summary>
+    SyntaxNode MemberRoot(SyntaxNode declaration);
+
     /// <summary>The nodes of <paramref name="root"/> that belong to the type itself: nested types and base lists are left out.</summary>
     IEnumerable<SyntaxNode> Nodes(SyntaxNode root);
 

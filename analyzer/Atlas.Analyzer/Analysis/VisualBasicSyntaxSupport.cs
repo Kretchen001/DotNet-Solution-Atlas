@@ -20,6 +20,15 @@ internal sealed class VisualBasicSyntaxSupport : ISyntaxSupport
             ? block
             : declaration;
 
+    // A method symbol points at its header ("Sub Confirm()"), a field at the name in
+    // "Private _total As Decimal". The body is in the block around the header, or in the declarator.
+    public SyntaxNode MemberRoot(SyntaxNode declaration) => declaration switch
+    {
+        ModifiedIdentifierSyntax { Parent: VariableDeclaratorSyntax declarator } => declarator,
+        MethodBaseSyntax { Parent: MethodBlockBaseSyntax or PropertyBlockSyntax or EventBlockSyntax } => declaration.Parent!,
+        _ => declaration,
+    };
+
     // Nested types are nodes of their own. Inherits and Implements are already covered by the
     // "inherits" and "implements" edges.
     public IEnumerable<SyntaxNode> Nodes(SyntaxNode root) =>

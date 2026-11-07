@@ -15,6 +15,8 @@ internal sealed class CSharpSyntaxSupport : ISyntaxSupport
 
     public SyntaxNode BodyRoot(SyntaxNode declaration) => declaration;
 
+    public SyntaxNode MemberRoot(SyntaxNode declaration) => declaration;
+
     // Nested types and delegates are nodes of their own and are analyzed separately. The
     // base list is already covered by "inherits" and "implements".
     public IEnumerable<SyntaxNode> Nodes(SyntaxNode root) =>
