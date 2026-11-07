@@ -10,6 +10,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## English
 
+### 0.6.0 – 2026-11-07
+
+- Added: compare the open map with a Git commit, branch or tag ("Compare with Git…" in the toolbar, also a command). New types and dependencies are marked in green, removed ones are drawn again as red dashed ghosts, and the sidebar lists the changes. The revision is analyzed in a temporary checkout; your working directory is not touched.
+
 ### 0.5.0 – 2026-11-07
 
 - Added: export of the map as shown (filters, collapsed groups and namespace frames included): PNG, SVG, Mermaid, Graphviz DOT and JSON ("Export…" in the toolbar).
@@ -50,6 +54,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Deutsch
+
+### 0.6.0 – 2026-11-07
+
+- Neu: die geöffnete Karte mit einem Git-Commit, Branch oder Tag vergleichen („Compare with Git…“ in der Werkzeugleiste, auch als Befehl). Neue Typen und Abhängigkeiten werden grün markiert, entfernte als rote gestrichelte Geister erneut gezeichnet, und die Seitenleiste listet die Änderungen. Der Stand wird in einem temporären Checkout analysiert; dein Arbeitsverzeichnis bleibt unberührt.
 
 ### 0.5.0 – 2026-11-07
 
@@ -92,6 +100,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## 中文
 
+### 0.6.0 – 2026-11-07
+
+- 新增：将已打开的地图与 Git 提交、分支或标签比较（工具栏中的“Compare with Git…”，也可作为命令使用）。新增的类型和依赖以绿色标出，已删除的以红色虚线“幽灵”重新绘制，侧边栏列出所有变更。该版本在临时检出目录中分析，不会改动你的工作目录。
+
 ### 0.5.0 – 2026-11-07
 
 - 新增：导出当前显示的地图（包含过滤结果、折叠的分组和命名空间框）：PNG、SVG、Mermaid、Graphviz DOT 和 JSON（工具栏中的“Export…”）。
@@ -133,6 +145,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 
 ## Русский
 
+### 0.6.0 – 2026-11-07
+
+- Добавлено: сравнение открытой карты с коммитом, веткой или тегом Git («Compare with Git…» на панели инструментов, также как команда). Новые типы и зависимости отмечаются зелёным, удалённые рисуются снова как красные пунктирные «призраки», а боковая панель перечисляет изменения. Состояние анализируется во временной копии; рабочий каталог не затрагивается.
+
 ### 0.5.0 – 2026-11-07
 
 - Добавлено: экспорт карты в том виде, как она показана (с фильтрами, свёрнутыми группами и рамками пространств имён): PNG, SVG, Mermaid, Graphviz DOT и JSON («Export…» на панели инструментов).
@@ -173,6 +189,10 @@ All notable changes to **DotNet Solution Atlas** are listed here. The format fol
 ---
 
 ## Español
+
+### 0.6.0 – 2026-11-07
+
+- Añadido: comparar el mapa abierto con un commit, una rama o una etiqueta de Git («Compare with Git…» en la barra de herramientas, también como comando). Los tipos y dependencias nuevos se marcan en verde, los eliminados se dibujan de nuevo como «fantasmas» rojos discontinuos y el panel lateral enumera los cambios. La versión se analiza en una copia temporal; tu directorio de trabajo no se toca.
 
 ### 0.5.0 – 2026-11-07
 
