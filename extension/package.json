@@ -28,7 +28,7 @@
         {
           "id": "dotnetAtlas",
           "title": "DotNet Solution Atlas",
-          "icon": "$(type-hierarchy)"
+          "icon": "media/atlas-activitybar.svg"
         }
       ]
     },
