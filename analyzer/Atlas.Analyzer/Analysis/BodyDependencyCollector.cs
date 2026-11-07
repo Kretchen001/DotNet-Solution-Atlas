@@ -5,6 +5,9 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace Atlas.Analyzer.Analysis;
 
+/// <summary>A reference found in code: the type it points to, how, and the member if there is one.</summary>
+internal readonly record struct Reference(string Target, EdgeKind Kind, string? Member = null);
+
 /// <summary>
 /// Finds what the code of a type refers to, which the signatures alone do not show.
 /// Members are found through Roslyn's operation tree, so implicit calls are seen as well:
@@ -26,11 +29,11 @@ internal static class BodyDependencyCollector
         Compilation compilation,
         CancellationToken ct = default)
     {
-        var result = new List<(string Target, EdgeKind Kind)>();
+        var result = new List<Reference>();
 
         if (SyntaxSupport.For(compilation.Language) is not { } syntax)
         {
-            return result;
+            return [];
         }
 
         foreach (var reference in type.DeclaringSyntaxReferences)
@@ -38,8 +41,30 @@ internal static class BodyDependencyCollector
             Walk(syntax.BodyRoot(reference.GetSyntax(ct)), syntax, compilation, result, ct);
         }
 
+        return ToTargets(result);
+    }
+
+    /// <summary>
+    /// What the code of one member refers to, with the name of the called or accessed member.
+    /// <paramref name="declaration"/> is what the symbol of the member points at.
+    /// </summary>
+    public static List<Reference> CollectMember(
+        SyntaxNode declaration,
+        Compilation compilation,
+        CancellationToken ct = default)
+    {
+        var result = new List<Reference>();
+
+        if (SyntaxSupport.For(compilation.Language) is { } syntax)
+        {
+            Walk(syntax.MemberRoot(declaration), syntax, compilation, result, ct);
+        }
+
         return result;
     }
+
+    private static List<(string Target, EdgeKind Kind)> ToTargets(List<Reference> references) =>
+        references.Select(r => (r.Target, r.Kind)).ToList();
 
     /// <summary>The code of a C# file with top-level statements, which belongs to no declared type.</summary>
     public static List<(string Target, EdgeKind Kind)> CollectTopLevel(
@@ -47,21 +72,21 @@ internal static class BodyDependencyCollector
         Compilation compilation,
         CancellationToken ct = default)
     {
-        var result = new List<(string Target, EdgeKind Kind)>();
+        var result = new List<Reference>();
 
         foreach (var statement in statements)
         {
             Walk(statement, CSharpSyntaxSupport.Instance, compilation, result, ct);
         }
 
-        return result;
+        return ToTargets(result);
     }
 
     private static void Walk(
         SyntaxNode root,
         ISyntaxSupport syntax,
         Compilation compilation,
-        List<(string Target, EdgeKind Kind)> result,
+        List<Reference> result,
         CancellationToken ct)
     {
         var model = compilation.GetSemanticModel(root.SyntaxTree);
@@ -70,7 +95,7 @@ internal static class BodyDependencyCollector
         {
             if (syntax.ReferencedType(node, model, ct) is { } named)
             {
-                result.Add((SymbolIds.For(named), EdgeKind.Uses));
+                result.Add(new Reference(SymbolIds.For(named), EdgeKind.Uses));
             }
 
             if (syntax.OperationRoot(node) is { } operationRoot && model.GetOperation(operationRoot, ct) is { } operation)
@@ -87,7 +112,7 @@ internal static class BodyDependencyCollector
         IOperation operation,
         ISyntaxSupport syntax,
         SemanticModel model,
-        List<(string Target, EdgeKind Kind)> result)
+        List<Reference> result)
     {
         // User-defined operators and conversions are calls, too: a + b, (Money)x, x++.
         var operatorMethod = operation switch
@@ -153,7 +178,7 @@ internal static class BodyDependencyCollector
         }
     }
 
-    private static void AddMethod(IMethodSymbol? method, List<(string Target, EdgeKind Kind)> result)
+    private static void AddMethod(IMethodSymbol? method, List<Reference> result)
     {
         if (method is null || method.MethodKind is MethodKind.LocalFunction or MethodKind.AnonymousFunction)
         {
@@ -163,23 +188,27 @@ internal static class BodyDependencyCollector
         // For an extension method called like an instance method this is the static class.
         if ((method.ReducedFrom ?? method).ContainingType is { } owner)
         {
-            result.Add((SymbolIds.For(owner), EdgeKind.Calls));
+            result.Add(new Reference(SymbolIds.For(owner), EdgeKind.Calls, MemberName(method)));
         }
     }
 
-    private static void AddMember(ISymbol? member, List<(string Target, EdgeKind Kind)> result)
+    /// <summary>The name shown for a called method; the compiler calls every constructor <c>.ctor</c>, so it is shown with the name of its type.</summary>
+    private static string MemberName(IMethodSymbol method) =>
+        method.MethodKind is MethodKind.Constructor or MethodKind.StaticConstructor ? method.ContainingType.Name : method.Name;
+
+    private static void AddMember(ISymbol? member, List<Reference> result)
     {
         if (member?.ContainingType is { } owner)
         {
-            result.Add((SymbolIds.For(owner), EdgeKind.Accesses));
+            result.Add(new Reference(SymbolIds.For(owner), EdgeKind.Accesses, member.Name));
         }
     }
 
-    private static void AddTypes(ITypeSymbol? type, EdgeKind kind, List<(string Target, EdgeKind Kind)> result)
+    private static void AddTypes(ITypeSymbol? type, EdgeKind kind, List<Reference> result)
     {
         foreach (var named in DependencyCollector.Named(type))
         {
-            result.Add((SymbolIds.For(named), kind));
+            result.Add(new Reference(SymbolIds.For(named), kind));
         }
     }
 }

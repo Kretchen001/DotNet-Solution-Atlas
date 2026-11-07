@@ -65,6 +65,9 @@ internal static class DependencyCollector
         }
     }
 
+    /// <summary>The types a member names in its signature (field type, return and parameter types).</summary>
+    internal static IEnumerable<string> SignatureTargets(ISymbol member) => Referenced(TypesInSignature(member));
+
     private static IEnumerable<ITypeSymbol> TypesInSignature(ISymbol member)
     {
         switch (member)
