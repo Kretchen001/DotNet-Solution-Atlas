@@ -42,6 +42,10 @@
   ];
 
   const NODE_HEIGHT = 30;
+  // From this many drawn types on, the fast layered layout of atlasLogic replaces dagre, which becomes far too
+  // slow for large maps (it inserts a helper node for every rank a long edge spans).
+  const FAST_LAYOUT_LIMIT = 80;
+  const FAST_LAYOUT_PAIRS = 200;
   const MAX_EXTRA_HEIGHT = 30;
 
   const state = {
@@ -364,7 +368,12 @@
     const addedColor = css('--vscode-charts-green', '#3fa66b');
     const panel = css('--vscode-editorWidget-background', '#252526');
 
+    const manyEdges = graph.edges.length > 1500;
+
     cy = cytoscape({
+      // While panning and zooming, large maps are drawn from a texture and without the edges.
+      textureOnViewport: manyEdges,
+      hideEdgesOnViewport: graph.edges.length > 3000,
       container: $('cy'),
       elements: [
         ...allNamespaces(graph).map((namespace) => ({
@@ -418,7 +427,8 @@
         {
           selector: 'edge',
           style: {
-            'curve-style': 'bezier',
+            // Curved edges are expensive to draw: large maps get straight lines.
+            'curve-style': manyEdges ? 'straight' : 'bezier',
             width: 'mapData(weight, 1, 10, 1, 4)',
             'line-color': edgeColor,
             'target-arrow-color': edgeColor,
@@ -652,7 +662,27 @@
   }
 
   function layout() {
-    shown().layout({
+    const types = shown().nodes('[!isNamespace]');
+
+    // dagre only needs to know that two types are connected, not by how many kinds of relationship.
+    const pairs = new Set();
+    const edges = shown().edges().filter((edge) => {
+      const key = edge.data('source') + '\u0000' + edge.data('target');
+      if (pairs.has(key)) return false;
+      pairs.add(key);
+      return true;
+    });
+
+    // dagre is slow for many types and also for few types that are densely connected, for example the
+    // groups of a collapsed solution: 40 groups with a thousand relationships take it several seconds.
+    if (types.length > FAST_LAYOUT_LIMIT || pairs.size > FAST_LAYOUT_PAIRS) {
+      fastLayout(types);
+      return;
+    }
+
+    const nodes = shown().nodes();
+
+    nodes.union(edges).layout({
       name: 'dagre',
       rankDir: 'TB',
       nodeSep: 24,
@@ -663,6 +693,25 @@
     }).run();
 
     if (state.namespaces !== 'off') separateRows();
+  }
+
+  /** Layout for large maps: see layeredLayout in atlasLogic.js. Namespace frames follow their types. */
+  function fastLayout(types) {
+    const byId = new Map(types.map((n) => [n.id(), n]));
+    const grouped = state.namespaces !== 'off';
+    const positions = L.layeredLayout(
+      types.map((n) => ({ id: n.id(), namespace: n.data('isGroup') ? '' : n.data('namespace') || '' })),
+      shown().edges().map((e) => ({ source: e.data('source'), target: e.data('target') })),
+      {
+        size: (n) => ({ w: byId.get(n.id).outerWidth(), h: byId.get(n.id).outerHeight() }),
+        groupOf: (n) => (grouped ? n.namespace : ''),
+      },
+    );
+
+    cy.batch(() => {
+      for (const [id, position] of positions) byId.get(id).position({ x: position.x, y: position.y });
+    });
+    cy.fit(shown(), 30);
   }
 
   /**
@@ -961,7 +1010,8 @@
   /** Fades everything except the group, zooms to it and lists its members. */
   /**
    * Centres the map on a node and zooms so that it and its neighbours are in view, without
-   * zooming in further than 1.5 for a type that has hardly any neighbours.
+   * zooming in further than 1.5 for a type that has hardly any neighbours. A node that sits in
+   * a collapsed group or is filtered out is brought back first by select().
    */
   function focusInMap(node) {
     if (!cy || node.removed()) return;
