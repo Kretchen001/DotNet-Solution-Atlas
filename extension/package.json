@@ -51,6 +51,11 @@
         "command": "dotnetAtlas.openSample",
         "title": "Open sample map",
         "category": "DotNet Solution Atlas"
+      },
+      {
+        "command": "dotnetAtlas.compareWithGit",
+        "title": "Compare the open map with a Git commit, branch or tag",
+        "category": "DotNet Solution Atlas"
       }
     ],
     "configuration": {

@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { ACTIONS_VIEW_ID, ActionsViewProvider } from './actionsView';
 import { AnalyzerError, resolveAnalyzerDll, runAnalyzer } from './analyzerRunner';
 import { AtlasPanel } from './atlasPanel';
+import { analyzeRevision, pickRevision, repositoryRoot } from './gitCompare';
 import { pickTarget } from './targetPicker';
 import type { AtlasGraph } from './types';
 
@@ -17,6 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.window.registerTreeDataProvider(ACTIONS_VIEW_ID, new ActionsViewProvider()),
     vscode.commands.registerCommand('dotnetAtlas.openMap', () => openMap(context)),
     vscode.commands.registerCommand('dotnetAtlas.openSample', () => openSample(context)),
+    vscode.commands.registerCommand('dotnetAtlas.compareWithGit', () => compareWithGit(context)),
   );
 }
 
@@ -36,6 +38,52 @@ async function openMap(context: vscode.ExtensionContext): Promise<void> {
   }
 
   AtlasPanel.show(context.extensionUri, graph);
+}
+
+/** Compares the open map with the same solution in another Git revision. */
+async function compareWithGit(context: vscode.ExtensionContext): Promise<void> {
+  const channel = output!;
+  const target = AtlasPanel.currentTarget();
+
+  if (!target || !path.isAbsolute(target)) {
+    void vscode.window.showInformationMessage('DotNet Solution Atlas: open the map of a solution first, then compare it.');
+    return;
+  }
+
+  try {
+    const revision = await pickRevision(await repositoryRoot(path.dirname(target)));
+    if (!revision) {
+      return;
+    }
+
+    const dotnetPath = vscode.workspace.getConfiguration('dotnetAtlas').get<string>('dotnetPath', 'dotnet');
+    const baseline = await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `DotNet Solution Atlas: analyzing ${revision.label}`,
+        cancellable: true,
+      },
+      (progress, token) =>
+        analyzeRevision({
+          target,
+          revision,
+          analyzerDll: resolveAnalyzerDll(context.extensionPath),
+          dotnetPath,
+          output: channel,
+          token,
+          progress: (message) => progress.report({ message }),
+        }),
+    );
+
+    AtlasPanel.showBaseline(revision.label, baseline);
+  } catch (error) {
+    if (error instanceof AnalyzerError) {
+      void vscode.window.showErrorMessage(`DotNet Solution Atlas: ${error.message}`);
+    } else {
+      channel.appendLine(String(error));
+      void vscode.window.showErrorMessage('DotNet Solution Atlas: unexpected error, see the output for details.');
+    }
+  }
 }
 
 /** Shows a small example map, so the view can be tried without a .NET solution or SDK. */

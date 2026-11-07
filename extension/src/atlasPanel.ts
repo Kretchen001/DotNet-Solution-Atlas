@@ -48,6 +48,29 @@ export class AtlasPanel {
   /** Rules that come with the sample map instead of a file. */
   private sampleRules: unknown;
 
+  /** The solution or project file of the map that is open, if any. */
+  static currentTarget(): string | undefined {
+    return AtlasPanel.current?.graph.root;
+  }
+
+  /** Marks what changed since an earlier revision in the open map. */
+  static showBaseline(label: string, baseline: AtlasGraph): void {
+    const panel = AtlasPanel.current;
+    if (!panel) {
+      return;
+    }
+
+    // Only what the comparison needs: no paths of the temporary checkout, no member details.
+    const slim: AtlasGraph = {
+      root: baseline.root,
+      nodes: baseline.nodes.map(({ memberDetails: _members, file: _file, ...node }) => node),
+      edges: baseline.edges,
+    };
+
+    panel.panel.reveal();
+    void panel.panel.webview.postMessage({ type: 'baseline', label, graph: slim });
+  }
+
   static show(extensionUri: vscode.Uri, graph: AtlasGraph, sampleRules?: unknown): void {
     if (AtlasPanel.current) {
       AtlasPanel.current.update(graph, sampleRules);
@@ -218,6 +241,10 @@ export class AtlasPanel {
         void this.openFile(message.file, message.line);
         break;
 
+      case 'compare':
+        void vscode.commands.executeCommand('dotnetAtlas.compareWithGit');
+        break;
+
       case 'save':
         void this.saveExport(message.format, message.content);
         break;
@@ -340,6 +367,10 @@ export class AtlasPanel {
         </label>
         <label class="check"><input id="markCycles" type="checkbox" checked> Mark cycles</label>
         <label class="check"><input id="showViolations" type="checkbox" checked> Mark rule violations</label>
+        <details id="changesBox" hidden>
+          <summary>Changes <span id="changeCount" class="badge"></span></summary>
+          <div id="changes"></div>
+        </details>
         <details>
           <summary>Cycles <span id="cycleCount" class="badge"></span></summary>
           <div id="cycles"></div>
@@ -387,6 +418,8 @@ export class AtlasPanel {
               <option value="json">JSON</option>
             </select>
           </label>
+          <button id="compare" type="button" title="Mark what changed since a Git commit, branch or tag">Compare with Git…</button>
+          <button id="clearCompare" type="button" hidden>Clear comparison</button>
           <button id="fit" type="button">Fit</button>
           <button id="relayout" type="button">Re-layout</button>
         </div>

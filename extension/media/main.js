@@ -64,6 +64,7 @@
   };
 
   let cy = null;
+  let currentGraph = null;
   let lastVisibleKey = '';
   let analysis = null;
 
@@ -116,7 +117,7 @@
 
   /** The real types: no namespace frames and no collapsed groups. */
   function typeNodes() {
-    return cy.nodes('[!isNamespace][!isGroup]');
+    return cy.nodes('[!isNamespace][!isGroup][!isGhost]');
   }
 
   /** What is drawn at the moment. */
@@ -145,6 +146,11 @@
   // ---------------------------------------------------------------- loading
 
   function load(graph, settings, rules) {
+    currentGraph = graph;
+    state.baseline = null;
+    $('compare').hidden = false;
+    $('clearCompare').hidden = true;
+    $('changesBox').hidden = true;
     state.selected = null;
     state.expanded = new Set();
     // The settings only give the starting values; the toolbar can change them afterwards.
@@ -163,6 +169,111 @@
     buildGraph(graph, settings);
     applyView();
     showDetails(null);
+  }
+
+  // ------------------------------------------------------------- comparison
+
+  /** Marks what changed since an earlier revision: new types and dependencies, and the removed ones as ghosts. */
+  function showBaseline(label, previous) {
+    if (!cy || !currentGraph) return;
+    clearBaseline(false);
+
+    const diff = L.diffGraphs(previous, currentGraph);
+    state.baseline = { label, diff };
+
+    cy.batch(() => {
+      for (const node of diff.removedNodes) {
+        if (cy.getElementById(node.id).nonempty()) continue;
+        cy.add({
+          group: 'nodes',
+          data: { ...node, label: node.name, h: NODE_HEIGHT, isGhost: true, file: undefined },
+          classes: 'ghost removed',
+        });
+      }
+
+      for (const id of diff.addedNodes) cy.getElementById(id).addClass('added');
+
+      const byKey = new Map();
+      cy.edges().not('.synthetic, .ghost').forEach((edge) => {
+        byKey.set(L.edgeKey({ source: edge.data('source'), target: edge.data('target'), kind: edge.data('kind') }), edge);
+      });
+      for (const edge of diff.addedEdges) {
+        const found = byKey.get(L.edgeKey(edge));
+        if (found) found.addClass('added');
+      }
+
+      diff.removedEdges.forEach((edge, index) => {
+        if (cy.getElementById(edge.source).empty() || cy.getElementById(edge.target).empty()) return;
+        cy.add({
+          group: 'edges',
+          data: { id: 'ghost:' + index, source: edge.source, target: edge.target, kind: edge.kind, weight: edge.weight || 1 },
+          classes: 'ghost removed',
+        });
+      });
+    });
+
+    $('compare').textContent = 'Compare with Git…';
+    $('clearCompare').hidden = false;
+    $('changesBox').hidden = false;
+    $('changesBox').open = true;
+    lastVisibleKey = '';
+    applyView();
+    renderChanges();
+  }
+
+  function clearBaseline(apply = true) {
+    if (!cy) return;
+    cy.remove('.ghost');
+    cy.elements().removeClass('added removed');
+    state.baseline = null;
+    $('clearCompare').hidden = true;
+    $('changesBox').hidden = true;
+    if (apply) {
+      lastVisibleKey = '';
+      applyView();
+    }
+  }
+
+  function renderChanges() {
+    const box = $('changes');
+    box.replaceChildren();
+    if (!state.baseline) return;
+
+    const { label, diff } = state.baseline;
+    const total = diff.addedNodes.length + diff.removedNodes.length + diff.addedEdges.length + diff.removedEdges.length;
+    $('changeCount').textContent = total === 0 ? '✓' : String(total);
+
+    box.append(el('p', { className: 'hint', textContent: `Compared with ${label}. Green: new, red dashed: removed.` }));
+    if (total === 0) {
+      box.append(el('p', { textContent: 'No type and no dependency changed.' }));
+      return;
+    }
+
+    const section = (title, items) => {
+      if (items.length === 0) return;
+      box.append(el('p', { className: 'sub', textContent: `${title}: ${items.length}` }));
+      const list = el('ul', { className: 'links' });
+      for (const item of items.slice(0, 100)) list.append(el('li', {}, ...item));
+      box.append(list);
+      if (items.length > 100) box.append(el('p', { className: 'hint', textContent: `... and ${items.length - 100} more` }));
+    };
+
+    const typeItem = (id, name) => [link(name, () => select(id), id)];
+    const edgeItem = (edge) => [
+      link(`${nameOf(edge.source)} → ${nameOf(edge.target)}`, () => focusEdge(edge)),
+      el('span', { className: 'edge', textContent: edge.kind }),
+    ];
+
+    section('New types', diff.addedNodes.map((id) => typeItem(id, nameOf(id))));
+    section('Removed types', diff.removedNodes.map((node) => typeItem(node.id, node.name)));
+    section('New dependencies', diff.addedEdges.map(edgeItem));
+    section('Removed dependencies', diff.removedEdges.map(edgeItem));
+  }
+
+  /** Selects the source of a dependency, so that its neighbours (and with them the dependency) are in view. */
+  function focusEdge(edge) {
+    const source = cy.getElementById(edge.source);
+    if (source.nonempty() && !source.hasClass('hidden')) select(edge.source);
   }
 
   function setRulesInfo(info, apply = true) {
@@ -250,6 +361,7 @@
       return css(kind.color[0], kind.color[1]);
     };
     const warnColor = css('--vscode-charts-red', '#f14c4c');
+    const addedColor = css('--vscode-charts-green', '#3fa66b');
     const panel = css('--vscode-editorWidget-background', '#252526');
 
     cy = cytoscape({
@@ -356,6 +468,17 @@
         {
           selector: 'edge.violation',
           style: { width: 3, opacity: 1, 'line-color': warnColor, 'target-arrow-color': warnColor, 'line-style': 'solid', 'z-index': 10 },
+        },
+        // Comparison with an earlier revision: new in green, removed (drawn again as a ghost) in red.
+        { selector: 'node.added', style: { 'border-width': 3, 'border-color': addedColor } },
+        { selector: 'node.removed', style: { 'border-width': 2, 'border-style': 'dashed', 'border-color': warnColor, opacity: 0.6 } },
+        {
+          selector: 'edge.added',
+          style: { width: 3, opacity: 1, 'line-color': addedColor, 'target-arrow-color': addedColor, 'z-index': 9 },
+        },
+        {
+          selector: 'edge.removed',
+          style: { width: 2, opacity: 0.9, 'line-color': warnColor, 'target-arrow-color': warnColor, 'line-style': 'dashed', 'z-index': 9 },
         },
         { selector: 'node:selected', style: { 'border-width': 3, 'border-color': accent } },
         { selector: '.faded', style: { opacity: 0.15 } },
@@ -589,7 +712,7 @@
    */
   function computeAnalysis() {
     const nodes = typeNodes().not('.hidden').map((n) => n.data());
-    const edges = cy.edges().not('.synthetic').not('.hidden').map((e) => ({
+    const edges = cy.edges().not('.synthetic, .ghost').not('.hidden').map((e) => ({
       source: e.data('source'),
       target: e.data('target'),
       kind: e.data('kind'),
@@ -812,7 +935,7 @@
     const box = $('groups');
     box.replaceChildren();
 
-    const components = shown().not('.namespace').components()
+    const components = shown().not('.namespace, .ghost').components()
       .map((component) => component.nodes())
       .sort((a, b) => b.length - a.length);
     const groups = components.filter((nodes) => nodes.length > 1);
@@ -1107,6 +1230,9 @@
     }
   }
 
+  $('compare').addEventListener('click', () => vscode.postMessage({ type: 'compare' }));
+  $('clearCompare').addEventListener('click', () => clearBaseline());
+
   $('export').addEventListener('change', (e) => {
     const format = e.target.value;
     e.target.value = '';
@@ -1145,6 +1271,7 @@
     const message = event.data;
     if (!message) return;
     if (message.type === 'graph') load(message.graph, message.settings, message.rules);
+    else if (message.type === 'baseline') showBaseline(message.label, message.graph);
     else if (message.type === 'rules') setRulesInfo(message.rules);
   });
 
